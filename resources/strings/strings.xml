@@ -1,0 +1,112 @@
+<strings>
+    <string id="AppName">WheelDash (dev)</string>
+    <!-- Strings, that are used in Connect IQ Settings menu, like 
+        one you see in Garmin Express or Garmin Connect Mobile -->
+    <string id="wheelBrand">Wheel brand</string>
+    <string id="wheelBrand0">Gotway/Begode</string>
+    <string id="wheelBrand1">Leaperkim</string>
+    <string id="wheelBrand2">Kingsong</string>
+
+    <string id="currentCorrection">Current correction type</string>
+    <string id="currentCorrection0">None</string>
+    <string id="currentCorrection1">Negative</string>
+    <string id="currentCorrection2">Absolute</string>
+
+    <string id="voltageCorrectionFactor">Voltage Correction Factor (Gotway/Begode only)</string>
+    <string id="begodeCF">Begode with custom firmware (use hardware PWM)</string>
+
+    <string id="speedCorrectionFactor">Speed Correction Factor, to adjust wheel reported speed.</string>
+    
+    <string id="rotationSpeed_PWM">Cut-out speed when performing free spin test</string>
+    <string id="ErrorMessage">Value out of range</string>
+
+    <string id="rotationVoltage_PWM">Voltage when performing free spin test</string>
+    <string id="powerFactor_PWM">Power factor correction</string>
+    <string id="PWMSettings">Calculated PWM variables</string>
+  
+   <string id="wheelSettings">Wheels settings</string>
+
+    
+   <string id="debugMode">Enable Debug Mode (view)</string>
+    <!-- FIT Strings-->
+
+    <string id="speed_graph_label">Speed</string>
+    <string id="speed_label">Speed</string>
+    <string id="speed_units_kmh">km/h</string>
+    <string id="speed_units_mph">mph</string>
+    <string id="pwm_graph_label">PWM</string>
+    <string id="pwm_label">PWM</string>
+    <string id="pwm_units"></string>
+    <string id="voltage_graph_label">Voltage</string>
+    <string id="voltage_label">Voltage</string>
+    <string id="voltage_units">V</string>
+    <string id="current_graph_label">Current</string>
+    <string id="current_label">Current</string>
+    <string id="current_units">A</string>
+    <string id="power_graph_label">Motor power</string>
+    <string id="power_label">Motor power</string>
+    <string id="power_units">W</string>
+    <string id="temperature_graph_label">MB Temperature</string>
+    <string id="temperature_label">MB Temperature</string>
+    <string id="temperature_units">°C</string>
+    <string id="tripDistance_label">Trip distance</string>
+    <string id="distanceUnits_km">km</string>
+    <string id="distanceUnits_miles">miles</string>
+    <string id="maxSpeed_label">Session max speed</string>
+    
+    <string id="maxPWM_label">Session max PWM</string>
+    
+    <string id="percentage_units">%</string>
+    <string id="maxCurrent_label">Session max current</string>
+  
+    <string id="maxPower_label">Session max power</string>
+   
+    <string id="maxTemperature_label">Session max temp.</string>
+    <string id="minTemperature_label">Session min temp.</string>
+
+    <string id="avgSpeed_label">Session average speed</string>
+    
+    <string id="avgCurrent_label">Session average current</string>
+    <string id="avgCurrent_units">A</string>
+    <string id="avgPower_label">Session average power</string>
+    <string id="avgPower_units">W</string>
+  
+    <string id="runnintTime_units">s</string>
+
+    <string id="minVoltage_label">Session min voltage</string>
+    <string id="maxVoltage_label">Session max voltage</string>
+    <string id="minBattery_label">Session min battery %</string>
+    <string id="maxBattery_label">Session max battery %</string>
+    <string id="field1">field1</string>
+     <string id="field2">field2</string>
+      <string id="field3">field3</string>
+       <string id="field4">field4</string>
+        <string id="field5">field5</string>
+         <string id="field6">field6</string>
+         <string id="eucdata0">Speed</string>
+         <string id="eucdata1">Voltage</string>
+         <string id="eucdata2">Trip distance</string>
+         <string id="eucdata3">Current</string>
+          <string id="eucdata4">Temperature</string>
+          <string id="eucdata5">Total Distance</string>
+          <string id="eucdata6">PWM</string>
+          <string id="eucdata7">Battery %</string>
+          <string id="eucdata8">Min temp.</string>
+          <string id="eucdata9">Max temp.</string>
+          <string id="eucdata10">Max speed</string>
+          <string id="eucdata11">Avg Speed</string>
+         <string id="eucdata12">Min Voltage</string>
+         <string id="eucdata13">Max Voltage</string>
+          <string id="eucdata14">Max Current</string>
+          <string id="eucdata15">Avg Current</string>
+          <string id="eucdata16">Min Battery</string>
+          <string id="eucdata17">Max Battery</string>
+          <string id="eucdata18">Avg Power</string>
+          <string id="eucdata19">Max Power</string>
+
+
+
+
+   
+
+</strings>

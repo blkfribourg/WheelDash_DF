@@ -1,0 +1,22 @@
+<properties>
+
+    <property id="wheelBrand" type="number">0</property>
+    <property id="rotationSpeed_PWM" type="float">65.2</property>
+    <property id="rotationVoltage_PWM" type="float">81.5</property>
+    <property id="powerFactor_PWM" type="float">0.9</property>
+    <property id="voltageCorrectionFactor" type="float">1.25</property>
+    <property id="speedCorrectionFactor" type="float">1.0</property>
+    <property id="currentCorrection" type="number">0</property>
+    <property id="begodeCF" type="boolean">false</property>
+    <property id="debugMode" type="boolean">false</property>
+    <property id="field1" type="number">0</property>
+    <property id="field2" type="number">1</property>
+    <property id="field3" type="number">2</property>
+    <property id="field4" type="number">3</property>
+    <property id="field5" type="number">4</property>
+    <property id="field6" type="number">5</property>
+    
+    
+    
+    
+</properties>
