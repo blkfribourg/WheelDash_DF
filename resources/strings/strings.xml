@@ -1,5 +1,5 @@
 <strings>
-    <string id="AppName">WheelDash (dev)</string>
+    <string id="AppName">WheelDash DF (dev)</string>
     <!-- Strings, that are used in Connect IQ Settings menu, like 
         one you see in Garmin Express or Garmin Connect Mobile -->
     <string id="wheelBrand">Wheel brand</string>
@@ -23,10 +23,15 @@
     <string id="rotationVoltage_PWM">Voltage when performing free spin test</string>
     <string id="powerFactor_PWM">Power factor correction</string>
     <string id="PWMSettings">Calculated PWM variables</string>
-  
-   <string id="wheelSettings">Wheels settings</string>
-
+     <string id="alarmThreshold_PWM">Percentage of PWM that trigger an alarm</string>
     
+    <string id="alarmThreshold_PWM_ErrorMessage">Value out of range</string>
+    <string id="alarmThreshold_speed">Speed that trigger an alarm </string>
+    <string id="alarmThreshold_speed_ErrorMessage">Value out of range</string>
+    <string id="alarmThreshold_temp">Temperature that trigger an alarm</string>
+    <string id="alarmThreshold_temp_ErrorMessage">Value out of range</string>
+
+   <string id="wheelSettings">Wheels settings</string>
    <string id="debugMode">Enable Debug Mode (view)</string>
     <!-- FIT Strings-->
 

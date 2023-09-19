@@ -7,6 +7,9 @@
     <property id="voltageCorrectionFactor" type="float">1.25</property>
     <property id="speedCorrectionFactor" type="float">1.0</property>
     <property id="currentCorrection" type="number">0</property>
+    <property id="alarmThreshold_PWM" type="number">80</property>
+    <property id="alarmThreshold_speed" type="number">0</property>
+    <property id="alarmThreshold_temp" type="number">0</property>
     <property id="begodeCF" type="boolean">false</property>
     <property id="debugMode" type="boolean">false</property>
     <property id="field1" type="number">0</property>

@@ -339,7 +339,7 @@
                 max="1"
                 errorMessage="@Strings.ErrorMessage" />
         </setting>
-        <!--
+        
         <setting
             propertyKey="@Properties.alarmThreshold_PWM"
             title="@Strings.alarmThreshold_PWM">
@@ -367,7 +367,7 @@
                 max="120"
                 errorMessage="@Strings.alarmThreshold_temp_ErrorMessage" />
         </setting>
-   
+   <!--
          <setting
             propertyKey="@Properties.activityRecordingOnStartup"
             title="@Strings.activityRecordingOnStartup">

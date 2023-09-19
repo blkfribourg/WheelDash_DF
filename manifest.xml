@@ -5,10 +5,10 @@
         Use "Monkey C: Edit Application" from the Visual Studio Code command palette
         to update the application attributes.
     -->
-    <iq:application id="d7399422-2a19-4d1c-9b30-b9bd962e9ac5" type="datafield" name="@Strings.AppName" entry="GarminEUCApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.1.0">
-        <!-- beta id : 660b1447015e4b11831927a65bc1a644
-             app id  : ca20d053c8f3466a94306dcd96e8eb99
-             dev id : 5ddbef4d-2a34-4eef-9094-16660b79f5d3-->
+    <iq:application id="11687288-d1f1-43e9-aaa4-2f5cce1fb17e" type="datafield" name="@Strings.AppName" entry="GarminEUCApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.3.0">
+        <!-- 
+             df id  : d7399422-2a19-4d1c-9b30-b9bd962e9ac5
+             dev id : 11687288-d1f1-43e9-aaa4-2f5cce1fb17e-->
         <!--
             Use the following from the Visual Studio Code comand palette to edit
             the build targets:
@@ -26,16 +26,12 @@
             <iq:product id="fenix5plus"/>
             <iq:product id="fenix5splus"/>
             <iq:product id="fenix5xplus"/>
-            <iq:product id="fenix6"/>
             <iq:product id="fenix6pro"/>
-            <iq:product id="fenix6s"/>
             <iq:product id="fenix6spro"/>
             <iq:product id="fenix6xpro"/>
             <iq:product id="fenix7"/>
             <iq:product id="fenix7s"/>
             <iq:product id="fenix7x"/>
-            <iq:product id="fr245"/>
-            <iq:product id="fr245m"/>
             <iq:product id="fr255"/>
             <iq:product id="fr255m"/>
             <iq:product id="fr745"/>
@@ -43,8 +39,6 @@
             <iq:product id="fr945lte"/>
             <iq:product id="fr955"/>
             <iq:product id="fr965"/>
-            <iq:product id="legacyherofirstavenger"/>
-            <iq:product id="legacysagadarthvader"/>
             <iq:product id="marq2"/>
             <iq:product id="marq2aviator"/>
             <iq:product id="marqadventurer"/>
@@ -55,6 +49,11 @@
             <iq:product id="marqdriver"/>
             <iq:product id="marqexpedition"/>
             <iq:product id="marqgolfer"/>
+            <iq:product id="venu2"/>
+            <iq:product id="venu2plus"/>
+            <iq:product id="venu2s"/>
+            <iq:product id="venu3"/>
+            <iq:product id="venu3s"/>
         </iq:products>
         <!--
             Use "Monkey C: Edit Permissions" from the Visual Studio Code command
@@ -62,6 +61,7 @@
         -->
         <iq:permissions>
             <iq:uses-permission id="BluetoothLowEnergy"/>
+            <iq:uses-permission id="DataFieldAlert"/>
             <iq:uses-permission id="FitContributor"/>
         </iq:permissions>
         <!--
