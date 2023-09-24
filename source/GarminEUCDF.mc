@@ -89,8 +89,8 @@ class GarminEUCDF extends WatchUi.DataField {
     _minBatteryPerc,
     _sessionDistance,
     _avgSpeed,
-    _maxPWM,
-    _startingMoment
+    _maxPWM
+    // _startingMoment
   ) {
     {
       maxTemp = _maxTemp;
@@ -103,7 +103,7 @@ class GarminEUCDF extends WatchUi.DataField {
     sessionDistance = _sessionDistance;
     avgSpeed = _avgSpeed;
     maxPWM = _maxPWM;
-    startingMoment = _startingMoment;
+    // startingMoment = _startingMoment;
   }
   function fieldsInitialize() {
     mSpeedField = createField(
@@ -259,8 +259,8 @@ class GarminEUCDF extends WatchUi.DataField {
   var maxPWM = 0.0;
   var maxCurrent = 0.0;
   var maxPower = 0.0;
-  var maxTemp = 0.0;
-  var minTemp = 0.0;
+  var maxTemp = -255.0;
+  var minTemp = 255.0;
   var currentPWM = 0.0;
   var correctedSpeed = 0.0;
   var currentCurrent = 0.0;
@@ -271,17 +271,17 @@ class GarminEUCDF extends WatchUi.DataField {
   var currentPower = 0.0;
   var sumPower = 0.0;
   var sessionDistance = 0.0;
-  var startingEUCTripDistance = 0.0;
-  var startingMoment = 0.0;
-  var minVoltage = 0.0;
+  var startingEUCTripDistance = 0;
+  //var startingMoment = 0.0;
+  var minVoltage = 255.0;
   var maxVoltage = 0.0;
-  var minBatteryPerc = 0.0;
+  var minBatteryPerc = 101.0;
   var maxBatteryPerc = 0.0;
   var avgSpeed = 0.0;
   var avgCurrent = 0.0;
   var avgPower = 0.0;
 
-  function updateFitData() {
+  function updateFitData(garminInfo) {
     callNb++;
     currentVoltage = eucData.getVoltage();
     currentBatteryPerc = eucData.getBatteryPercentage();
@@ -340,17 +340,20 @@ class GarminEUCDF extends WatchUi.DataField {
       mMinBatteryField.setData(minBatteryPerc);
     }
 
-    var currentMoment = new Time.Moment(Time.now().value());
-    var elaspedTime = startingMoment.subtract(currentMoment);
-    //System.println("elaspsed :" + elaspedTime.value());
-    if (elaspedTime.value() != 0 && eucData.totalDistance > 0) {
-      if (startingEUCTripDistance < 0) {
+    // var currentMoment = new Time.Moment(Time.now().value());
+    // var elapsedTime = startingMoment.subtract(currentMoment);
+    var elapsedTime = garminInfo.elapsedTime / 1000.0; // convert to seconds
+    //System.println("elaspsed :" + elapsedTime.value());
+    if (elapsedTime != 0 && eucData.totalDistance > 0) {
+      //if (elapsedTime.value() != 0 && eucData.totalDistance > 0) {
+      if (startingEUCTripDistance == 0) {
         startingEUCTripDistance = eucData.totalDistance;
       }
       sessionDistance =
         (eucData.totalDistance - startingEUCTripDistance) *
         eucData.speedCorrectionFactor;
-      avgSpeed = sessionDistance / (elaspedTime.value() / 3600.0);
+      //avgSpeed = sessionDistance / (elapsedTime.value() / 3600.0);
+      avgSpeed = sessionDistance / (elapsedTime / 3600.0);
     } else {
       sessionDistance = 0.0;
       avgSpeed = 0.0;
@@ -367,24 +370,32 @@ class GarminEUCDF extends WatchUi.DataField {
     //mAvgPowerField.setData(sumPower / callNb); // id 14
   }
   function resetVariables() {
-    startingMoment = new Time.Moment(Time.now().value());
-    startingEUCTripDistance = -1;
-    minVoltage = 255.0;
-    maxVoltage = 0.0;
-    minBatteryPerc = 101.0;
-    maxBatteryPerc = 0.0;
+    //System.println("reset variables");
+    //startingMoment = new Time.Moment(Time.now().value());
     maxSpeed = 0.0;
     maxPWM = 0.0;
     maxCurrent = 0.0;
     maxPower = 0.0;
-    minTemp = 255.0;
     maxTemp = -255.0;
+    minTemp = 255.0;
+    currentPWM = 0.0;
+    correctedSpeed = 0.0;
+    currentCurrent = 0.0;
+    currentVoltage = 0.0;
+    currentBatteryPerc = 0.0;
     sumCurrent = 0.0;
+    callNb = 0.0;
+    currentPower = 0.0;
     sumPower = 0.0;
+    sessionDistance = 0.0;
+    startingEUCTripDistance = 0;
+    minVoltage = 255.0;
+    maxVoltage = 0.0;
+    minBatteryPerc = 101.0;
+    maxBatteryPerc = 0.0;
     avgSpeed = 0.0;
     avgCurrent = 0.0;
     avgPower = 0.0;
-    callNb = 0;
   }
   function getFieldValues() {
     if (AppStorage.getSetting("field1") == 0) {
@@ -875,15 +886,30 @@ class GarminEUCDF extends WatchUi.DataField {
   }
   // Calculate the data to display in the field here
   function compute(info) {
+    //eucData.paired = true;
     if (eucData.paired == true) {
       if (delay < 0) {
-        updateFitData();
+        updateFitData(info);
         getFieldValues();
         checkAlarms();
       } else {
-        resetVariables(); // dirty
+        //System.println(info.averageSpeed);
+        if (info.elapsedTime == null || info.elapsedTime < 30000) {
+          resetVariables();
+        }
         delay = delay - 1;
       }
+      /*
+      delay = delay - 1; //to remove
+      if (delay == -10) {
+        onTimerStart();
+      }
+      if (delay == -20) {
+        onTimerStop();
+      }
+      if (delay == -30) {
+        onTimerReset();
+      }*/
     }
   }
 
@@ -1107,18 +1133,11 @@ class GarminEUCDF extends WatchUi.DataField {
     //View.onUpdate(dc);
   }
   function onTimerReset() {
-    Storage.setValue("maxTemp", null);
-    Storage.setValue("minTemp", null);
-    Storage.setValue("maxVoltage", null);
-    Storage.setValue("minVoltage", null);
-    Storage.setValue("maxBatteryPerc", null);
-    Storage.setValue("minBatteryPerc", null);
-    Storage.setValue("sessionDistance", null);
-    Storage.setValue("avgSpeed", null);
-    Storage.setValue("maxPWM", null);
-    Storage.setValue("startingMoment", null);
+    //System.println("reset");
+    //Storage.clearValues();
   }
   function onTimerStop() {
+    // System.println("stop");
     Storage.setValue("maxTemp", maxTemp);
     Storage.setValue("minTemp", minTemp);
     Storage.setValue("maxVoltage", maxVoltage);
@@ -1127,10 +1146,20 @@ class GarminEUCDF extends WatchUi.DataField {
     Storage.setValue("minBatteryPerc", minBatteryPerc);
     Storage.setValue("sessionDistance", sessionDistance);
     Storage.setValue("avgSpeed", avgSpeed);
+    Storage.setValue("avgCurrent", avgCurrent);
+    Storage.setValue("avgPower", avgPower);
+    Storage.setValue("maxSpeed", maxSpeed);
     Storage.setValue("maxPWM", maxPWM);
-    Storage.setValue("startingMoment", startingMoment);
+    Storage.setValue("maxCurrent", maxCurrent);
+    Storage.setValue("maxPower", maxPower);
+    Storage.setValue("sumCurrent", sumCurrent);
+    Storage.setValue("sumPower", sumPower);
+    Storage.setValue("callNb", callNb);
+    //Storage.setValue("startingMoment", startingMoment.value());
+    Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
   }
   function onTimerStart() {
+    // System.println("start");
     if (
       Storage.getValue("maxTemp") != null &&
       Storage.getValue("minTemp") != null &&
@@ -1141,7 +1170,16 @@ class GarminEUCDF extends WatchUi.DataField {
       Storage.getValue("sessionDistance") != null &&
       Storage.getValue("avgSpeed") != null &&
       Storage.getValue("maxPWM") != null &&
-      Storage.getValue("startingMoment") != null
+      //Storage.getValue("startingMoment") != null &&
+      Storage.getValue("avgCurrent") != null &&
+      Storage.getValue("avgPower") != null &&
+      Storage.getValue("maxSpeed") != null &&
+      Storage.getValue("maxPower") != null &&
+      Storage.getValue("maxCurrent") != null &&
+      Storage.getValue("sumCurrent") != null &&
+      Storage.getValue("sumPower") != null &&
+      Storage.getValue("callNb") != null &&
+      Storage.getValue("startingEUCTripDistance") != null
     ) {
       maxTemp = Storage.getValue("maxTemp");
       minTemp = Storage.getValue("minTemp");
@@ -1151,11 +1189,21 @@ class GarminEUCDF extends WatchUi.DataField {
       minBatteryPerc = Storage.getValue("minBatteryPerc");
       sessionDistance = Storage.getValue("sessionDistance");
       avgSpeed = Storage.getValue("avgSpeed");
+      avgCurrent = Storage.getValue("avgCurrent");
+      avgPower = Storage.getValue("avgPower");
+      maxSpeed = Storage.getValue("maxSpeed");
+      maxCurrent = Storage.getValue("maxCurrent");
+      maxPower = Storage.getValue("maxPower");
+      sumCurrent = Storage.getValue("sumCurrent");
+      sumPower = Storage.getValue("sumPower");
+      callNb = Storage.getValue("callNb");
+      startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
       maxPWM = Storage.getValue("maxPWM");
-      startingMoment = Storage.getValue("startingMoment");
+      // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
     }
   }
   function onTimerResume() {
+    //System.println("resume");
     if (
       Storage.getValue("maxTemp") != null &&
       Storage.getValue("minTemp") != null &&
@@ -1166,7 +1214,16 @@ class GarminEUCDF extends WatchUi.DataField {
       Storage.getValue("sessionDistance") != null &&
       Storage.getValue("avgSpeed") != null &&
       Storage.getValue("maxPWM") != null &&
-      Storage.getValue("startingMoment") != null
+      // Storage.getValue("startingMoment") != null &&
+      Storage.getValue("avgCurrent") != null &&
+      Storage.getValue("avgPower") != null &&
+      Storage.getValue("maxSpeed") != null &&
+      Storage.getValue("maxPower") != null &&
+      Storage.getValue("maxCurrent") != null &&
+      Storage.getValue("sumCurrent") != null &&
+      Storage.getValue("sumPower") != null &&
+      Storage.getValue("callNb") != null &&
+      Storage.getValue("startingEUCTripDistance") != null
     ) {
       maxTemp = Storage.getValue("maxTemp");
       minTemp = Storage.getValue("minTemp");
@@ -1176,8 +1233,17 @@ class GarminEUCDF extends WatchUi.DataField {
       minBatteryPerc = Storage.getValue("minBatteryPerc");
       sessionDistance = Storage.getValue("sessionDistance");
       avgSpeed = Storage.getValue("avgSpeed");
+      avgCurrent = Storage.getValue("avgCurrent");
+      avgPower = Storage.getValue("avgPower");
+      maxSpeed = Storage.getValue("maxSpeed");
+      maxCurrent = Storage.getValue("maxCurrent");
+      maxPower = Storage.getValue("maxPower");
+      sumCurrent = Storage.getValue("sumCurrent");
+      sumPower = Storage.getValue("sumPower");
+      callNb = Storage.getValue("callNb");
+      startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
       maxPWM = Storage.getValue("maxPWM");
-      startingMoment = Storage.getValue("startingMoment");
+      // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
     }
   }
 }
