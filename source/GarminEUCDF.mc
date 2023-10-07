@@ -19,9 +19,6 @@ class GarminEUCDF extends WatchUi.DataField {
   hidden var field4_value = 0;
   hidden var field5_value = 0;
   hidden var field6_value = 0;
-  var alarmThreshold_PWM = 0;
-  var alarmThreshold_speed = 0;
-  var alarmThreshold_temp = 0;
   const SPEED_FIELD_ID = 0;
   const PWM_FIELD_ID = 1;
   const VOLTAGE_FIELD_ID = 2;
@@ -73,13 +70,8 @@ class GarminEUCDF extends WatchUi.DataField {
   function initialize() {
     DataField.initialize();
     fieldsInitialize();
-    getDFAlarmsThr();
   }
-  function getDFAlarmsThr() {
-    alarmThreshold_PWM = AppStorage.getSetting("alarmThreshold_PWM");
-    alarmThreshold_speed = AppStorage.getSetting("alarmThreshold_speed");
-    alarmThreshold_temp = AppStorage.getSetting("alarmThreshold_temp");
-  }
+
   public function restoreValues(
     _maxTemp,
     _minTemp,
@@ -92,9 +84,7 @@ class GarminEUCDF extends WatchUi.DataField {
     _maxPWM
     // _startingMoment
   ) {
-    {
-      maxTemp = _maxTemp;
-    }
+    maxTemp = _maxTemp;
     minTemp = _minTemp;
     maxVoltage = _maxVoltage;
     minVoltage = _minVoltage;
@@ -239,6 +229,8 @@ class GarminEUCDF extends WatchUi.DataField {
     );*/
 
     // set fields to 0
+
+    /* V0.0.38
     mSpeedField.setData(0.0);
     mPWMField.setData(0.0);
     mVoltageField.setData(0.0);
@@ -253,6 +245,7 @@ class GarminEUCDF extends WatchUi.DataField {
     //  mMaxBatteryField.setData(0.0);
     mMinBatteryField.setData(0.0);
     //mMinTempField.setData(0.0);
+    */
   }
 
   var maxSpeed = 0.0;
@@ -342,7 +335,7 @@ class GarminEUCDF extends WatchUi.DataField {
 
     // var currentMoment = new Time.Moment(Time.now().value());
     // var elapsedTime = startingMoment.subtract(currentMoment);
-    var elapsedTime = garminInfo.elapsedTime / 1000.0; // convert to seconds
+    var elapsedTime = garminInfo.timerTime / 1000.0; // convert to seconds
     //System.println("elaspsed :" + elapsedTime.value());
     if (elapsedTime != 0 && eucData.totalDistance > 0) {
       //if (elapsedTime.value() != 0 && eucData.totalDistance > 0) {
@@ -885,21 +878,71 @@ class GarminEUCDF extends WatchUi.DataField {
     }
   }
   // Calculate the data to display in the field here
+  var activityElapsedTime = "";
+  var activityElapsedDist = "";
+  var activityAvgSpd = "";
+  var activityGPSAcc = "";
+  var activityStartTimeVal = "";
+  var activityTimerState = "";
+  var activityTimerTime = "";
+  var reset = "no";
+  // Calculate the data to display in the field here
   function compute(info) {
-    //eucData.paired = true;
+    if (info.elapsedTime != null) {
+      activityElapsedTime = info.elapsedTime;
+    }
+    if (info.elapsedDistance != null) {
+      activityElapsedDist = info.elapsedDistance;
+    }
+    if (info.averageSpeed != null) {
+      activityAvgSpd = info.averageSpeed;
+    }
+    if (info.currentLocationAccuracy != null) {
+      activityGPSAcc = info.currentLocationAccuracy;
+    }
+    if (info.startTime != null) {
+      activityStartTimeVal = info.startTime.value();
+    }
+    if (info.timerState != null) {
+      activityTimerState = info.timerState;
+    }
+    if (info.timerTime != null) {
+      activityTimerTime = info.timerTime;
+    }
+
+   // eucData.paired = true;
+    var activityResumed
     if (eucData.paired == true) {
       if (delay < 0) {
         updateFitData(info);
         getFieldValues();
         checkAlarms();
       } else {
-        //System.println(info.averageSpeed);
-        if (info.elapsedTime == null || info.elapsedTime < 30000) {
-          resetVariables();
+        /*
+        if (AppStorage.getSetting("resumeDectectionMethod") == 0) {
+          if (info.elapsedTime == null || info.elapsedTime < 300000) {
+            resetVariables();
+            reset = "yes";
+          }
         }
-        delay = delay - 1;
+        if (AppStorage.getSetting("resumeDectectionMethod") == 1) {
+          // if activity is not started yet
+          */
+        if (info.timerState == 1) {
+          loadStoredValues();
+        } 
+        /* V0.0.38
+        else {
+          resetVariables();
+          reset = true;
+        }*/
       }
-      /*
+      // }
+      //System.println(info.averageSpeed);
+
+      delay = delay - 1;
+    }
+    /*
       delay = delay - 1; //to remove
       if (delay == -10) {
         onTimerStart();
@@ -910,7 +953,6 @@ class GarminEUCDF extends WatchUi.DataField {
       if (delay == -30) {
         onTimerReset();
       }*/
-    }
   }
 
   var PWMAlert = false;
@@ -921,20 +963,26 @@ class GarminEUCDF extends WatchUi.DataField {
   var textAlert = "";
   function checkAlarms() {
     if (WatchUi.DataField has :showAlert) {
-      if (currentPWM > alarmThreshold_PWM && alarmThreshold_PWM != 0) {
+      if (
+        currentPWM > eucData.alarmThreshold_PWM &&
+        eucData.alarmThreshold_PWM != 0
+      ) {
         PWMAlert = true;
       } else {
         PWMAlert = false;
       }
       if (
-        eucData.temperature > alarmThreshold_temp &&
-        alarmThreshold_temp != 0
+        eucData.temperature > eucData.alarmThreshold_temp &&
+        eucData.alarmThreshold_temp != 0
       ) {
         tempAlert = true;
       } else {
         tempAlert = false;
       }
-      if (correctedSpeed > alarmThreshold_speed && alarmThreshold_speed != 0) {
+      if (
+        correctedSpeed > eucData.alarmThreshold_speed &&
+        eucData.alarmThreshold_speed != 0
+      ) {
         speedAlert = true;
       } else {
         speedAlert = false;
@@ -956,6 +1004,8 @@ class GarminEUCDF extends WatchUi.DataField {
         displayAlertTimer = displayAlertTimer - 1;
         if (displayAlertTimer < -1) {
           displayAlertTimer = 2;
+        } else {
+          vibrate();
         }
       }
     }
@@ -969,197 +1019,286 @@ class GarminEUCDF extends WatchUi.DataField {
         new Attention.VibeProfile(0, 500),
       ]);
     }
+    if (Attention has :ToneProfile) {
+      var toneProfile = [
+        new Attention.ToneProfile(420, 300),
+        new Attention.ToneProfile(516, 300),
+        new Attention.ToneProfile(425, 300),
+        new Attention.ToneProfile(0, 1000),
+      ];
+      Attention.playTone({ :toneProfile => toneProfile });
+    }
   }
+
   // Update the field layout and display the field data
   function onUpdate(dc) {
-    var gap = dc.getWidth() / 40;
-    var scr_height = dc.getHeight();
-    var scr_width = dc.getWidth();
-    var fieldNameFont = Graphics.FONT_XTINY;
-    var fieldValueFont = Graphics.FONT_MEDIUM;
-
-    dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
-    dc.clear();
-    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_WHITE);
-    dc.drawLine(gap, scr_height / 2, scr_width - 2 * gap, scr_height / 2);
-    dc.drawLine(
-      scr_width / 2,
-      2 * gap +
-        (Graphics.getFontHeight(fieldNameFont) +
-          Graphics.getFontHeight(fieldValueFont)),
-      scr_width / 2,
-      scr_height / 2 - 2 * gap
-    );
-    dc.drawLine(
-      scr_width / 2,
-      scr_height / 2 + 2 * gap,
-      scr_width / 2,
-      scr_height -
-        2 * gap -
-        (Graphics.getFontHeight(fieldNameFont) +
-          Graphics.getFontHeight(fieldValueFont))
-    );
-
-    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-    dc.drawText(
-      scr_width / 2,
-      gap,
-      fieldNameFont,
-      field1,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    dc.drawText(
-      scr_width / 2,
-      gap + Graphics.getFontHeight(fieldNameFont),
-      fieldValueFont,
-      field1_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-
-    dc.drawText(
-      scr_width / 4,
-      scr_height / 4,
-      fieldNameFont,
-      field2,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    dc.drawText(
-      scr_width / 4,
-      scr_height / 4 + Graphics.getFontHeight(fieldNameFont),
-      fieldValueFont,
-      field2_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-
-    dc.drawText(
-      scr_width - scr_width / 4,
-      scr_height / 4,
-      fieldNameFont,
-      field3,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    dc.drawText(
-      scr_width - scr_width / 4,
-      scr_height / 4 + Graphics.getFontHeight(fieldNameFont),
-      fieldValueFont,
-      field3_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-
-    dc.drawText(
-      scr_width / 4,
-      scr_height / 2 + gap,
-      fieldNameFont,
-      field4,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    dc.drawText(
-      scr_width / 4,
-      scr_height / 2 + gap + Graphics.getFontHeight(fieldNameFont),
-      fieldValueFont,
-      field4_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-
-    dc.drawText(
-      scr_width - scr_width / 4,
-      scr_height / 2 + gap,
-      fieldNameFont,
-      field5,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    dc.drawText(
-      scr_width - scr_width / 4,
-      scr_height / 2 + gap + Graphics.getFontHeight(fieldNameFont),
-      fieldValueFont,
-      field5_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-
-    dc.drawText(
-      scr_width / 2,
-      scr_height -
-        gap -
-        Graphics.getFontHeight(fieldNameFont) -
-        Graphics.getFontHeight(fieldValueFont),
-      fieldNameFont,
-      field6,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-
-    dc.drawText(
-      scr_width / 2,
-      scr_height - gap - Graphics.getFontHeight(fieldValueFont),
-      fieldValueFont,
-      field6_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    if (displayingAlert == true && displayAlertTimer > 0) {
-      vibrate();
+    if (eucData.debug) {
+      var alignAxe = dc.getWidth() / 5;
+      var space = dc.getHeight() / 10;
+      var yGap = dc.getHeight() / 8;
+      var xGap = dc.getWidth() / 12;
       dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
-      dc.fillRectangle(
-        0,
-        dc.getWidth() / 2 - Graphics.getFontHeight(Graphics.FONT_SMALL) / 2,
-        dc.getWidth(),
-        Graphics.getFontHeight(Graphics.FONT_SMALL)
-      );
+      dc.fillRectangle(0, 0, dc.getWidth(), dc.getHeight());
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-      dc.drawLine(
-        0,
-        dc.getHeight() / 2 -
-          Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 -
-          1,
-        dc.getWidth(),
-        dc.getHeight() / 2 - Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 - 1
-      );
-      dc.drawLine(
-        0,
-        dc.getHeight() / 2 +
-          Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 +
-          1,
-        dc.getWidth(),
-        dc.getHeight() / 2 + Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 + 1
-      );
-      dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_BLACK);
+      dc.drawRectangle(0, 0, dc.getWidth(), dc.getHeight());
       dc.drawText(
-        dc.getWidth() / 2,
-        dc.getHeight() / 2 - Graphics.getFontHeight(Graphics.FONT_SMALL) / 2,
-        Graphics.FONT_SMALL,
-        textAlert,
-        Graphics.TEXT_JUSTIFY_CENTER
+        alignAxe,
+        yGap,
+        Graphics.FONT_TINY,
+        "ElpsTm: " + activityElapsedTime,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
-    }
+      dc.drawText(
+        alignAxe - xGap,
+        space + yGap,
+        Graphics.FONT_TINY,
+        "ElpsDst: " + activityElapsedDist,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - 2 * xGap,
+        2 * space + yGap,
+        Graphics.FONT_TINY,
+        "AvgSpd: " + activityAvgSpd,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - 2 * xGap,
+        3 * space + yGap,
+        Graphics.FONT_TINY,
+        "GPSacc: " + activityGPSAcc,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - 2 * xGap,
+        4 * space + yGap,
+        Graphics.FONT_TINY,
+        "StrtTime: " + activityStartTimeVal,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - 2 * xGap,
+        5 * space + yGap,
+        Graphics.FONT_TINY,
+        "TmrSte: " + activityTimerState,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - xGap,
+        6 * space + yGap,
+        Graphics.FONT_TINY,
+        "TmrTme: " + activityTimerTime,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe,
+        7 * space + yGap,
+        Graphics.FONT_TINY,
+        "rstOcc: " + reset,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+    } else {
+      // System.println(eucData.isFirst);
+      if (eucData.isFirst && !eucData.paired) {
+        var textToDisplay =
+          "Profile " +
+          eucData.profile +
+          " 1st connection\nPlease turn on your wheel\n and wait for connection\n\nensure only one wheel is ON!\n\nIf you enjoy this app :\n ko-fi.com/wheeldash";
+        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+        dc.clear();
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
+        dc.drawText(
+          dc.getWidth() / 2,
+          dc.getHeight() / 2,
+          Graphics.FONT_XTINY,
+          textToDisplay,
+          Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
+        );
+      } else if (eucData.isFirst && eucData.paired && delay > 0) {
+        var textToDisplay =
+          "Profile " +
+          eucData.profile +
+          " connected.\n\nSaving wheel footprint...";
+        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+        dc.clear();
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+
+        dc.drawText(
+          dc.getWidth() / 2,
+          dc.getHeight() / 2,
+          Graphics.FONT_XTINY,
+          textToDisplay,
+          Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
+        );
+      } else {
+        var gap = dc.getWidth() / 40;
+        var scr_height = dc.getHeight();
+        var scr_width = dc.getWidth();
+        var fieldNameFont = Graphics.FONT_XTINY;
+        var fieldValueFont = Graphics.FONT_MEDIUM;
+
+        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+        dc.clear();
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_WHITE);
+        dc.drawLine(gap, scr_height / 2, scr_width - 2 * gap, scr_height / 2);
+        dc.drawLine(
+          scr_width / 2,
+          2 * gap +
+            (Graphics.getFontHeight(fieldNameFont) +
+              Graphics.getFontHeight(fieldValueFont)),
+          scr_width / 2,
+          scr_height / 2 - 2 * gap
+        );
+        dc.drawLine(
+          scr_width / 2,
+          scr_height / 2 + 2 * gap,
+          scr_width / 2,
+          scr_height -
+            2 * gap -
+            (Graphics.getFontHeight(fieldNameFont) +
+              Graphics.getFontHeight(fieldValueFont))
+        );
+
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.drawText(
+          scr_width / 2,
+          gap,
+          fieldNameFont,
+          field1,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        dc.drawText(
+          scr_width / 2,
+          gap + Graphics.getFontHeight(fieldNameFont),
+          fieldValueFont,
+          field1_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width / 4,
+          scr_height / 4,
+          fieldNameFont,
+          field2,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        dc.drawText(
+          scr_width / 4,
+          scr_height / 4 + Graphics.getFontHeight(fieldNameFont),
+          fieldValueFont,
+          field2_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width - scr_width / 4,
+          scr_height / 4,
+          fieldNameFont,
+          field3,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        dc.drawText(
+          scr_width - scr_width / 4,
+          scr_height / 4 + Graphics.getFontHeight(fieldNameFont),
+          fieldValueFont,
+          field3_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width / 4,
+          scr_height / 2 + gap,
+          fieldNameFont,
+          field4,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        dc.drawText(
+          scr_width / 4,
+          scr_height / 2 + gap + Graphics.getFontHeight(fieldNameFont),
+          fieldValueFont,
+          field4_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width - scr_width / 4,
+          scr_height / 2 + gap,
+          fieldNameFont,
+          field5,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        dc.drawText(
+          scr_width - scr_width / 4,
+          scr_height / 2 + gap + Graphics.getFontHeight(fieldNameFont),
+          fieldValueFont,
+          field5_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width / 2,
+          scr_height -
+            gap -
+            Graphics.getFontHeight(fieldNameFont) -
+            Graphics.getFontHeight(fieldValueFont),
+          fieldNameFont,
+          field6,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width / 2,
+          scr_height - gap - Graphics.getFontHeight(fieldValueFont),
+          fieldValueFont,
+          field6_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        if (displayingAlert == true && displayAlertTimer > 0) {
+          dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+          dc.fillRectangle(
+            0,
+            dc.getWidth() / 2 - Graphics.getFontHeight(Graphics.FONT_SMALL) / 2,
+            dc.getWidth(),
+            Graphics.getFontHeight(Graphics.FONT_SMALL)
+          );
+          dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+          dc.drawLine(
+            0,
+            dc.getHeight() / 2 -
+              Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 -
+              1,
+            dc.getWidth(),
+            dc.getHeight() / 2 -
+              Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 -
+              1
+          );
+          dc.drawLine(
+            0,
+            dc.getHeight() / 2 +
+              Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 +
+              1,
+            dc.getWidth(),
+            dc.getHeight() / 2 +
+              Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 +
+              1
+          );
+          dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_BLACK);
+          dc.drawText(
+            dc.getWidth() / 2,
+            dc.getHeight() / 2 -
+              Graphics.getFontHeight(Graphics.FONT_SMALL) / 2,
+            Graphics.FONT_SMALL,
+            textAlert,
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+        }
+      }
+    }
     //View.onUpdate(dc);
   }
-  function onTimerReset() {
-    //System.println("reset");
-    //Storage.clearValues();
-  }
-  function onTimerStop() {
-    // System.println("stop");
-    Storage.setValue("maxTemp", maxTemp);
-    Storage.setValue("minTemp", minTemp);
-    Storage.setValue("maxVoltage", maxVoltage);
-    Storage.setValue("minVoltage", minVoltage);
-    Storage.setValue("maxBatteryPerc", maxBatteryPerc);
-    Storage.setValue("minBatteryPerc", minBatteryPerc);
-    Storage.setValue("sessionDistance", sessionDistance);
-    Storage.setValue("avgSpeed", avgSpeed);
-    Storage.setValue("avgCurrent", avgCurrent);
-    Storage.setValue("avgPower", avgPower);
-    Storage.setValue("maxSpeed", maxSpeed);
-    Storage.setValue("maxPWM", maxPWM);
-    Storage.setValue("maxCurrent", maxCurrent);
-    Storage.setValue("maxPower", maxPower);
-    Storage.setValue("sumCurrent", sumCurrent);
-    Storage.setValue("sumPower", sumPower);
-    Storage.setValue("callNb", callNb);
-    //Storage.setValue("startingMoment", startingMoment.value());
-    Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
-  }
-  function onTimerStart() {
-    // System.println("start");
+
+  function loadStoredValues() {
     if (
       Storage.getValue("maxTemp") != null &&
       Storage.getValue("minTemp") != null &&
@@ -1202,7 +1341,79 @@ class GarminEUCDF extends WatchUi.DataField {
       // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
     }
   }
+  function onTimerReset() {
+    //System.println("reset");
+    //Storage.clearValues();
+  }
+  function onTimerStop() {
+    // System.println("stop");
+    Storage.setValue("maxTemp", maxTemp);
+    Storage.setValue("minTemp", minTemp);
+    Storage.setValue("maxVoltage", maxVoltage);
+    Storage.setValue("minVoltage", minVoltage);
+    Storage.setValue("maxBatteryPerc", maxBatteryPerc);
+    Storage.setValue("minBatteryPerc", minBatteryPerc);
+    Storage.setValue("sessionDistance", sessionDistance);
+    Storage.setValue("avgSpeed", avgSpeed);
+    Storage.setValue("avgCurrent", avgCurrent);
+    Storage.setValue("avgPower", avgPower);
+    Storage.setValue("maxSpeed", maxSpeed);
+    Storage.setValue("maxPWM", maxPWM);
+    Storage.setValue("maxCurrent", maxCurrent);
+    Storage.setValue("maxPower", maxPower);
+    Storage.setValue("sumCurrent", sumCurrent);
+    Storage.setValue("sumPower", sumPower);
+    Storage.setValue("callNb", callNb);
+    //Storage.setValue("startingMoment", startingMoment.value());
+    Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
+  }
+  function onTimerStart() {
+    // System.println("start");
+    /*
+    if (
+      Storage.getValue("maxTemp") != null &&
+      Storage.getValue("minTemp") != null &&
+      Storage.getValue("maxVoltage") != null &&
+      Storage.getValue("minVoltage") != null &&
+      Storage.getValue("maxBatteryPerc") != null &&
+      Storage.getValue("minBatteryPerc") != null &&
+      Storage.getValue("sessionDistance") != null &&
+      Storage.getValue("avgSpeed") != null &&
+      Storage.getValue("maxPWM") != null &&
+      //Storage.getValue("startingMoment") != null &&
+      Storage.getValue("avgCurrent") != null &&
+      Storage.getValue("avgPower") != null &&
+      Storage.getValue("maxSpeed") != null &&
+      Storage.getValue("maxPower") != null &&
+      Storage.getValue("maxCurrent") != null &&
+      Storage.getValue("sumCurrent") != null &&
+      Storage.getValue("sumPower") != null &&
+      Storage.getValue("callNb") != null &&
+      Storage.getValue("startingEUCTripDistance") != null
+    ) {
+      maxTemp = Storage.getValue("maxTemp");
+      minTemp = Storage.getValue("minTemp");
+      maxVoltage = Storage.getValue("maxVoltage");
+      minVoltage = Storage.getValue("minVoltage");
+      maxBatteryPerc = Storage.getValue("maxBatteryPerc");
+      minBatteryPerc = Storage.getValue("minBatteryPerc");
+      sessionDistance = Storage.getValue("sessionDistance");
+      avgSpeed = Storage.getValue("avgSpeed");
+      avgCurrent = Storage.getValue("avgCurrent");
+      avgPower = Storage.getValue("avgPower");
+      maxSpeed = Storage.getValue("maxSpeed");
+      maxCurrent = Storage.getValue("maxCurrent");
+      maxPower = Storage.getValue("maxPower");
+      sumCurrent = Storage.getValue("sumCurrent");
+      sumPower = Storage.getValue("sumPower");
+      callNb = Storage.getValue("callNb");
+      startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
+      maxPWM = Storage.getValue("maxPWM");
+      // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
+    }*/
+  }
   function onTimerResume() {
+    /*
     //System.println("resume");
     if (
       Storage.getValue("maxTemp") != null &&
@@ -1244,6 +1455,6 @@ class GarminEUCDF extends WatchUi.DataField {
       startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
       maxPWM = Storage.getValue("maxPWM");
       // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
-    }
+    }*/
   }
 }

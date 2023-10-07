@@ -1,6 +1,9 @@
 module eucData {
+  var isFirst = false;
+  var profile = "";
   var wheelBrand;
   var paired = false;
+  var debug = false;
   // Calculated PWM variables :
   // PLEASE UPDATE WITH YOU OWN VALUES BEFORE USE !
   var rotationSpeed; // cutoff speed when freespin test performed
@@ -32,6 +35,11 @@ module eucData {
   var model = "none";
   var temperature2 = 0;
   var cpuLoad = 0;
+
+  //alarms
+  var alarmThreshold_PWM = 0;
+  var alarmThreshold_speed = 0;
+  var alarmThreshold_temp = 0;
 
   function getBatteryPercentage() {
     // using better battery formula from wheellog

@@ -2,36 +2,76 @@
     <string id="AppName">WheelDash DF (dev)</string>
     <!-- Strings, that are used in Connect IQ Settings menu, like 
         one you see in Garmin Express or Garmin Connect Mobile -->
-    <string id="wheelBrand">Wheel brand</string>
+    <string id="debugView">Debug View</string>
     <string id="wheelBrand0">Gotway/Begode</string>
     <string id="wheelBrand1">Leaperkim</string>
     <string id="wheelBrand2">Kingsong</string>
+    <string id="wheelBrand3">Kingsong (old)</string>
 
-    <string id="currentCorrection">Current correction type</string>
+    <string id="profile">Profile to use</string>
+    <string id="profile0">Last used profile</string>
+    <string id="profile1">Profile 1</string>      
+    <string id="profile2">Profile 2</string>
+    <string id="profile3">Profile 3</string>
+
+    <string id="wheelName_p1">Wheel name (Profile 1)</string>
+    <string id="wheelName_p2">Wheel name (Profile 2)</string>
+    <string id="wheelName_p3">Wheel name (Profile 3)</string>
+    <string id="resumeDectectionMethod">Resume detection method</string>
+    <string id="resumeDectectionMethod0">method1</string>
+    <string id="resumeDectectionMethod1">method2</string>
+    
+
+    <string id="wheelBrand_p1">Wheel brand (profile1)</string>
+    <string id="wheelBrand_p2">Wheel brand (profile2)</string>
+    <string id="wheelBrand_p3">Wheel brand (profile3)</string>
+    <string id="currentCorrection_p1">Current correction type (profile1)</string>
+    <string id="currentCorrection_p2">Current correction type (profile2)</string>
+    <string id="currentCorrection_p3">Current correction type (profile3)</string>
     <string id="currentCorrection0">None</string>
     <string id="currentCorrection1">Negative</string>
     <string id="currentCorrection2">Absolute</string>
 
-    <string id="voltageCorrectionFactor">Voltage Correction Factor (Gotway/Begode only)</string>
-    <string id="begodeCF">Begode with custom firmware (use hardware PWM)</string>
+    <string id="voltageCorrectionFactor_p1">Voltage Correction Factor (Gotway/Begode only) (profile1)</string>
+    <string id="voltageCorrectionFactor_p2">Voltage Correction Factor (Gotway/Begode only) (profile2)</string>
+    <string id="voltageCorrectionFactor_p3">Voltage Correction Factor (Gotway/Begode only) (profile3)</string>
+    <string id="begodeCF_p1">Begode with custom firmware (use hardware PWM) (profile1)</string>
+    <string id="begodeCF_p2">Begode with custom firmware (use hardware PWM) (profile2)</string>
+    <string id="begodeCF_p3">Begode with custom firmware (use hardware PWM) (profile3)</string>
 
-    <string id="speedCorrectionFactor">Speed Correction Factor, to adjust wheel reported speed.</string>
-    
-    <string id="rotationSpeed_PWM">Cut-out speed when performing free spin test</string>
+    <string id="speedCorrectionFactor_p1">Speed Correction Factor, to adjust wheel reported speed (profile1)</string>
+    <string id="speedCorrectionFactor_p2">Speed Correction Factor, to adjust wheel reported speed (profile2)</string>
+    <string id="speedCorrectionFactor_p3">Speed Correction Factor, to adjust wheel reported speed (profile3)</string>
+
+    <string id="rotationSpeed_PWM_p1">Free spin test cut-out speed (Gotway/Begode only) (profile1)</string>
+    <string id="rotationSpeed_PWM_p2">Free spin test cut-out speed (Gotway/Begode only) (profile2)</string>
+    <string id="rotationSpeed_PWM_p3">Free spin test cut-out speed (Gotway/Begode only) (profile3)</string>
+
+    <string id="rotationVoltage_PWM_p1">Free spin test voltage (Gotway/Begode only) (profile1)</string>
+    <string id="rotationVoltage_PWM_p2">Free spin test voltage (Gotway/Begode only) (profile2)</string>
+    <string id="rotationVoltage_PWM_p3">Free spin test voltage (Gotway/Begode only) (profile3)</string>
+
+    <string id="powerFactor_PWM_p1">Power factor correction (Gotway/Begode only) (profile1)</string>
+    <string id="powerFactor_PWM_p2">Power factor correction (Gotway/Begode only) (profile2)</string>
+    <string id="powerFactor_PWM_p3">Power factor correction (Gotway/Begode only) (profile3)</string>
+
     <string id="ErrorMessage">Value out of range</string>
 
-    <string id="rotationVoltage_PWM">Voltage when performing free spin test</string>
-    <string id="powerFactor_PWM">Power factor correction</string>
-    <string id="PWMSettings">Calculated PWM variables</string>
-     <string id="alarmThreshold_PWM">Percentage of PWM that trigger an alarm</string>
-    
+    <string id="alarmThreshold_PWM_p1">Percentage of PWM that trigger an alarm (profile1)</string>
+    <string id="alarmThreshold_PWM_p2">Percentage of PWM that trigger an alarm (profile2)</string>
+    <string id="alarmThreshold_PWM_p3">Percentage of PWM that trigger an alarm (profile3)</string>
+
     <string id="alarmThreshold_PWM_ErrorMessage">Value out of range</string>
-    <string id="alarmThreshold_speed">Speed that trigger an alarm </string>
+    <string id="alarmThreshold_speed_p1">Speed that trigger an alarm (profile1)</string>
+    <string id="alarmThreshold_speed_p2">Speed that trigger an alarm (profile2)</string>
+    <string id="alarmThreshold_speed_p3">Speed that trigger an alarm (profile3)</string>
+
     <string id="alarmThreshold_speed_ErrorMessage">Value out of range</string>
-    <string id="alarmThreshold_temp">Temperature that trigger an alarm</string>
+    <string id="alarmThreshold_temp_p1">Temperature that trigger an alarm (profile1)</string>
+    <string id="alarmThreshold_temp_p2">Temperature that trigger an alarm (profile2)</string>
+    <string id="alarmThreshold_temp_p3">Temperature that trigger an alarm (profile3)</string>
     <string id="alarmThreshold_temp_ErrorMessage">Value out of range</string>
 
-   <string id="wheelSettings">Wheels settings</string>
    <string id="debugMode">Enable Debug Mode (view)</string>
     <!-- FIT Strings-->
 
