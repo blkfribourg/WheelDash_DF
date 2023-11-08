@@ -2,9 +2,12 @@ import Toybox.Application.Storage;
 import Toybox.Lang;
 import Toybox.WatchUi;
 using Toybox.Graphics;
+using Toybox.Math;
 import Toybox.System;
 using Toybox.Application.Storage;
 class GarminEUCDF extends WatchUi.DataField {
+  var fill_logo;
+  var empty_logo;
   var delay = 3;
   var firstCall = true;
   hidden var field1 = "NC";
@@ -70,6 +73,18 @@ class GarminEUCDF extends WatchUi.DataField {
   function initialize() {
     DataField.initialize();
     fieldsInitialize();
+
+    // draw logo
+    if (eucData.logoFill.length() > 10) {
+      fill_logo = stringToArrays(eucData.logoFill);
+    }
+    if (eucData.logoEmpty.length() > 10) {
+      empty_logo = stringToArrays(eucData.logoEmpty);
+    }
+
+    // System.println(fill_logo);
+    eucData.logoFill = ""; // cleaning doesn't free memory, probably useless
+    eucData.logoEmpty = "";
   }
 
   public function restoreValues(
@@ -311,15 +326,15 @@ class GarminEUCDF extends WatchUi.DataField {
       maxTemp = eucData.temperature;
       mMaxTempField.setData(maxTemp); // id 11
     }
-    if (eucData.temperature < minTemp) {
+    if (eucData.temperature < minTemp && eucData.temperature != 0.0) {
       minTemp = eucData.temperature;
       // mMinTempField.setData(minTemp); // id 11
     }
-    if (currentVoltage > maxVoltage) {
+    if (currentVoltage > maxVoltage && currentVoltage != 0.0) {
       maxVoltage = currentVoltage;
       mMaxVoltageField.setData(maxVoltage);
     }
-    if (currentVoltage < minVoltage) {
+    if (currentVoltage < minVoltage && currentVoltage != 0.0) {
       minVoltage = currentVoltage;
       mMinVoltageField.setData(minVoltage);
     }
@@ -328,7 +343,7 @@ class GarminEUCDF extends WatchUi.DataField {
       maxBatteryPerc = currentBatteryPerc;
       // mMaxBatteryField.setData(maxBatteryPerc);
     }
-    if (currentBatteryPerc < minBatteryPerc) {
+    if (currentBatteryPerc < minBatteryPerc && currentBatteryPerc != 0.0) {
       minBatteryPerc = currentBatteryPerc;
       mMinBatteryField.setData(minBatteryPerc);
     }
@@ -910,8 +925,7 @@ class GarminEUCDF extends WatchUi.DataField {
       activityTimerTime = info.timerTime;
     }
 
-   // eucData.paired = true;
-    var activityResumed
+    //eucData.paired = true;
     if (eucData.paired == true) {
       if (delay < 0) {
         updateFitData(info);
@@ -930,7 +944,7 @@ class GarminEUCDF extends WatchUi.DataField {
           */
         if (info.timerState == 1) {
           loadStoredValues();
-        } 
+        }
         /* V0.0.38
         else {
           resetVariables();
@@ -1037,10 +1051,8 @@ class GarminEUCDF extends WatchUi.DataField {
       var space = dc.getHeight() / 10;
       var yGap = dc.getHeight() / 8;
       var xGap = dc.getWidth() / 12;
-      dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
-      dc.fillRectangle(0, 0, dc.getWidth(), dc.getHeight());
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-      dc.drawRectangle(0, 0, dc.getWidth(), dc.getHeight());
+      dc.clear();
       dc.drawText(
         alignAxe,
         yGap,
@@ -1104,14 +1116,13 @@ class GarminEUCDF extends WatchUi.DataField {
           "Profile " +
           eucData.profile +
           " 1st connection\nPlease turn on your wheel\n and wait for connection\n\nensure only one wheel is ON!\n\nIf you enjoy this app :\n ko-fi.com/wheeldash";
-        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
-        dc.clear();
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.clear();
 
         dc.drawText(
           dc.getWidth() / 2,
           dc.getHeight() / 2,
-          Graphics.FONT_XTINY,
+          Graphics.FONT_SYSTEM_XTINY,
           textToDisplay,
           Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
         );
@@ -1120,9 +1131,8 @@ class GarminEUCDF extends WatchUi.DataField {
           "Profile " +
           eucData.profile +
           " connected.\n\nSaving wheel footprint...";
-        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
-        dc.clear();
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.clear();
 
         dc.drawText(
           dc.getWidth() / 2,
@@ -1138,9 +1148,10 @@ class GarminEUCDF extends WatchUi.DataField {
         var fieldNameFont = Graphics.FONT_XTINY;
         var fieldValueFont = Graphics.FONT_MEDIUM;
 
-        dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.clear();
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_WHITE);
+        drawBackground(dc);
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.drawLine(gap, scr_height / 2, scr_width - 2 * gap, scr_height / 2);
         dc.drawLine(
           scr_width / 2,
@@ -1159,8 +1170,7 @@ class GarminEUCDF extends WatchUi.DataField {
             (Graphics.getFontHeight(fieldNameFont) +
               Graphics.getFontHeight(fieldValueFont))
         );
-
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
         dc.drawText(
           scr_width / 2,
           gap,
@@ -1298,6 +1308,22 @@ class GarminEUCDF extends WatchUi.DataField {
     //View.onUpdate(dc);
   }
 
+  function drawBackground(dc) {
+    if (fill_logo != null) {
+      //dc.setColor(eucData.logoColor, Graphics.COLOR_TRANSPARENT);
+      dc.setColor(eucData.logoColor, Graphics.COLOR_TRANSPARENT);
+
+      for (var i = 0; i < fill_logo.size(); i++) {
+        dc.fillPolygon(fill_logo[i]);
+      }
+    }
+    if (empty_logo != null) {
+      dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_TRANSPARENT);
+      for (var i = 0; i < empty_logo.size(); i++) {
+        dc.fillPolygon(empty_logo[i]);
+      }
+    }
+  }
   function loadStoredValues() {
     if (
       Storage.getValue("maxTemp") != null &&

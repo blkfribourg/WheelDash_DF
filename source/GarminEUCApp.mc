@@ -40,6 +40,12 @@ class GarminEUCApp extends Application.AppBase {
   function setSettings(profile) {
     eucData.profile = AppStorage.getSetting("profile");
     eucData.debug = AppStorage.getSetting("debugView");
+    eucData.logoFill = AppStorage.getSetting("logoFill");
+    eucData.logoEmpty = AppStorage.getSetting("logoEmpty");
+    eucData.logoColor = AppStorage.getSetting("logoColor").toNumberWithBase(16);
+    eucData.logoOffsetx = AppStorage.getSetting("logoOffsetx");
+    eucData.logoOffsety = AppStorage.getSetting("logoOffsety");
+
     if (eucData.profile == 1) {
       eucData.wheelBrand = AppStorage.getSetting("wheelBrand_p1");
       eucData.gothPWN = AppStorage.getSetting("begodeCF_p1");

@@ -1,6 +1,7 @@
 import Toybox.Lang;
 using Toybox.StringUtil;
 using Toybox.Math;
+using Toybox.System;
 
 // convert string to byte, used when sending string command via BLE
 function string_to_byte_array(plain_text) {
@@ -21,7 +22,10 @@ function valueRound(value, format) {
 }
 
 function splitstr(str as Lang.String, char) {
-  var stringArray = new [0];
+  var stringArray;
+
+  stringArray = new [0];
+
   var strlength = str.length();
   for (var i = 0; i < strlength; i++) {
     var endidx = str.find(char);
@@ -30,7 +34,7 @@ function splitstr(str as Lang.String, char) {
       if (substr != null) {
         stringArray.add(substr);
         var startidx = endidx + 1;
-        str = str.substring(startidx, strlength - substr.length());
+        str = str.substring(startidx, null);
       }
     } else {
       if (str.length() > 0) {
@@ -81,4 +85,53 @@ function decode2bytes(byte1, byte2) {
 }
 function decode4bytes(byte1, byte2, byte3, byte4) {
   return (byte1 << 16) + (byte2 << 24) + byte3 + (byte4 << 8);
+}
+
+function stringToArrays(str) {
+  var array = splitstr(str, ";");
+  var nestedArray = new [0];
+  for (var i = 0; i < array.size(); i++) {
+    var temp_array = splitstr(array[i], ",");
+    var points;
+    var points_nb = temp_array.size();
+    var limitsize = 64;
+    if (points_nb > limitsize) {
+      var loop_nb = points_nb / limitsize.toFloat();
+      var temp_coord_array;
+      System.println("alert split required");
+
+      for (var z = 0; z < loop_nb; z++) {
+        var startindex = limitsize * z;
+        if (z + 1 < loop_nb) {
+          temp_coord_array = temp_array.slice(startindex, limitsize * (z + 1));
+        } else {
+          temp_coord_array = temp_array
+            .slice(startindex, null)
+            .add(temp_array.slice(0, 1)[0]); // adding first point at last pos
+        }
+        points = new [temp_coord_array.size()];
+        for (var j = 0; j < temp_coord_array.size(); j++) {
+          var coord_array = splitstr(temp_coord_array[j], "-");
+          points[j] = sArray2nArray(coord_array) as Array<Number>;
+        }
+        nestedArray.add(points);
+      }
+    } else {
+      points = new [temp_array.size()];
+      for (var j = 0; j < temp_array.size(); j++) {
+        var coord_array = splitstr(temp_array[j], "-");
+        points[j] = sArray2nArray(coord_array) as Array<Number>;
+      }
+      nestedArray.add(points);
+    }
+  }
+  return nestedArray;
+}
+
+function sArray2nArray(sArray) {
+  // System.println(sArray);
+  var nArray = new [2] as Array<Number>;
+  nArray[0] = sArray[0].toNumber() + eucData.logoOffsetx;
+  nArray[1] = sArray[1].toNumber() + eucData.logoOffsety;
+  return nArray;
 }

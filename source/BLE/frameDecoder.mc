@@ -18,8 +18,6 @@ module frameDecoder {
 }
 
 class GwDecoder {
- 
-
   function frameBuffer(transmittedFrame) {
     for (var i = 0; i < transmittedFrame.size(); i++) {
       if (checkChar(transmittedFrame[i]) == true) {
@@ -370,6 +368,4 @@ class KingsongDecoder {
     }
     return false;
   }
-
- 
 }

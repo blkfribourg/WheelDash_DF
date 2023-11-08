@@ -1,6 +1,11 @@
 module eucData {
   var isFirst = false;
   var profile = "";
+  var logoFill = "";
+  var logoEmpty = "";
+  var logoOffsetx = 0;
+  var logoOffsety = 0;
+  var logoColor = 0x1f1f1f;
   var wheelBrand;
   var paired = false;
   var debug = false;

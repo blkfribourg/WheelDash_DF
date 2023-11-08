@@ -1,11 +1,36 @@
 <settings>
  <setting
+                propertyKey="@Properties.logoFill"
+                title="@Strings.logoFill">
+                <settingConfig type="alphaNumeric"/>
+            </setting>       
+
+ <setting
+                propertyKey="@Properties.logoEmpty"
+                title="@Strings.logoEmpty">
+                <settingConfig type="alphaNumeric"/>
+            </setting>       
+<setting
+                propertyKey="@Properties.logoOffsetx"
+                title="@Strings.logoOffsetx">
+                <settingConfig type="numeric"/>
+</setting> 
+<setting
+                propertyKey="@Properties.logoOffsety"
+                title="@Strings.logoOffsety">
+                <settingConfig type="numeric"/>
+</setting>     
+<setting
+                propertyKey="@Properties.logoColor"
+                title="@Strings.logoColor">
+                <settingConfig type="alphaNumeric"/>
+</setting>         
+ <setting
+ 
                     propertyKey="@Properties.debugView"
                     title="@Strings.debugView">
-                    <settingConfig
-                        type="boolean"
-                    />
-                </setting>
+                    <settingConfig type="boolean"/>
+  </setting>
  <setting
                 propertyKey="@Properties.field1"
                 title="@Strings.field1">
