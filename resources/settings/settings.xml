@@ -24,7 +24,23 @@
                 propertyKey="@Properties.logoColor"
                 title="@Strings.logoColor">
                 <settingConfig type="alphaNumeric"/>
-</setting>         
+</setting>
+<setting
+                propertyKey="@Properties.txtColor"
+                title="@Strings.txtColor">
+                <settingConfig type="alphaNumeric"/>
+</setting>     
+<setting
+                propertyKey="@Properties.linesColor"
+                title="@Strings.linesColor">
+                <settingConfig type="alphaNumeric"/>
+</setting>        
+ <setting
+ 
+                    propertyKey="@Properties.drawLines"
+                    title="@Strings.drawLines">
+                    <settingConfig type="boolean"/>
+  </setting>
  <setting
  
                     propertyKey="@Properties.debugView"

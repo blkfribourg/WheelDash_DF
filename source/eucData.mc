@@ -6,6 +6,9 @@ module eucData {
   var logoOffsetx = 0;
   var logoOffsety = 0;
   var logoColor = 0x1f1f1f;
+  var txtColor = 0xffffff;
+  var linesColor = 0xffffff;
+  var drawLines = true;
   var wheelBrand;
   var paired = false;
   var debug = false;

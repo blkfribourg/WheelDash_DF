@@ -3,9 +3,12 @@
     <!-- Strings, that are used in Connect IQ Settings menu, like 
         one you see in Garmin Express or Garmin Connect Mobile -->
     <string id="debugView">Debug View</string>
+    <string id="drawLines">Draw separation lines</string>
     <string id="logoFill">Logo fill coords list</string>
     <string id="logoEmpty">Logo empty coords list</string>
     <string id="logoColor">Logo color (hex) #</string>
+    <string id="linesColor">Lines color (hex) #</string>
+    <string id="txtColor">Text color (hex) #</string>
     <string id="logoOffsetx">Logo offset x</string>
     <string id="logoOffsety">Logo offset y</string>
     <string id="wheelBrand0">Gotway/Begode</string>

@@ -1146,31 +1146,34 @@ class GarminEUCDF extends WatchUi.DataField {
         var scr_height = dc.getHeight();
         var scr_width = dc.getWidth();
         var fieldNameFont = Graphics.FONT_XTINY;
-        var fieldValueFont = Graphics.FONT_MEDIUM;
+        var fieldValueFont = Graphics.FONT_GLANCE_NUMBER;
 
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.clear();
         drawBackground(dc);
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-        dc.drawLine(gap, scr_height / 2, scr_width - 2 * gap, scr_height / 2);
-        dc.drawLine(
-          scr_width / 2,
-          2 * gap +
-            (Graphics.getFontHeight(fieldNameFont) +
-              Graphics.getFontHeight(fieldValueFont)),
-          scr_width / 2,
-          scr_height / 2 - 2 * gap
-        );
-        dc.drawLine(
-          scr_width / 2,
-          scr_height / 2 + 2 * gap,
-          scr_width / 2,
-          scr_height -
-            2 * gap -
-            (Graphics.getFontHeight(fieldNameFont) +
-              Graphics.getFontHeight(fieldValueFont))
-        );
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        if (eucData.drawLines) {
+          dc.setColor(eucData.linesColor, Graphics.COLOR_BLACK);
+          dc.drawLine(gap, scr_height / 2, scr_width - gap, scr_height / 2);
+          dc.drawLine(
+            scr_width / 2,
+            2 * gap +
+              (Graphics.getFontHeight(fieldNameFont) +
+                Graphics.getFontHeight(fieldValueFont)),
+            scr_width / 2,
+            scr_height / 2 - 2 * gap
+          );
+          dc.drawLine(
+            scr_width / 2,
+            scr_height / 2 + 2 * gap,
+            scr_width / 2,
+            scr_height -
+              2 * gap -
+              (Graphics.getFontHeight(fieldNameFont) +
+                Graphics.getFontHeight(fieldValueFont))
+          );
+        }
+
+        dc.setColor(eucData.txtColor, Graphics.COLOR_TRANSPARENT);
         dc.drawText(
           scr_width / 2,
           gap,
@@ -1249,7 +1252,7 @@ class GarminEUCDF extends WatchUi.DataField {
         dc.drawText(
           scr_width / 2,
           scr_height -
-            gap -
+            //gap -
             Graphics.getFontHeight(fieldNameFont) -
             Graphics.getFontHeight(fieldValueFont),
           fieldNameFont,
@@ -1259,7 +1262,9 @@ class GarminEUCDF extends WatchUi.DataField {
 
         dc.drawText(
           scr_width / 2,
-          scr_height - gap - Graphics.getFontHeight(fieldValueFont),
+          scr_height -
+            //- gap
+            Graphics.getFontHeight(fieldValueFont),
           fieldValueFont,
           field6_value,
           Graphics.TEXT_JUSTIFY_CENTER
