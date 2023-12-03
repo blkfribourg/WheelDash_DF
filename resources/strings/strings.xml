@@ -9,6 +9,9 @@
     <string id="logoColor">Logo color (hex) #</string>
     <string id="linesColor">Lines color (hex) #</string>
     <string id="txtColor">Text color (hex) #</string>
+    <string id="font">Field value font</string>
+    <string id="font0">Roboto</string>
+    <string id="font1">Rajdhani</string>
     <string id="logoOffsetx">Logo offset x</string>
     <string id="logoOffsety">Logo offset y</string>
     <string id="wheelBrand0">Gotway/Begode</string>
@@ -130,6 +133,9 @@
     <string id="maxVoltage_label">Session max voltage</string>
     <string id="minBattery_label">Session min battery %</string>
     <string id="maxBattery_label">Session max battery %</string>
+    <string id="EORBattery_label">End of ride battery %</string>
+
+    
     <string id="field1">field1</string>
      <string id="field2">field2</string>
       <string id="field3">field3</string>

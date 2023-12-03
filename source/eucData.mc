@@ -1,10 +1,17 @@
 module eucData {
+  //var GUI = false;
+  var orangeColoringThreshold = 80;
+  var redColoringThreshold = 90;
+  var mainNumber = 0;
+  var topBar = 0;
+  var maxDisplayedSpeed = 0;
   var isFirst = false;
   var profile = "";
   var logoFill = "";
   var logoEmpty = "";
   var logoOffsetx = 0;
   var logoOffsety = 0;
+  var fontID = 0;
   var logoColor = 0x1f1f1f;
   var txtColor = 0xffffff;
   var linesColor = 0xffffff;
@@ -28,7 +35,7 @@ module eucData {
   var current = 0.0;
   var temperature = 0.0;
   var maxTemperature = 65;
-  var totalDistance = -1.0;
+  var totalDistance = 0.0;
   var PWM = 0;
   var hPWM = 0.0;
   var currentCorrection;

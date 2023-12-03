@@ -5,6 +5,7 @@
     <property id="logoEmpty" type="string">empty</property>
     <property id="logoColor" type="string">1f1f1f</property>
     <property id="linesColor" type="string">ffffff</property>
+    <property id="font" type="number">0</property>
     <property id="txtColor" type="string">ffffff</property>
     <property id="logoOffsetx" type="number">0</property>
     <property id="logoOffsety" type="number">0</property>

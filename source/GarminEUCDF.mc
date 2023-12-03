@@ -1,7 +1,7 @@
 import Toybox.Application.Storage;
 import Toybox.Lang;
 import Toybox.WatchUi;
-using Toybox.Graphics;
+import Toybox.Graphics;
 using Toybox.Math;
 import Toybox.System;
 using Toybox.Application.Storage;
@@ -48,6 +48,7 @@ class GarminEUCDF extends WatchUi.DataField {
   const MINBATTERY_FIELD_ID = 18;
   const MAXBATTERY_FIELD_ID = 19;
   const MINTEMP_FIELD_ID = 20;
+  const EORBATTERY_FIELD_ID = 21;
 
   var mSpeedField = null;
   var mPWMField = null;
@@ -69,10 +70,20 @@ class GarminEUCDF extends WatchUi.DataField {
   var mMaxVoltageField = null;
   var mMinBatteryField = null;
   var mMaxBatteryField = null;
+  var mEORBatteryField = null;
   var _alertDisplayed = false;
+  var nb_Font;
+  private var cDrawables = {};
+
   function initialize() {
     DataField.initialize();
     fieldsInitialize();
+    //load custom number font
+    if (eucData.fontID == 0) {
+      nb_Font = WatchUi.loadResource(Rez.Fonts.Roboto);
+    } else {
+      nb_Font = WatchUi.loadResource(Rez.Fonts.Rajdhani);
+    }
 
     // draw logo
     if (eucData.logoFill.length() > 10) {
@@ -86,7 +97,26 @@ class GarminEUCDF extends WatchUi.DataField {
     eucData.logoFill = ""; // cleaning doesn't free memory, probably useless
     eucData.logoEmpty = "";
   }
+  /*
+  function onLayout(dc) as Void {
+    if (eucData.GUI == true) {
+      setLayout(Rez.Layouts.HomeLayout(dc));
 
+      // Label drawables
+      cDrawables[:TimeDate] = View.findDrawableById("TimeDate");
+      cDrawables[:SpeedNumber] = View.findDrawableById("SpeedNumber");
+      cDrawables[:BatteryNumber] = View.findDrawableById("BatteryNumber");
+      cDrawables[:TemperatureNumber] =
+        View.findDrawableById("TemperatureNumber");
+      cDrawables[:BottomSubtitle] = View.findDrawableById("BottomSubtitle");
+      // And arc drawables
+      cDrawables[:SpeedArc] = View.findDrawableById("SpeedDial"); // used for PMW
+      cDrawables[:BatteryArc] = View.findDrawableById("BatteryArc");
+      cDrawables[:TemperatureArc] = View.findDrawableById("TemperatureArc");
+      cDrawables[:RecordingIndicator] =
+        View.findDrawableById("RecordingIndicator");
+    }
+  }*/
   public function restoreValues(
     _maxTemp,
     _minTemp,
@@ -121,7 +151,7 @@ class GarminEUCDF extends WatchUi.DataField {
     mPWMField = createField(
       "PWM",
       PWM_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
+      FitContributor.DATA_TYPE_UINT8,
       { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "%" }
     );
     mVoltageField = createField(
@@ -166,7 +196,7 @@ class GarminEUCDF extends WatchUi.DataField {
     mMaxPWMField = createField(
       "Max_PWM",
       MAXPWM_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
+      FitContributor.DATA_TYPE_UINT8,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
     );
     /*
@@ -225,7 +255,13 @@ class GarminEUCDF extends WatchUi.DataField {
     mMinBatteryField = createField(
       "Min_Battery",
       MINBATTERY_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
+      FitContributor.DATA_TYPE_UINT8,
+      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
+    );
+    mEORBatteryField = createField(
+      "EORBattery",
+      EORBATTERY_FIELD_ID,
+      FitContributor.DATA_TYPE_UINT8,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
     );
     /*
@@ -245,7 +281,7 @@ class GarminEUCDF extends WatchUi.DataField {
 
     // set fields to 0
 
-    /* V0.0.38
+    // V0.0.38
     mSpeedField.setData(0.0);
     mPWMField.setData(0.0);
     mVoltageField.setData(0.0);
@@ -260,7 +296,6 @@ class GarminEUCDF extends WatchUi.DataField {
     //  mMaxBatteryField.setData(0.0);
     mMinBatteryField.setData(0.0);
     //mMinTempField.setData(0.0);
-    */
   }
 
   var maxSpeed = 0.0;
@@ -304,7 +339,9 @@ class GarminEUCDF extends WatchUi.DataField {
     //    mCurrentField.setData(currentCurrent); // id 3
     //    mPowerField.setData(currentPower); // id 4
     mTempField.setData(eucData.temperature); // id 5
-
+    if (currentBatteryPerc > 0 && eucData.paired == true) {
+      mEORBatteryField.setData(currentBatteryPerc);
+    }
     if (correctedSpeed > maxSpeed) {
       maxSpeed = correctedSpeed;
       mMaxSpeedField.setData(maxSpeed); // id 7
@@ -1046,6 +1083,7 @@ class GarminEUCDF extends WatchUi.DataField {
 
   // Update the field layout and display the field data
   function onUpdate(dc) {
+    // DEBUG SCREEN
     if (eucData.debug) {
       var alignAxe = dc.getWidth() / 5;
       var space = dc.getHeight() / 10;
@@ -1108,7 +1146,7 @@ class GarminEUCDF extends WatchUi.DataField {
         Graphics.FONT_TINY,
         "rstOcc: " + reset,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
-      );
+      ); // END OF DEBUG SCREEN
     } else {
       // System.println(eucData.isFirst);
       if (eucData.isFirst && !eucData.paired) {
@@ -1142,12 +1180,108 @@ class GarminEUCDF extends WatchUi.DataField {
           Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
         );
       } else {
-        var gap = dc.getWidth() / 40;
+        /*
+        // Should rewrite layout for 240x240 round watches,
+        if (eucData.GUI == true) {
+          // GUI
+          var CurrentTime = System.getClockTime();
+          cDrawables[:TimeDate].setText(
+            CurrentTime.hour.format("%d") + ":" + CurrentTime.min.format("%02d")
+          );
+
+          cDrawables[:TimeDate].setColor(Graphics.COLOR_WHITE);
+
+          // Update label drawables
+          cDrawables[:TimeDate].setText(
+            // Update time
+            System.getClockTime().hour.format("%d") +
+              ":" +
+              System.getClockTime().min.format("%02d")
+          );
+          var batteryPercentage = eucData.getBatteryPercentage();
+
+          cDrawables[:BatteryNumber].setText(
+            valueRound(batteryPercentage, "%.1f") + "%"
+          );
+          cDrawables[:TemperatureNumber].setText(
+            valueRound(eucData.temperature, "%.1f").toString() + "°C"
+          );
+          // cDrawables[:BottomSubtitle].setText(diplayStats());
+         
+
+          var speedNumberStr = "";
+
+          if (eucData.mainNumber == 0) {
+            var speedNumberVal = "";
+            speedNumberVal = eucData.correctedSpeed;
+            if (speedNumberVal > 100) {
+              speedNumberStr = valueRound(
+                eucData.correctedSpeed,
+                "%d"
+              ).toString();
+            } else {
+              speedNumberStr = valueRound(
+                eucData.correctedSpeed,
+                "%.1f"
+              ).toString();
+            }
+          }
+          if (eucData.mainNumber == 1) {
+            var speedNumberVal;
+            speedNumberVal = eucData.PWM;
+            if (speedNumberVal > 100) {
+              speedNumberStr = valueRound(eucData.PWM, "%d").toString();
+            } else {
+              speedNumberStr = valueRound(eucData.PWM, "%.1f").toString();
+            }
+          }
+          if (eucData.mainNumber == 2) {
+            var speedNumberVal;
+            speedNumberVal = eucData.getBatteryPercentage();
+            if (speedNumberVal > 100) {
+              speedNumberStr = valueRound(speedNumberVal, "%d").toString();
+            } else {
+              speedNumberStr = valueRound(speedNumberVal, "%.1f").toString();
+            }
+          }
+          cDrawables[:SpeedNumber].setText(speedNumberStr);
+          //cDrawables[:SpeedArc].setValues(WheelData.currentSpeed.toFloat(), WheelData.speedLimit);
+          if (eucData.topBar == 0) {
+            cDrawables[:SpeedArc].setValues(eucData.PWM.toFloat(), 100);
+          } else {
+            cDrawables[:SpeedArc].setValues(
+              eucData.correctedSpeed.toFloat(),
+              eucData.maxDisplayedSpeed
+            );
+          }
+
+          cDrawables[:BatteryArc].setValues(batteryPercentage, 100);
+          cDrawables[:TemperatureArc].setValues(
+            eucData.temperature,
+            eucData.maxTemperature
+          );
+          cDrawables[:TimeDate].setColor(Graphics.COLOR_WHITE);
+          cDrawables[:SpeedNumber].setColor(Graphics.COLOR_WHITE);
+          cDrawables[:BatteryNumber].setColor(Graphics.COLOR_WHITE);
+          cDrawables[:TemperatureNumber].setColor(Graphics.COLOR_WHITE);
+          cDrawables[:BottomSubtitle].setColor(Graphics.COLOR_WHITE);
+
+          // END OF GUI
+          
+        } else {*/
+        var gap;
         var scr_height = dc.getHeight();
         var scr_width = dc.getWidth();
         var fieldNameFont = Graphics.FONT_XTINY;
-        var fieldValueFont = Graphics.FONT_GLANCE_NUMBER;
-
+        var fieldValueFont = nb_Font;
+        var fieldNameFontHeight = Graphics.getFontHeight(fieldNameFont);
+        var fieldValueFontHeight = Graphics.getFontHeight(fieldValueFont);
+        if (scr_width < 260) {
+          gap = dc.getWidth() / 80;
+          fieldNameFontHeight = fieldNameFontHeight - 4;
+        } else {
+          gap = dc.getWidth() / 40;
+        }
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.clear();
         drawBackground(dc);
@@ -1156,9 +1290,7 @@ class GarminEUCDF extends WatchUi.DataField {
           dc.drawLine(gap, scr_height / 2, scr_width - gap, scr_height / 2);
           dc.drawLine(
             scr_width / 2,
-            2 * gap +
-              (Graphics.getFontHeight(fieldNameFont) +
-                Graphics.getFontHeight(fieldValueFont)),
+            2 * gap + (fieldNameFontHeight + fieldValueFontHeight),
             scr_width / 2,
             scr_height / 2 - 2 * gap
           );
@@ -1166,10 +1298,7 @@ class GarminEUCDF extends WatchUi.DataField {
             scr_width / 2,
             scr_height / 2 + 2 * gap,
             scr_width / 2,
-            scr_height -
-              2 * gap -
-              (Graphics.getFontHeight(fieldNameFont) +
-                Graphics.getFontHeight(fieldValueFont))
+            scr_height - 2 * gap - (fieldNameFontHeight + fieldValueFontHeight)
           );
         }
 
@@ -1183,7 +1312,7 @@ class GarminEUCDF extends WatchUi.DataField {
         );
         dc.drawText(
           scr_width / 2,
-          gap + Graphics.getFontHeight(fieldNameFont),
+          gap + fieldNameFontHeight,
           fieldValueFont,
           field1_value,
           Graphics.TEXT_JUSTIFY_CENTER
@@ -1198,7 +1327,7 @@ class GarminEUCDF extends WatchUi.DataField {
         );
         dc.drawText(
           scr_width / 4,
-          scr_height / 4 + Graphics.getFontHeight(fieldNameFont),
+          scr_height / 4 + fieldNameFontHeight,
           fieldValueFont,
           field2_value,
           Graphics.TEXT_JUSTIFY_CENTER
@@ -1213,7 +1342,7 @@ class GarminEUCDF extends WatchUi.DataField {
         );
         dc.drawText(
           scr_width - scr_width / 4,
-          scr_height / 4 + Graphics.getFontHeight(fieldNameFont),
+          scr_height / 4 + fieldNameFontHeight,
           fieldValueFont,
           field3_value,
           Graphics.TEXT_JUSTIFY_CENTER
@@ -1228,7 +1357,7 @@ class GarminEUCDF extends WatchUi.DataField {
         );
         dc.drawText(
           scr_width / 4,
-          scr_height / 2 + gap + Graphics.getFontHeight(fieldNameFont),
+          scr_height / 2 + gap + fieldNameFontHeight,
           fieldValueFont,
           field4_value,
           Graphics.TEXT_JUSTIFY_CENTER
@@ -1243,7 +1372,7 @@ class GarminEUCDF extends WatchUi.DataField {
         );
         dc.drawText(
           scr_width - scr_width / 4,
-          scr_height / 2 + gap + Graphics.getFontHeight(fieldNameFont),
+          scr_height / 2 + gap + fieldNameFontHeight,
           fieldValueFont,
           field5_value,
           Graphics.TEXT_JUSTIFY_CENTER
@@ -1251,10 +1380,7 @@ class GarminEUCDF extends WatchUi.DataField {
 
         dc.drawText(
           scr_width / 2,
-          scr_height -
-            //gap -
-            Graphics.getFontHeight(fieldNameFont) -
-            Graphics.getFontHeight(fieldValueFont),
+          scr_height - gap - fieldNameFontHeight - fieldValueFontHeight,
           fieldNameFont,
           field6,
           Graphics.TEXT_JUSTIFY_CENTER
@@ -1262,9 +1388,7 @@ class GarminEUCDF extends WatchUi.DataField {
 
         dc.drawText(
           scr_width / 2,
-          scr_height -
-            //- gap
-            Graphics.getFontHeight(fieldValueFont),
+          scr_height - gap - fieldValueFontHeight,
           fieldValueFont,
           field6_value,
           Graphics.TEXT_JUSTIFY_CENTER
@@ -1310,8 +1434,13 @@ class GarminEUCDF extends WatchUi.DataField {
         }
       }
     }
-    //View.onUpdate(dc);
   }
+  /*
+    if (eucData.GUI == true) {
+      View.onUpdate(dc);
+    }
+    
+}*/
 
   function drawBackground(dc) {
     if (fill_logo != null) {
@@ -1370,6 +1499,14 @@ class GarminEUCDF extends WatchUi.DataField {
       startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
       maxPWM = Storage.getValue("maxPWM");
       // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
+
+      // should only be required for max values
+      mMaxSpeedField.setData(maxSpeed);
+      mMaxPWMField.setData(maxPWM);
+      mMaxTempField.setData(maxTemp);
+      mMinVoltageField.setData(minVoltage);
+      mMaxVoltageField.setData(maxVoltage);
+      mMinBatteryField.setData(minBatteryPerc);
     }
   }
   function onTimerReset() {

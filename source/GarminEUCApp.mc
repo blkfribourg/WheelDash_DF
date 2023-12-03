@@ -46,6 +46,7 @@ class GarminEUCApp extends Application.AppBase {
     eucData.linesColor =
       AppStorage.getSetting("linesColor").toNumberWithBase(16);
     eucData.txtColor = AppStorage.getSetting("txtColor").toNumberWithBase(16);
+    eucData.fontID = AppStorage.getSetting("font");
     eucData.logoOffsetx = AppStorage.getSetting("logoOffsetx");
     eucData.logoOffsety = AppStorage.getSetting("logoOffsety");
     eucData.drawLines = AppStorage.getSetting("drawLines");
