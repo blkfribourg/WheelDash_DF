@@ -98,7 +98,7 @@ function stringToArrays(str) {
     if (points_nb > limitsize) {
       var loop_nb = points_nb / limitsize.toFloat();
       var temp_coord_array;
-      System.println("alert split required");
+      //System.println("alert split required");
 
       for (var z = 0; z < loop_nb; z++) {
         var startindex = limitsize * z;

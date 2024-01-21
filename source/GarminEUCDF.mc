@@ -1301,8 +1301,12 @@ class GarminEUCDF extends WatchUi.DataField {
             scr_height - 2 * gap - (fieldNameFontHeight + fieldValueFontHeight)
           );
         }
+        if (eucData.paired == true) {
+          dc.setColor(eucData.txtColor, Graphics.COLOR_TRANSPARENT);
+        } else {
+          dc.setColor(eucData.txtColor_unpr, Graphics.COLOR_TRANSPARENT);
+        }
 
-        dc.setColor(eucData.txtColor, Graphics.COLOR_TRANSPARENT);
         dc.drawText(
           scr_width / 2,
           gap,

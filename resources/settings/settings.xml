@@ -527,6 +527,11 @@
                 propertyKey="@Properties.txtColor"
                 title="@Strings.txtColor">
                 <settingConfig type="alphaNumeric"/>
+</setting>
+<setting
+                propertyKey="@Properties.txtColor_unpr"
+                title="@Strings.txtColor_unpr">
+                <settingConfig type="alphaNumeric"/>
 </setting>     
 <setting
                 propertyKey="@Properties.linesColor"

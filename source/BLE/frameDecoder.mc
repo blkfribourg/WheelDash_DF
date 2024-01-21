@@ -347,7 +347,7 @@ class KingsongDecoder {
         for (i = 2; i < end; i++) {
           advName = advName + value[i].toChar().toString();
         }
-        System.println(advName);
+        //System.println(advName);
         var model = "";
         var ss = splitstr(advName, "-");
         for (i = 0; i < ss.size() - 1; i++) {
@@ -355,7 +355,7 @@ class KingsongDecoder {
             model = model + "-";
           }
           model = model + ss[i];
-          System.println("." + model + ".");
+          //System.println("." + model + ".");
         }
 
         eucData.model = model;

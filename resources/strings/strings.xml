@@ -9,6 +9,7 @@
     <string id="logoColor">Logo color (hex) #</string>
     <string id="linesColor">Lines color (hex) #</string>
     <string id="txtColor">Text color (hex) #</string>
+    <string id="txtColor_unpr">Text color when EUC disconnected/unpaired (hex) #</string>
     <string id="font">Field value font</string>
     <string id="font0">Roboto</string>
     <string id="font1">Rajdhani</string>

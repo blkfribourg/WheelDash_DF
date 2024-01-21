@@ -14,6 +14,7 @@ module eucData {
   var fontID = 0;
   var logoColor = 0x1f1f1f;
   var txtColor = 0xffffff;
+  var txtColor_unpr = 0xff8000;
   var linesColor = 0xffffff;
   var drawLines = true;
   var wheelBrand;

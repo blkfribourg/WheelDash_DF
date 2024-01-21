@@ -23,7 +23,9 @@ class GarminEUCApp extends Application.AppBase {
   }
 
   // Return the initial view of your application here
-  function getInitialView() as Array<Views or InputDelegates>? {
+  function getInitialView() {
+    //Connect IQ7
+    // function getInitialView() as Array<Views or InputDelegates>? {
     //queue = new BleQueue();
 
     if (Toybox has :BluetoothLowEnergy) {
@@ -34,7 +36,8 @@ class GarminEUCApp extends Application.AppBase {
     }
 
     view = new GarminEUCDF();
-    return [view] as Array<Views or InputDelegates>;
+    return [view]; //Connect IQ7
+    // return [view] as Array<Views or InputDelegates>?;
   }
 
   function setSettings(profile) {
@@ -46,6 +49,8 @@ class GarminEUCApp extends Application.AppBase {
     eucData.linesColor =
       AppStorage.getSetting("linesColor").toNumberWithBase(16);
     eucData.txtColor = AppStorage.getSetting("txtColor").toNumberWithBase(16);
+    eucData.txtColor_unpr =
+      AppStorage.getSetting("txtColor_unpr").toNumberWithBase(16);
     eucData.fontID = AppStorage.getSetting("font");
     eucData.logoOffsetx = AppStorage.getSetting("logoOffsetx");
     eucData.logoOffsety = AppStorage.getSetting("logoOffsety");
