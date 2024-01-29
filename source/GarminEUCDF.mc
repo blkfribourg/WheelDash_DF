@@ -1,7 +1,13 @@
-using Toybox.WatchUi;
-using Toybox.Graphics;
-
+import Toybox.Application.Storage;
+import Toybox.Lang;
+import Toybox.WatchUi;
+import Toybox.Graphics;
+using Toybox.Math;
+import Toybox.System;
+using Toybox.Application.Storage;
 class GarminEUCDF extends WatchUi.DataField {
+  var fill_logo;
+  var empty_logo;
   var delay = 3;
   var firstCall = true;
   hidden var field1 = "NC";
@@ -10,13 +16,12 @@ class GarminEUCDF extends WatchUi.DataField {
   hidden var field4 = "NC";
   hidden var field5 = "NC";
   hidden var field6 = "NC";
-  hidden var field1_value = 0.0;
-  hidden var field2_value = 0.0;
-  hidden var field3_value = 0.0;
-  hidden var field4_value = 0.0;
-  hidden var field5_value = 0.0;
-  hidden var field6_value = 0.0;
-
+  hidden var field1_value = 0;
+  hidden var field2_value = 0;
+  hidden var field3_value = 0;
+  hidden var field4_value = 0;
+  hidden var field5_value = 0;
+  hidden var field6_value = 0;
   const SPEED_FIELD_ID = 0;
   const PWM_FIELD_ID = 1;
   const VOLTAGE_FIELD_ID = 2;
@@ -43,6 +48,7 @@ class GarminEUCDF extends WatchUi.DataField {
   const MINBATTERY_FIELD_ID = 18;
   const MAXBATTERY_FIELD_ID = 19;
   const MINTEMP_FIELD_ID = 20;
+  const EORBATTERY_FIELD_ID = 21;
 
   var mSpeedField = null;
   var mPWMField = null;
@@ -64,12 +70,76 @@ class GarminEUCDF extends WatchUi.DataField {
   var mMaxVoltageField = null;
   var mMinBatteryField = null;
   var mMaxBatteryField = null;
+  var mEORBatteryField = null;
+  var _alertDisplayed = false;
+  var nb_Font;
+  private var cDrawables = {};
 
   function initialize() {
     DataField.initialize();
     fieldsInitialize();
-  }
+    //load custom number font
+    if (eucData.fontID == 0) {
+      nb_Font = WatchUi.loadResource(Rez.Fonts.Roboto);
+    } else {
+      nb_Font = WatchUi.loadResource(Rez.Fonts.Rajdhani);
+    }
 
+    // draw logo
+    if (eucData.logoFill.length() > 10) {
+      fill_logo = stringToArrays(eucData.logoFill);
+    }
+    if (eucData.logoEmpty.length() > 10) {
+      empty_logo = stringToArrays(eucData.logoEmpty);
+    }
+
+    // System.println(fill_logo);
+    eucData.logoFill = ""; // cleaning doesn't free memory, probably useless
+    eucData.logoEmpty = "";
+  }
+  /*
+  function onLayout(dc) as Void {
+    if (eucData.GUI == true) {
+      setLayout(Rez.Layouts.HomeLayout(dc));
+
+      // Label drawables
+      cDrawables[:TimeDate] = View.findDrawableById("TimeDate");
+      cDrawables[:SpeedNumber] = View.findDrawableById("SpeedNumber");
+      cDrawables[:BatteryNumber] = View.findDrawableById("BatteryNumber");
+      cDrawables[:TemperatureNumber] =
+        View.findDrawableById("TemperatureNumber");
+      cDrawables[:BottomSubtitle] = View.findDrawableById("BottomSubtitle");
+      // And arc drawables
+      cDrawables[:SpeedArc] = View.findDrawableById("SpeedDial"); // used for PMW
+      cDrawables[:BatteryArc] = View.findDrawableById("BatteryArc");
+      cDrawables[:TemperatureArc] = View.findDrawableById("TemperatureArc");
+      cDrawables[:RecordingIndicator] =
+        View.findDrawableById("RecordingIndicator");
+    }
+  }*/
+  public function restoreValues(
+    _maxTemp,
+    _minTemp,
+    _maxVoltage,
+    _minVoltage,
+    _maxBatteryPerc,
+    _minBatteryPerc,
+    _sessionDistance,
+    _avgSpeed,
+    _maxPWM
+    // _startingMoment
+  ) {
+    maxTemp = _maxTemp;
+    minTemp = _minTemp;
+    maxVoltage = _maxVoltage;
+    minVoltage = _minVoltage;
+    maxBatteryPerc = _maxBatteryPerc;
+    minBatteryPerc = _minBatteryPerc;
+    sessionDistance = _sessionDistance;
+    avgSpeed = _avgSpeed;
+    maxPWM = _maxPWM;
+    // startingMoment = _startingMoment;
+  }
   function fieldsInitialize() {
     mSpeedField = createField(
       "speed",
@@ -81,7 +151,7 @@ class GarminEUCDF extends WatchUi.DataField {
     mPWMField = createField(
       "PWM",
       PWM_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
+      FitContributor.DATA_TYPE_UINT8,
       { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "%" }
     );
     mVoltageField = createField(
@@ -126,7 +196,7 @@ class GarminEUCDF extends WatchUi.DataField {
     mMaxPWMField = createField(
       "Max_PWM",
       MAXPWM_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
+      FitContributor.DATA_TYPE_UINT8,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
     );
     /*
@@ -185,7 +255,13 @@ class GarminEUCDF extends WatchUi.DataField {
     mMinBatteryField = createField(
       "Min_Battery",
       MINBATTERY_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
+      FitContributor.DATA_TYPE_UINT8,
+      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
+    );
+    mEORBatteryField = createField(
+      "EORBattery",
+      EORBATTERY_FIELD_ID,
+      FitContributor.DATA_TYPE_UINT8,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
     );
     /*
@@ -204,6 +280,8 @@ class GarminEUCDF extends WatchUi.DataField {
     );*/
 
     // set fields to 0
+
+    // V0.0.38
     mSpeedField.setData(0.0);
     mPWMField.setData(0.0);
     mVoltageField.setData(0.0);
@@ -224,8 +302,8 @@ class GarminEUCDF extends WatchUi.DataField {
   var maxPWM = 0.0;
   var maxCurrent = 0.0;
   var maxPower = 0.0;
-  var maxTemp = 0.0;
-  var minTemp = 0.0;
+  var maxTemp = -255.0;
+  var minTemp = 255.0;
   var currentPWM = 0.0;
   var correctedSpeed = 0.0;
   var currentCurrent = 0.0;
@@ -236,17 +314,17 @@ class GarminEUCDF extends WatchUi.DataField {
   var currentPower = 0.0;
   var sumPower = 0.0;
   var sessionDistance = 0.0;
-  var startingEUCTripDistance = 0.0;
-  var startingMoment = 0.0;
-  var minVoltage = 0.0;
+  var startingEUCTripDistance = 0;
+  //var startingMoment = 0.0;
+  var minVoltage = 255.0;
   var maxVoltage = 0.0;
-  var minBatteryPerc = 0.0;
+  var minBatteryPerc = 101.0;
   var maxBatteryPerc = 0.0;
   var avgSpeed = 0.0;
   var avgCurrent = 0.0;
   var avgPower = 0.0;
 
-  function updateFitData() {
+  function updateFitData(garminInfo) {
     callNb++;
     currentVoltage = eucData.getVoltage();
     currentBatteryPerc = eucData.getBatteryPercentage();
@@ -261,7 +339,9 @@ class GarminEUCDF extends WatchUi.DataField {
     //    mCurrentField.setData(currentCurrent); // id 3
     //    mPowerField.setData(currentPower); // id 4
     mTempField.setData(eucData.temperature); // id 5
-
+    if (currentBatteryPerc > 0 && eucData.paired == true) {
+      mEORBatteryField.setData(currentBatteryPerc);
+    }
     if (correctedSpeed > maxSpeed) {
       maxSpeed = correctedSpeed;
       mMaxSpeedField.setData(maxSpeed); // id 7
@@ -283,15 +363,15 @@ class GarminEUCDF extends WatchUi.DataField {
       maxTemp = eucData.temperature;
       mMaxTempField.setData(maxTemp); // id 11
     }
-    if (eucData.temperature < minTemp) {
+    if (eucData.temperature < minTemp && eucData.temperature != 0.0) {
       minTemp = eucData.temperature;
       // mMinTempField.setData(minTemp); // id 11
     }
-    if (currentVoltage > maxVoltage) {
+    if (currentVoltage > maxVoltage && currentVoltage != 0.0) {
       maxVoltage = currentVoltage;
       mMaxVoltageField.setData(maxVoltage);
     }
-    if (currentVoltage < minVoltage) {
+    if (currentVoltage < minVoltage && currentVoltage != 0.0) {
       minVoltage = currentVoltage;
       mMinVoltageField.setData(minVoltage);
     }
@@ -300,22 +380,25 @@ class GarminEUCDF extends WatchUi.DataField {
       maxBatteryPerc = currentBatteryPerc;
       // mMaxBatteryField.setData(maxBatteryPerc);
     }
-    if (currentBatteryPerc < minBatteryPerc) {
+    if (currentBatteryPerc < minBatteryPerc && currentBatteryPerc != 0.0) {
       minBatteryPerc = currentBatteryPerc;
       mMinBatteryField.setData(minBatteryPerc);
     }
 
-    var currentMoment = new Time.Moment(Time.now().value());
-    var elaspedTime = startingMoment.subtract(currentMoment);
-    //System.println("elaspsed :" + elaspedTime.value());
-    if (elaspedTime.value() != 0 && eucData.totalDistance > 0) {
-      if (startingEUCTripDistance < 0) {
+    // var currentMoment = new Time.Moment(Time.now().value());
+    // var elapsedTime = startingMoment.subtract(currentMoment);
+    var elapsedTime = garminInfo.timerTime / 1000.0; // convert to seconds
+    //System.println("elaspsed :" + elapsedTime.value());
+    if (elapsedTime != 0 && eucData.totalDistance > 0) {
+      //if (elapsedTime.value() != 0 && eucData.totalDistance > 0) {
+      if (startingEUCTripDistance == 0) {
         startingEUCTripDistance = eucData.totalDistance;
       }
       sessionDistance =
         (eucData.totalDistance - startingEUCTripDistance) *
         eucData.speedCorrectionFactor;
-      avgSpeed = sessionDistance / (elaspedTime.value() / 3600.0);
+      //avgSpeed = sessionDistance / (elapsedTime.value() / 3600.0);
+      avgSpeed = sessionDistance / (elapsedTime / 3600.0);
     } else {
       sessionDistance = 0.0;
       avgSpeed = 0.0;
@@ -332,24 +415,32 @@ class GarminEUCDF extends WatchUi.DataField {
     //mAvgPowerField.setData(sumPower / callNb); // id 14
   }
   function resetVariables() {
-    startingMoment = new Time.Moment(Time.now().value());
-    startingEUCTripDistance = -1;
-    minVoltage = 255.0;
-    maxVoltage = 0.0;
-    minBatteryPerc = 101.0;
-    maxBatteryPerc = 0.0;
+    //System.println("reset variables");
+    //startingMoment = new Time.Moment(Time.now().value());
     maxSpeed = 0.0;
     maxPWM = 0.0;
     maxCurrent = 0.0;
     maxPower = 0.0;
-    minTemp = 255.0;
     maxTemp = -255.0;
+    minTemp = 255.0;
+    currentPWM = 0.0;
+    correctedSpeed = 0.0;
+    currentCurrent = 0.0;
+    currentVoltage = 0.0;
+    currentBatteryPerc = 0.0;
     sumCurrent = 0.0;
+    callNb = 0.0;
+    currentPower = 0.0;
     sumPower = 0.0;
+    sessionDistance = 0.0;
+    startingEUCTripDistance = 0;
+    minVoltage = 255.0;
+    maxVoltage = 0.0;
+    minBatteryPerc = 101.0;
+    maxBatteryPerc = 0.0;
     avgSpeed = 0.0;
     avgCurrent = 0.0;
     avgPower = 0.0;
-    callNb = 0;
   }
   function getFieldValues() {
     if (AppStorage.getSetting("field1") == 0) {
@@ -839,155 +930,703 @@ class GarminEUCDF extends WatchUi.DataField {
     }
   }
   // Calculate the data to display in the field here
+  var activityElapsedTime = "";
+  var activityElapsedDist = "";
+  var activityAvgSpd = "";
+  var activityGPSAcc = "";
+  var activityStartTimeVal = "";
+  var activityTimerState = "";
+  var activityTimerTime = "";
+  var reset = "no";
+  // Calculate the data to display in the field here
   function compute(info) {
+    if (info.elapsedTime != null) {
+      activityElapsedTime = info.elapsedTime;
+    }
+    if (info.elapsedDistance != null) {
+      activityElapsedDist = info.elapsedDistance;
+    }
+    if (info.averageSpeed != null) {
+      activityAvgSpd = info.averageSpeed;
+    }
+    if (info.currentLocationAccuracy != null) {
+      activityGPSAcc = info.currentLocationAccuracy;
+    }
+    if (info.startTime != null) {
+      activityStartTimeVal = info.startTime.value();
+    }
+    if (info.timerState != null) {
+      activityTimerState = info.timerState;
+    }
+    if (info.timerTime != null) {
+      activityTimerTime = info.timerTime;
+    }
+
+    //eucData.paired = true;
     if (eucData.paired == true) {
       if (delay < 0) {
-        updateFitData();
+        updateFitData(info);
         getFieldValues();
+        checkAlarms();
       } else {
-        resetVariables(); // dirty
-        delay = delay - 1;
+        /*
+        if (AppStorage.getSetting("resumeDectectionMethod") == 0) {
+          if (info.elapsedTime == null || info.elapsedTime < 300000) {
+            resetVariables();
+            reset = "yes";
+          }
+        }
+        if (AppStorage.getSetting("resumeDectectionMethod") == 1) {
+          // if activity is not started yet
+          */
+        if (info.timerState == 1) {
+          loadStoredValues();
+        }
+        /* V0.0.38
+        else {
+          resetVariables();
+          reset = true;
+        }*/
       }
+      // }
+      //System.println(info.averageSpeed);
 
-      /*
-      System.println("correctedSpeed :" + correctedSpeed);
-      System.println("currentPWM :" + currentPWM);
-      System.println("currentVoltage :" + currentVoltage);
-      System.println("temperature :" + eucData.temperature);
-      System.println("maxSpeed :" + maxSpeed);
-      System.println("maxPWM :" + maxPWM);
-      System.println("maxTemp" + maxTemp);
-      System.println("minTemp:" + minTemp);
-      System.println("sessionDistance" + sessionDistance);
-      System.println("avgSpeed" + avgSpeed);
-      */
+      delay = delay - 1;
+    }
+    /*
+      delay = delay - 1; //to remove
+      if (delay == -10) {
+        onTimerStart();
+      }
+      if (delay == -20) {
+        onTimerStop();
+      }
+      if (delay == -30) {
+        onTimerReset();
+      }*/
+  }
+
+  var PWMAlert = false;
+  var tempAlert = false;
+  var speedAlert = false;
+  var displayingAlert = false;
+  var displayAlertTimer = 2;
+  var textAlert = "";
+  function checkAlarms() {
+    if (WatchUi.DataField has :showAlert) {
+      if (
+        currentPWM > eucData.alarmThreshold_PWM &&
+        eucData.alarmThreshold_PWM != 0
+      ) {
+        PWMAlert = true;
+      } else {
+        PWMAlert = false;
+      }
+      if (
+        eucData.temperature > eucData.alarmThreshold_temp &&
+        eucData.alarmThreshold_temp != 0
+      ) {
+        tempAlert = true;
+      } else {
+        tempAlert = false;
+      }
+      if (
+        correctedSpeed > eucData.alarmThreshold_speed &&
+        eucData.alarmThreshold_speed != 0
+      ) {
+        speedAlert = true;
+      } else {
+        speedAlert = false;
+      }
+      if (PWMAlert == true) {
+        textAlert = "!! PWM Alarm !!";
+      } else {
+        if (tempAlert == true) {
+          textAlert = "!! Temperature Alarm !!";
+        } else if (speedAlert == true) {
+          textAlert = "!! Speed Alarm !!";
+        }
+      }
+      if (!PWMAlert && !tempAlert && !speedAlert) {
+        displayingAlert = false;
+        displayAlertTimer = 2;
+      } else {
+        displayingAlert = true;
+        displayAlertTimer = displayAlertTimer - 1;
+        if (displayAlertTimer < -1) {
+          displayAlertTimer = 2;
+        } else {
+          vibrate();
+        }
+      }
+    }
+  }
+  function vibrate() {
+    if (Attention has :vibrate) {
+      Attention.vibrate([
+        new Attention.VibeProfile(100, 300),
+        new Attention.VibeProfile(0, 500),
+        new Attention.VibeProfile(100, 300),
+        new Attention.VibeProfile(0, 500),
+      ]);
+    }
+    if (Attention has :ToneProfile) {
+      var toneProfile = [
+        new Attention.ToneProfile(420, 300),
+        new Attention.ToneProfile(516, 300),
+        new Attention.ToneProfile(425, 300),
+        new Attention.ToneProfile(0, 1000),
+      ];
+      Attention.playTone({ :toneProfile => toneProfile });
     }
   }
 
   // Update the field layout and display the field data
   function onUpdate(dc) {
-    var gap = dc.getWidth() / 40;
-    var scr_height = dc.getHeight();
-    var scr_width = dc.getWidth();
-    var fieldNameFont = Graphics.FONT_XTINY;
-    var fieldValueFont = Graphics.FONT_MEDIUM;
+    // DEBUG SCREEN
+    if (eucData.debug) {
+      var alignAxe = dc.getWidth() / 5;
+      var space = dc.getHeight() / 10;
+      var yGap = dc.getHeight() / 8;
+      var xGap = dc.getWidth() / 12;
+      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+      dc.clear();
+      dc.drawText(
+        alignAxe,
+        yGap,
+        Graphics.FONT_TINY,
+        "ElpsTm: " + activityElapsedTime,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - xGap,
+        space + yGap,
+        Graphics.FONT_TINY,
+        "ElpsDst: " + activityElapsedDist,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - 2 * xGap,
+        2 * space + yGap,
+        Graphics.FONT_TINY,
+        "AvgSpd: " + activityAvgSpd,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - 2 * xGap,
+        3 * space + yGap,
+        Graphics.FONT_TINY,
+        "GPSacc: " + activityGPSAcc,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - 2 * xGap,
+        4 * space + yGap,
+        Graphics.FONT_TINY,
+        "StrtTime: " + activityStartTimeVal,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - 2 * xGap,
+        5 * space + yGap,
+        Graphics.FONT_TINY,
+        "TmrSte: " + activityTimerState,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - xGap,
+        6 * space + yGap,
+        Graphics.FONT_TINY,
+        "TmrTme: " + activityTimerTime,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe,
+        7 * space + yGap,
+        Graphics.FONT_TINY,
+        "rstOcc: " + reset,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      ); // END OF DEBUG SCREEN
+    } else {
+      // System.println(eucData.isFirst);
+      if (eucData.isFirst && !eucData.paired) {
+        var textToDisplay =
+          "Profile " +
+          eucData.profile +
+          " 1st connection\nPlease turn on your wheel\n and wait for connection\n\nensure only one wheel is ON!\n\nIf you enjoy this app :\n ko-fi.com/wheeldash";
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.clear();
 
-    dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
-    dc.clear();
-    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_WHITE);
-    dc.drawLine(gap, scr_height / 2, scr_width - 2 * gap, scr_height / 2);
-    dc.drawLine(
-      scr_width / 2,
-      2 * gap +
-        (Graphics.getFontHeight(fieldNameFont) +
-          Graphics.getFontHeight(fieldValueFont)),
-      scr_width / 2,
-      scr_height / 2 - 2 * gap
-    );
-    dc.drawLine(
-      scr_width / 2,
-      scr_height / 2 + 2 * gap,
-      scr_width / 2,
-      scr_height -
-        2 * gap -
-        (Graphics.getFontHeight(fieldNameFont) +
-          Graphics.getFontHeight(fieldValueFont))
-    );
+        dc.drawText(
+          dc.getWidth() / 2,
+          dc.getHeight() / 2,
+          Graphics.FONT_SYSTEM_XTINY,
+          textToDisplay,
+          Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
+        );
+      } else if (eucData.isFirst && eucData.paired && delay > 0) {
+        var textToDisplay =
+          "Profile " +
+          eucData.profile +
+          " connected.\n\nSaving wheel footprint...";
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.clear();
 
-    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-    dc.drawText(
-      scr_width / 2,
-      gap,
-      fieldNameFont,
-      field1,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    dc.drawText(
-      scr_width / 2,
-      gap + Graphics.getFontHeight(fieldNameFont),
-      fieldValueFont,
-      field1_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
+        dc.drawText(
+          dc.getWidth() / 2,
+          dc.getHeight() / 2,
+          Graphics.FONT_XTINY,
+          textToDisplay,
+          Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
+        );
+      } else {
+        /*
+        // Should rewrite layout for 240x240 round watches,
+        if (eucData.GUI == true) {
+          // GUI
+          var CurrentTime = System.getClockTime();
+          cDrawables[:TimeDate].setText(
+            CurrentTime.hour.format("%d") + ":" + CurrentTime.min.format("%02d")
+          );
 
-    dc.drawText(
-      scr_width / 4,
-      scr_height / 4,
-      fieldNameFont,
-      field2,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    dc.drawText(
-      scr_width / 4,
-      scr_height / 4 + Graphics.getFontHeight(fieldNameFont),
-      fieldValueFont,
-      field2_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
+          cDrawables[:TimeDate].setColor(Graphics.COLOR_WHITE);
 
-    dc.drawText(
-      scr_width - scr_width / 4,
-      scr_height / 4,
-      fieldNameFont,
-      field3,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    dc.drawText(
-      scr_width - scr_width / 4,
-      scr_height / 4 + Graphics.getFontHeight(fieldNameFont),
-      fieldValueFont,
-      field3_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
+          // Update label drawables
+          cDrawables[:TimeDate].setText(
+            // Update time
+            System.getClockTime().hour.format("%d") +
+              ":" +
+              System.getClockTime().min.format("%02d")
+          );
+          var batteryPercentage = eucData.getBatteryPercentage();
 
-    dc.drawText(
-      scr_width / 4,
-      scr_height / 2 + gap,
-      fieldNameFont,
-      field4,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    dc.drawText(
-      scr_width / 4,
-      scr_height / 2 + gap + Graphics.getFontHeight(fieldNameFont),
-      fieldValueFont,
-      field4_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
+          cDrawables[:BatteryNumber].setText(
+            valueRound(batteryPercentage, "%.1f") + "%"
+          );
+          cDrawables[:TemperatureNumber].setText(
+            valueRound(eucData.temperature, "%.1f").toString() + "°C"
+          );
+          // cDrawables[:BottomSubtitle].setText(diplayStats());
+         
 
-    dc.drawText(
-      scr_width - scr_width / 4,
-      scr_height / 2 + gap,
-      fieldNameFont,
-      field5,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    dc.drawText(
-      scr_width - scr_width / 4,
-      scr_height / 2 + gap + Graphics.getFontHeight(fieldNameFont),
-      fieldValueFont,
-      field5_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
+          var speedNumberStr = "";
 
-    dc.drawText(
-      scr_width / 2,
-      scr_height -
-        gap -
-        Graphics.getFontHeight(fieldNameFont) -
-        Graphics.getFontHeight(fieldValueFont),
-      fieldNameFont,
-      field6,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
+          if (eucData.mainNumber == 0) {
+            var speedNumberVal = "";
+            speedNumberVal = eucData.correctedSpeed;
+            if (speedNumberVal > 100) {
+              speedNumberStr = valueRound(
+                eucData.correctedSpeed,
+                "%d"
+              ).toString();
+            } else {
+              speedNumberStr = valueRound(
+                eucData.correctedSpeed,
+                "%.1f"
+              ).toString();
+            }
+          }
+          if (eucData.mainNumber == 1) {
+            var speedNumberVal;
+            speedNumberVal = eucData.PWM;
+            if (speedNumberVal > 100) {
+              speedNumberStr = valueRound(eucData.PWM, "%d").toString();
+            } else {
+              speedNumberStr = valueRound(eucData.PWM, "%.1f").toString();
+            }
+          }
+          if (eucData.mainNumber == 2) {
+            var speedNumberVal;
+            speedNumberVal = eucData.getBatteryPercentage();
+            if (speedNumberVal > 100) {
+              speedNumberStr = valueRound(speedNumberVal, "%d").toString();
+            } else {
+              speedNumberStr = valueRound(speedNumberVal, "%.1f").toString();
+            }
+          }
+          cDrawables[:SpeedNumber].setText(speedNumberStr);
+          //cDrawables[:SpeedArc].setValues(WheelData.currentSpeed.toFloat(), WheelData.speedLimit);
+          if (eucData.topBar == 0) {
+            cDrawables[:SpeedArc].setValues(eucData.PWM.toFloat(), 100);
+          } else {
+            cDrawables[:SpeedArc].setValues(
+              eucData.correctedSpeed.toFloat(),
+              eucData.maxDisplayedSpeed
+            );
+          }
 
-    dc.drawText(
-      scr_width / 2,
-      scr_height - gap - Graphics.getFontHeight(fieldValueFont),
-      fieldValueFont,
-      field6_value,
-      Graphics.TEXT_JUSTIFY_CENTER
-    );
-    //View.onUpdate(dc);
+          cDrawables[:BatteryArc].setValues(batteryPercentage, 100);
+          cDrawables[:TemperatureArc].setValues(
+            eucData.temperature,
+            eucData.maxTemperature
+          );
+          cDrawables[:TimeDate].setColor(Graphics.COLOR_WHITE);
+          cDrawables[:SpeedNumber].setColor(Graphics.COLOR_WHITE);
+          cDrawables[:BatteryNumber].setColor(Graphics.COLOR_WHITE);
+          cDrawables[:TemperatureNumber].setColor(Graphics.COLOR_WHITE);
+          cDrawables[:BottomSubtitle].setColor(Graphics.COLOR_WHITE);
+
+          // END OF GUI
+          
+        } else {*/
+        var gap;
+        var scr_height = dc.getHeight();
+        var scr_width = dc.getWidth();
+        var fieldNameFont = Graphics.FONT_XTINY;
+        var fieldValueFont = nb_Font;
+        var fieldNameFontHeight = Graphics.getFontHeight(fieldNameFont);
+        var fieldValueFontHeight = Graphics.getFontHeight(fieldValueFont);
+        if (scr_width < 260) {
+          gap = dc.getWidth() / 80;
+          fieldNameFontHeight = fieldNameFontHeight - 4;
+        } else {
+          gap = dc.getWidth() / 40;
+        }
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.clear();
+        drawBackground(dc);
+        if (eucData.drawLines) {
+          dc.setColor(eucData.linesColor, Graphics.COLOR_BLACK);
+          dc.drawLine(gap, scr_height / 2, scr_width - gap, scr_height / 2);
+          dc.drawLine(
+            scr_width / 2,
+            2 * gap + (fieldNameFontHeight + fieldValueFontHeight),
+            scr_width / 2,
+            scr_height / 2 - 2 * gap
+          );
+          dc.drawLine(
+            scr_width / 2,
+            scr_height / 2 + 2 * gap,
+            scr_width / 2,
+            scr_height - 2 * gap - (fieldNameFontHeight + fieldValueFontHeight)
+          );
+        }
+        if (eucData.paired == true) {
+          dc.setColor(eucData.txtColor, Graphics.COLOR_TRANSPARENT);
+        } else {
+          dc.setColor(eucData.txtColor_unpr, Graphics.COLOR_TRANSPARENT);
+        }
+
+        dc.drawText(
+          scr_width / 2,
+          gap,
+          fieldNameFont,
+          field1,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        dc.drawText(
+          scr_width / 2,
+          gap + fieldNameFontHeight,
+          fieldValueFont,
+          field1_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width / 4,
+          scr_height / 4,
+          fieldNameFont,
+          field2,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        dc.drawText(
+          scr_width / 4,
+          scr_height / 4 + fieldNameFontHeight,
+          fieldValueFont,
+          field2_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width - scr_width / 4,
+          scr_height / 4,
+          fieldNameFont,
+          field3,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        dc.drawText(
+          scr_width - scr_width / 4,
+          scr_height / 4 + fieldNameFontHeight,
+          fieldValueFont,
+          field3_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width / 4,
+          scr_height / 2 + gap,
+          fieldNameFont,
+          field4,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        dc.drawText(
+          scr_width / 4,
+          scr_height / 2 + gap + fieldNameFontHeight,
+          fieldValueFont,
+          field4_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width - scr_width / 4,
+          scr_height / 2 + gap,
+          fieldNameFont,
+          field5,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        dc.drawText(
+          scr_width - scr_width / 4,
+          scr_height / 2 + gap + fieldNameFontHeight,
+          fieldValueFont,
+          field5_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width / 2,
+          scr_height - gap - fieldNameFontHeight - fieldValueFontHeight,
+          fieldNameFont,
+          field6,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+
+        dc.drawText(
+          scr_width / 2,
+          scr_height - gap - fieldValueFontHeight,
+          fieldValueFont,
+          field6_value,
+          Graphics.TEXT_JUSTIFY_CENTER
+        );
+        if (displayingAlert == true && displayAlertTimer > 0) {
+          dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+          dc.fillRectangle(
+            0,
+            dc.getWidth() / 2 - Graphics.getFontHeight(Graphics.FONT_SMALL) / 2,
+            dc.getWidth(),
+            Graphics.getFontHeight(Graphics.FONT_SMALL)
+          );
+          dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+          dc.drawLine(
+            0,
+            dc.getHeight() / 2 -
+              Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 -
+              1,
+            dc.getWidth(),
+            dc.getHeight() / 2 -
+              Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 -
+              1
+          );
+          dc.drawLine(
+            0,
+            dc.getHeight() / 2 +
+              Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 +
+              1,
+            dc.getWidth(),
+            dc.getHeight() / 2 +
+              Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 +
+              1
+          );
+          dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_BLACK);
+          dc.drawText(
+            dc.getWidth() / 2,
+            dc.getHeight() / 2 -
+              Graphics.getFontHeight(Graphics.FONT_SMALL) / 2,
+            Graphics.FONT_SMALL,
+            textAlert,
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+        }
+      }
+    }
+  }
+  /*
+    if (eucData.GUI == true) {
+      View.onUpdate(dc);
+    }
+    
+}*/
+
+  function drawBackground(dc) {
+    if (fill_logo != null) {
+      //dc.setColor(eucData.logoColor, Graphics.COLOR_TRANSPARENT);
+      dc.setColor(eucData.logoColor, Graphics.COLOR_TRANSPARENT);
+
+      for (var i = 0; i < fill_logo.size(); i++) {
+        dc.fillPolygon(fill_logo[i]);
+      }
+    }
+    if (empty_logo != null) {
+      dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_TRANSPARENT);
+      for (var i = 0; i < empty_logo.size(); i++) {
+        dc.fillPolygon(empty_logo[i]);
+      }
+    }
+  }
+  function loadStoredValues() {
+    if (
+      Storage.getValue("maxTemp") != null &&
+      Storage.getValue("minTemp") != null &&
+      Storage.getValue("maxVoltage") != null &&
+      Storage.getValue("minVoltage") != null &&
+      Storage.getValue("maxBatteryPerc") != null &&
+      Storage.getValue("minBatteryPerc") != null &&
+      Storage.getValue("sessionDistance") != null &&
+      Storage.getValue("avgSpeed") != null &&
+      Storage.getValue("maxPWM") != null &&
+      //Storage.getValue("startingMoment") != null &&
+      Storage.getValue("avgCurrent") != null &&
+      Storage.getValue("avgPower") != null &&
+      Storage.getValue("maxSpeed") != null &&
+      Storage.getValue("maxPower") != null &&
+      Storage.getValue("maxCurrent") != null &&
+      Storage.getValue("sumCurrent") != null &&
+      Storage.getValue("sumPower") != null &&
+      Storage.getValue("callNb") != null &&
+      Storage.getValue("startingEUCTripDistance") != null
+    ) {
+      maxTemp = Storage.getValue("maxTemp");
+      minTemp = Storage.getValue("minTemp");
+      maxVoltage = Storage.getValue("maxVoltage");
+      minVoltage = Storage.getValue("minVoltage");
+      maxBatteryPerc = Storage.getValue("maxBatteryPerc");
+      minBatteryPerc = Storage.getValue("minBatteryPerc");
+      sessionDistance = Storage.getValue("sessionDistance");
+      avgSpeed = Storage.getValue("avgSpeed");
+      avgCurrent = Storage.getValue("avgCurrent");
+      avgPower = Storage.getValue("avgPower");
+      maxSpeed = Storage.getValue("maxSpeed");
+      maxCurrent = Storage.getValue("maxCurrent");
+      maxPower = Storage.getValue("maxPower");
+      sumCurrent = Storage.getValue("sumCurrent");
+      sumPower = Storage.getValue("sumPower");
+      callNb = Storage.getValue("callNb");
+      startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
+      maxPWM = Storage.getValue("maxPWM");
+      // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
+
+      // should only be required for max values
+      mMaxSpeedField.setData(maxSpeed);
+      mMaxPWMField.setData(maxPWM);
+      mMaxTempField.setData(maxTemp);
+      mMinVoltageField.setData(minVoltage);
+      mMaxVoltageField.setData(maxVoltage);
+      mMinBatteryField.setData(minBatteryPerc);
+    }
+  }
+  function onTimerReset() {
+    //System.println("reset");
+    //Storage.clearValues();
+  }
+  function onTimerStop() {
+    // System.println("stop");
+    Storage.setValue("maxTemp", maxTemp);
+    Storage.setValue("minTemp", minTemp);
+    Storage.setValue("maxVoltage", maxVoltage);
+    Storage.setValue("minVoltage", minVoltage);
+    Storage.setValue("maxBatteryPerc", maxBatteryPerc);
+    Storage.setValue("minBatteryPerc", minBatteryPerc);
+    Storage.setValue("sessionDistance", sessionDistance);
+    Storage.setValue("avgSpeed", avgSpeed);
+    Storage.setValue("avgCurrent", avgCurrent);
+    Storage.setValue("avgPower", avgPower);
+    Storage.setValue("maxSpeed", maxSpeed);
+    Storage.setValue("maxPWM", maxPWM);
+    Storage.setValue("maxCurrent", maxCurrent);
+    Storage.setValue("maxPower", maxPower);
+    Storage.setValue("sumCurrent", sumCurrent);
+    Storage.setValue("sumPower", sumPower);
+    Storage.setValue("callNb", callNb);
+    //Storage.setValue("startingMoment", startingMoment.value());
+    Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
+  }
+  function onTimerStart() {
+    // System.println("start");
+    /*
+    if (
+      Storage.getValue("maxTemp") != null &&
+      Storage.getValue("minTemp") != null &&
+      Storage.getValue("maxVoltage") != null &&
+      Storage.getValue("minVoltage") != null &&
+      Storage.getValue("maxBatteryPerc") != null &&
+      Storage.getValue("minBatteryPerc") != null &&
+      Storage.getValue("sessionDistance") != null &&
+      Storage.getValue("avgSpeed") != null &&
+      Storage.getValue("maxPWM") != null &&
+      //Storage.getValue("startingMoment") != null &&
+      Storage.getValue("avgCurrent") != null &&
+      Storage.getValue("avgPower") != null &&
+      Storage.getValue("maxSpeed") != null &&
+      Storage.getValue("maxPower") != null &&
+      Storage.getValue("maxCurrent") != null &&
+      Storage.getValue("sumCurrent") != null &&
+      Storage.getValue("sumPower") != null &&
+      Storage.getValue("callNb") != null &&
+      Storage.getValue("startingEUCTripDistance") != null
+    ) {
+      maxTemp = Storage.getValue("maxTemp");
+      minTemp = Storage.getValue("minTemp");
+      maxVoltage = Storage.getValue("maxVoltage");
+      minVoltage = Storage.getValue("minVoltage");
+      maxBatteryPerc = Storage.getValue("maxBatteryPerc");
+      minBatteryPerc = Storage.getValue("minBatteryPerc");
+      sessionDistance = Storage.getValue("sessionDistance");
+      avgSpeed = Storage.getValue("avgSpeed");
+      avgCurrent = Storage.getValue("avgCurrent");
+      avgPower = Storage.getValue("avgPower");
+      maxSpeed = Storage.getValue("maxSpeed");
+      maxCurrent = Storage.getValue("maxCurrent");
+      maxPower = Storage.getValue("maxPower");
+      sumCurrent = Storage.getValue("sumCurrent");
+      sumPower = Storage.getValue("sumPower");
+      callNb = Storage.getValue("callNb");
+      startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
+      maxPWM = Storage.getValue("maxPWM");
+      // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
+    }*/
+  }
+  function onTimerResume() {
+    /*
+    //System.println("resume");
+    if (
+      Storage.getValue("maxTemp") != null &&
+      Storage.getValue("minTemp") != null &&
+      Storage.getValue("maxVoltage") != null &&
+      Storage.getValue("minVoltage") != null &&
+      Storage.getValue("maxBatteryPerc") != null &&
+      Storage.getValue("minBatteryPerc") != null &&
+      Storage.getValue("sessionDistance") != null &&
+      Storage.getValue("avgSpeed") != null &&
+      Storage.getValue("maxPWM") != null &&
+      // Storage.getValue("startingMoment") != null &&
+      Storage.getValue("avgCurrent") != null &&
+      Storage.getValue("avgPower") != null &&
+      Storage.getValue("maxSpeed") != null &&
+      Storage.getValue("maxPower") != null &&
+      Storage.getValue("maxCurrent") != null &&
+      Storage.getValue("sumCurrent") != null &&
+      Storage.getValue("sumPower") != null &&
+      Storage.getValue("callNb") != null &&
+      Storage.getValue("startingEUCTripDistance") != null
+    ) {
+      maxTemp = Storage.getValue("maxTemp");
+      minTemp = Storage.getValue("minTemp");
+      maxVoltage = Storage.getValue("maxVoltage");
+      minVoltage = Storage.getValue("minVoltage");
+      maxBatteryPerc = Storage.getValue("maxBatteryPerc");
+      minBatteryPerc = Storage.getValue("minBatteryPerc");
+      sessionDistance = Storage.getValue("sessionDistance");
+      avgSpeed = Storage.getValue("avgSpeed");
+      avgCurrent = Storage.getValue("avgCurrent");
+      avgPower = Storage.getValue("avgPower");
+      maxSpeed = Storage.getValue("maxSpeed");
+      maxCurrent = Storage.getValue("maxCurrent");
+      maxPower = Storage.getValue("maxPower");
+      sumCurrent = Storage.getValue("sumCurrent");
+      sumPower = Storage.getValue("sumPower");
+      callNb = Storage.getValue("callNb");
+      startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
+      maxPWM = Storage.getValue("maxPWM");
+      // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
+    }*/
   }
 }

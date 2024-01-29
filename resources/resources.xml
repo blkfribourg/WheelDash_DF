@@ -101,6 +101,9 @@
         unitLabel="@Strings.temperature_units"/>
 
 -->
+     <fitField id="21" displayInChart="false" displayInActivitySummary="true" sortOrder = "12" precision="2"
+        dataLabel="@Strings.EORBattery_label"
+        unitLabel="@Strings.percentage_units"/>
     </fitContributions>
 
 </resources>
