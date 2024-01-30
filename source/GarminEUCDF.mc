@@ -10,6 +10,8 @@ class GarminEUCDF extends WatchUi.DataField {
   var empty_logo;
   var delay = 3;
   var firstCall = true;
+  var bleDelegate;
+  var IM_count = 0;
   hidden var field1 = "NC";
   hidden var field2 = "NC";
   hidden var field3 = "NC";
@@ -75,7 +77,8 @@ class GarminEUCDF extends WatchUi.DataField {
   var nb_Font;
   private var cDrawables = {};
 
-  function initialize() {
+  function initialize(_bleDelegate) {
+    bleDelegate = _bleDelegate;
     DataField.initialize();
     fieldsInitialize();
     //load custom number font
@@ -962,8 +965,12 @@ class GarminEUCDF extends WatchUi.DataField {
       activityTimerTime = info.timerTime;
     }
 
-    //eucData.paired = true;
+    eucData.paired = true;
     if (eucData.paired == true) {
+      if (eucData.wheelBrand == 4 || eucData.wheelBrand == 5) {
+        // inmotion/VESC send live req
+        IM_VESC_frameReq();
+      }
       if (delay < 0) {
         updateFitData(info);
         getFieldValues();
@@ -1628,5 +1635,23 @@ class GarminEUCDF extends WatchUi.DataField {
       maxPWM = Storage.getValue("maxPWM");
       // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
     }*/
+  }
+
+  function IM_VESC_frameReq() {
+    if (eucData.wheelBrand == 4) {
+      if (IM_count > 0 && bleDelegate != null) {
+        bleDelegate.lastPacketType = "live";
+        bleDelegate.IM_VESC_reqLiveData();
+        IM_count = IM_count - 1;
+      }
+      if (IM_count <= 0 && bleDelegate != null) {
+        bleDelegate.lastPacketType = "stats";
+        bleDelegate.IM_reqStats();
+        IM_count = 30;
+      }
+    }
+    if (eucData.wheelBrand == 5) {
+      bleDelegate.IM_VESC_reqLiveData();
+    }
   }
 }

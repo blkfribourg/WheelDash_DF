@@ -41,7 +41,7 @@ module eucData {
   var hPWM = 0.0;
   var currentCorrection;
   var gothPWN = false;
-
+  var battery = 0;
   // Veteran specific
   var version = 0;
 
@@ -59,7 +59,7 @@ module eucData {
 
   function getBatteryPercentage() {
     // using better battery formula from wheellog
-    var battery = 0;
+
     // GOTWAY ---------------------------------------------------
     if (wheelBrand == 0) {
       if (voltage > 66.8) {
@@ -147,6 +147,32 @@ module eucData {
       } else {
         // unknown model
         battery = 0.0;
+      }
+    }
+    // Inmotion Wheels
+    // INMOTION V11 :
+    if (wheelBrand == 4) {
+      if (model.equals("V11")) {
+        if (voltage > 83.5) {
+          battery = 100.0;
+        } else if (voltage > 68.0) {
+          battery = (voltage - 66.5) / 0.17;
+        } else if (voltage > 64.0) {
+          battery = (voltage - 64.0) / 0.45;
+        } else {
+          battery = 0.0;
+        }
+      }
+      if (model.equals("V12")) {
+        if (voltage > 100.2) {
+          battery = 100.0;
+        } else if (voltage > 81.6) {
+          battery = (voltage - 79.8) / 0.204;
+        } else if (voltage > 76.8) {
+          battery = (voltage - 76.8) / 0.54;
+        } else {
+          battery = 0.0;
+        }
       }
     }
 

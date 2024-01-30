@@ -35,7 +35,7 @@ class GarminEUCApp extends Application.AppBase {
       eucPM.registerProfiles();
     }
 
-    view = new GarminEUCDF();
+    view = new GarminEUCDF(eucBleDelegate);
     return [view]; //Connect IQ7
     // return [view] as Array<Views or InputDelegates>?;
   }

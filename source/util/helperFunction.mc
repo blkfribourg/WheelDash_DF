@@ -86,7 +86,13 @@ function decode2bytes(byte1, byte2) {
 function decode4bytes(byte1, byte2, byte3, byte4) {
   return (byte1 << 16) + (byte2 << 24) + byte3 + (byte4 << 8);
 }
+function decodeint16(byte1, byte2) {
+  return (byte1 << 8) | byte2;
+}
 
+function decodeint32(byte1, byte2, byte3, byte4) {
+  return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
+}
 function stringToArrays(str) {
   var array = splitstr(str, ";");
   var nestedArray = new [0];

@@ -8,7 +8,7 @@ module eucPM {
     0x0000fff000001000l,
     0x800000805f9b34fbl
   );
-
+  var EUC_CHAR_W;
   var eucProfileDef;
 
   function init() {
@@ -17,6 +17,24 @@ module eucPM {
       :characteristics => [
         {
           :uuid => EUC_CHAR,
+          :descriptors => [Ble.cccdUuid()],
+        },
+      ],
+    };
+  }
+  function initInmotionV2orVESC() {
+    eucProfileDef = {
+      // Set the Profile
+      :uuid => EUC_SERVICE,
+      :characteristics => [
+        {
+          // Define the characteristics
+          :uuid => EUC_CHAR_W, // UUID of the first characteristic
+          :descriptors => [Ble.cccdUuid()],
+        },
+        {
+          // Define the characteristics
+          :uuid => EUC_CHAR, // UUID of the first characteristic
           :descriptors => [Ble.cccdUuid()],
         },
       ],
@@ -34,6 +52,13 @@ module eucPM {
   function setGotwayOrVeteranOrKingsong() {
     self.init();
   }
+  function setInmotionV2orVESC() {
+    EUC_SERVICE = Ble.longToUuid(0x6e400001b5a3f393l, 0xe0a9e50e24dcca9el);
+    EUC_CHAR = Ble.longToUuid(0x6e400003b5a3f393l, 0xe0a9e50e24dcca9el);
+    EUC_CHAR_W = Ble.longToUuid(0x6e400002b5a3f393l, 0xe0a9e50e24dcca9el);
+
+    self.initInmotionV2orVESC();
+  }
 
   function setManager() {
     if (
@@ -44,6 +69,9 @@ module eucPM {
     ) {
       // System.println("GW PM");
       setGotwayOrVeteranOrKingsong();
+    }
+    if (eucData.wheelBrand == 4 || 5) {
+      setInmotionV2orVESC();
     }
   }
 }
