@@ -965,7 +965,7 @@ class GarminEUCDF extends WatchUi.DataField {
       activityTimerTime = info.timerTime;
     }
 
-    eucData.paired = true;
+    //eucData.paired = true;
     if (eucData.paired == true) {
       if (eucData.wheelBrand == 4 || eucData.wheelBrand == 5) {
         // inmotion/VESC send live req
