@@ -1,13 +1,14 @@
 using Toybox.BluetoothLowEnergy as Ble;
 using Toybox.Application.Storage;
 import Toybox.Lang;
-
+using Toybox.AntPlus;
 class eucBLEDelegate extends Ble.BleDelegate {
   var device = null;
   var service = null;
   var char = null;
   var decoder = null;
   var lastPacketType;
+  var radar;
 
   function initialize(_decoder) {
     BleDelegate.initialize();
@@ -17,6 +18,9 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
+    if (eucData.useRadar == true) {
+      radar = new AntPlus.BikeRadar(null);
+    }
   }
 
   function onConnectedStateChanged(device, state) {
@@ -141,19 +145,24 @@ class eucBLEDelegate extends Ble.BleDelegate {
               }
             }
           }
-          if (eucData.wheelBrand == 4) {
+          if (eucData.wheelBrand == 4 || eucData.wheelBrand == 5) {
             // V11 or V12 only for now
 
             var advName = result.getDeviceName();
             if (advName != null) {
               var advModel = advName.substring(0, 3);
-              if (advModel.equals("V11") || advModel.equals("V12")) {
+              if (
+                advModel.equals("V11") ||
+                advModel.equals("V12") ||
+                advModel.equals("V13") ||
+                advModel.equals("V14")
+              ) {
                 eucData.model = advModel;
                 wheelFound = true;
               }
             }
           }
-          if (eucData.wheelBrand == 5) {
+          if (eucData.wheelBrand == 6) {
             // V11 only for now
             var advName = result.getDeviceName();
             if (advName != null) {
@@ -206,6 +215,18 @@ class eucBLEDelegate extends Ble.BleDelegate {
       (eucData.wheelBrand == 2 || eucData.wheelBrand == 3)
     ) {
       decoder.processFrame(value);
+    }
+    if (decoder != null && eucData.wheelBrand == 4) {
+      decoder.frameBuffer(self, value);
+    }
+    if (decoder != null && eucData.wheelBrand == 5) {
+      decoder.frameBuilder(self, value);
+    }
+    if (eucData.useRadar == true && radar != null) {
+      var target = radar.getRadarInfo();
+      if (target.size() != 0) {
+        Varia.processTarget(target);
+      }
     }
   }
 
@@ -264,21 +285,27 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
   function IM_VESC_reqLiveData() {
     // inmotion
-    if (eucData.wheelBrand == 4) {
-      char.requestWrite([0xaa, 0xaa, 0x14, 0x01, 0x04, 0x11]b, {
-        :writeType => Ble.WRITE_TYPE_DEFAULT,
-      });
+    if (eucData.wheelBrand == 4 || eucData.wheelBrand == 5) {
+      try {
+        char.requestWrite([0xaa, 0xaa, 0x14, 0x01, 0x04, 0x11]b, {
+          :writeType => Ble.WRITE_TYPE_DEFAULT,
+        });
+      } catch (e instanceof Lang.Exception) {}
     }
     // VESC
-    if (eucData.wheelBrand == 5) {
-      char.requestWrite([0x02, 0x01, 0x2f, 0xd5, 0x8d, 0x03]b, {
-        :writeType => Ble.WRITE_TYPE_DEFAULT,
-      });
+    if (eucData.wheelBrand == 6) {
+      try {
+        char.requestWrite([0x02, 0x01, 0x2f, 0xd5, 0x8d, 0x03]b, {
+          :writeType => Ble.WRITE_TYPE_DEFAULT,
+        });
+      } catch (e instanceof Lang.Exception) {}
     }
   }
   function IM_reqStats() {
-    char.requestWrite([0xaa, 0xaa, 0x14, 0x01, 0x11, 0x04]b, {
-      :writeType => Ble.WRITE_TYPE_DEFAULT,
-    });
+    try {
+      char.requestWrite([0xaa, 0xaa, 0x14, 0x01, 0x11, 0x04]b, {
+        :writeType => Ble.WRITE_TYPE_DEFAULT,
+      });
+    } catch (e instanceof Lang.Exception) {}
   }
 }

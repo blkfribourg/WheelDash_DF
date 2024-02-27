@@ -20,7 +20,8 @@
     <string id="wheelBrand2">Kingsong</string>
     <string id="wheelBrand3">Kingsong (old)</string>
     <string id="wheelBrand4">Inmotion V11 fw1.4/V12</string>
-    <string id="wheelBrand5">VESC</string>
+    <string id="wheelBrand5">Inmotion V11Y/V13/V14</string>
+    <string id="wheelBrand6">VESC</string>
 
     <string id="profile">Profile to use</string>
     <string id="profile0">Last used profile</string>
@@ -86,6 +87,7 @@
     <string id="alarmThreshold_temp_p3">Temperature that trigger an alarm (profile3)</string>
     <string id="alarmThreshold_temp_ErrorMessage">Value out of range</string>
 
+   <string id="useRadar">Varia radar alerts</string>
    <string id="debugMode">Enable Debug Mode (view)</string>
     <!-- FIT Strings-->
 

@@ -41,6 +41,7 @@ class GarminEUCApp extends Application.AppBase {
   }
 
   function setSettings(profile) {
+    eucData.useRadar = AppStorage.getSetting("useRadar");
     eucData.profile = AppStorage.getSetting("profile");
     eucData.debug = AppStorage.getSetting("debugView");
     eucData.logoFill = AppStorage.getSetting("logoFill");

@@ -10,6 +10,7 @@
     <property id="txtColor_unpr" type="string">ff8000</property>
     <property id="logoOffsetx" type="number">0</property>
     <property id="logoOffsety" type="number">0</property>
+    <property id="useRadar" type="boolean">false</property>
     <property id="profile" type="number">1</property>
     <property id="wheelBrand_p1" type="number">0</property>
     <property id="wheelName_p1" type="string">Profile 1</property>

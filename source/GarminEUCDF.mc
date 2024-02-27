@@ -965,9 +965,13 @@ class GarminEUCDF extends WatchUi.DataField {
       activityTimerTime = info.timerTime;
     }
 
-    //eucData.paired = true;
+    // eucData.paired = true;
     if (eucData.paired == true) {
-      if (eucData.wheelBrand == 4 || eucData.wheelBrand == 5) {
+      if (
+        eucData.wheelBrand == 4 ||
+        eucData.wheelBrand == 5 ||
+        eucData.wheelBrand == 6
+      ) {
         // inmotion/VESC send live req
         IM_VESC_frameReq();
       }
@@ -1638,7 +1642,7 @@ class GarminEUCDF extends WatchUi.DataField {
   }
 
   function IM_VESC_frameReq() {
-    if (eucData.wheelBrand == 4) {
+    if (eucData.wheelBrand == 4 || eucData.wheelBrand == 5) {
       if (IM_count > 0 && bleDelegate != null) {
         bleDelegate.lastPacketType = "live";
         bleDelegate.IM_VESC_reqLiveData();
@@ -1650,7 +1654,7 @@ class GarminEUCDF extends WatchUi.DataField {
         IM_count = 30;
       }
     }
-    if (eucData.wheelBrand == 5) {
+    if (eucData.wheelBrand == 6) {
       bleDelegate.IM_VESC_reqLiveData();
     }
   }

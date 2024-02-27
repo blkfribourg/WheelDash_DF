@@ -198,6 +198,7 @@
                     <listEntry value="3">@Strings.wheelBrand3</listEntry>
                     <listEntry value="4">@Strings.wheelBrand4</listEntry>
                     <listEntry value="5">@Strings.wheelBrand5</listEntry> 
+                    <listEntry value="6">@Strings.wheelBrand6</listEntry> 
                     
                 </settingConfig>
             </setting>
@@ -309,7 +310,8 @@
                     <listEntry value="2">@Strings.wheelBrand2</listEntry>
                     <listEntry value="3">@Strings.wheelBrand3</listEntry>
                     <listEntry value="4">@Strings.wheelBrand4</listEntry>
-                    <listEntry value="5">@Strings.wheelBrand5</listEntry> 
+                    <listEntry value="5">@Strings.wheelBrand5</listEntry>
+                    <listEntry value="6">@Strings.wheelBrand6</listEntry> 
                     
                 </settingConfig>
             </setting>
@@ -422,7 +424,8 @@
                     <listEntry value="2">@Strings.wheelBrand2</listEntry>
                     <listEntry value="3">@Strings.wheelBrand3</listEntry>
                     <listEntry value="4">@Strings.wheelBrand4</listEntry>
-                    <listEntry value="5">@Strings.wheelBrand5</listEntry> 
+                    <listEntry value="5">@Strings.wheelBrand5</listEntry>
+                    <listEntry value="6">@Strings.wheelBrand6</listEntry> 
                 </settingConfig>
             </setting>
             
@@ -575,6 +578,12 @@
                 title="@Strings.logoColor">
                 <settingConfig type="alphaNumeric"/>
 </setting>
+<setting
+ 
+                    propertyKey="@Properties.useRadar"
+                    title="@Strings.useRadar">
+                    <settingConfig type="boolean"/>
+  </setting>
  <setting
  
                     propertyKey="@Properties.debugView"

@@ -70,7 +70,11 @@ module eucPM {
       // System.println("GW PM");
       setGotwayOrVeteranOrKingsong();
     }
-    if (eucData.wheelBrand == 4 || 5) {
+    if (
+      eucData.wheelBrand == 4 ||
+      eucData.wheelBrand == 5 ||
+      eucData.wheelBrand == 6
+    ) {
       setInmotionV2orVESC();
     }
   }

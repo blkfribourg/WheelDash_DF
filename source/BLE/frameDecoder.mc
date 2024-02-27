@@ -11,6 +11,12 @@ module frameDecoder {
     }
     if (eucData.wheelBrand == 2 || eucData.wheelBrand == 3) {
       return new KingsongDecoder();
+    }
+    if (eucData.wheelBrand == 4 || eucData.wheelBrand == 5) {
+      return new IMV2Decoder();
+    }
+    if (eucData.wheelBrand == 6) {
+      return new VESCDecoder();
     } else {
       return null;
     }
@@ -376,47 +382,88 @@ class IMV2Decoder {
 
   function frameBuffer(bleDelegate, transmittedFrame) {
     if (
-      bleDelegate.lastPacketType.equals("live") &&
+      bleDelegate.queue.lastPacketType.equals("live") &&
       transmittedFrame.size() == 20
     ) {
-      eucData.voltage =
-        transmittedFrame
-          .decodeNumber(Lang.NUMBER_FORMAT_UINT16, {
-            :offset => 5,
-            :endianness => Lang.ENDIAN_LITTLE,
-          })
-          .abs() / 100.0;
-      var speed =
-        transmittedFrame
-          .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-            :offset => 9,
-            :endianness => Lang.ENDIAN_LITTLE,
-          })
-          .abs() / 100.0;
-      if (speed <= 100) {
-        //Should investigate if wrong packet or decoding error
-        eucData.speed = speed;
-      }
-      var pwm =
-        transmittedFrame
-          .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-            :offset => 13,
-            :endianness => Lang.ENDIAN_LITTLE,
-          })
-          .abs() / 100.0;
-      if (pwm < 100.0) {
-        //Should investigate if wrong packet or decoding error
-        eucData.hPWM = pwm;
-      }
+      // V11 & V12
+      if (eucData.wheelBrand == 4) {
+        eucData.voltage =
+          transmittedFrame
+            .decodeNumber(Lang.NUMBER_FORMAT_UINT16, {
+              :offset => 5,
+              :endianness => Lang.ENDIAN_LITTLE,
+            })
+            .abs() / 100.0;
+        var speed =
+          transmittedFrame
+            .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+              :offset => 9,
+              :endianness => Lang.ENDIAN_LITTLE,
+            })
+            .abs() / 100.0;
+        if (speed <= 100) {
+          //Should investigate if wrong packet or decoding error
+          eucData.speed = speed;
+        }
+        var pwm =
+          transmittedFrame
+            .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+              :offset => 13,
+              :endianness => Lang.ENDIAN_LITTLE,
+            })
+            .abs() / 100.0;
+        if (pwm < 100.0) {
+          //Should investigate if wrong packet or decoding error
+          eucData.hPWM = pwm;
+        }
 
-      eucData.current =
-        transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-          :offset => 7,
-          :endianness => Lang.ENDIAN_LITTLE,
-        }) / 100.0;
+        eucData.current =
+          transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+            :offset => 7,
+            :endianness => Lang.ENDIAN_LITTLE,
+          }) / 100.0;
+      }
+      // V11Y V13 V14
+      if (eucData.wheelBrand == 5) {
+        eucData.voltage =
+          transmittedFrame
+            .decodeNumber(Lang.NUMBER_FORMAT_UINT16, {
+              :offset => 5,
+              :endianness => Lang.ENDIAN_LITTLE,
+            })
+            .abs() / 100.0;
+        var speed =
+          transmittedFrame
+            .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+              :offset => 13,
+              :endianness => Lang.ENDIAN_LITTLE,
+            })
+            .abs() / 100.0;
+        if (speed <= 100) {
+          //Should investigate if wrong packet or decoding error
+          eucData.speed = speed;
+        }
+        var pwm =
+          transmittedFrame
+            .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+              :offset => 19,
+              :endianness => Lang.ENDIAN_LITTLE,
+            })
+            .abs() / 100.0;
+        if (pwm < 100.0) {
+          //Should investigate if wrong packet or decoding error
+          eucData.hPWM = pwm;
+        }
+
+        eucData.current =
+          transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+            :offset => 7,
+            :endianness => Lang.ENDIAN_LITTLE,
+          }) / 100.0;
+      }
     }
     if (
-      bleDelegate.lastPacketType.equals("stats") &&
+      bleDelegate.queue.lastPacketType.equals("stats") &&
       transmittedFrame.size() == 20
     ) {
       eucData.totalDistance =
