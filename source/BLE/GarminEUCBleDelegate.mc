@@ -1,11 +1,13 @@
 using Toybox.BluetoothLowEnergy as Ble;
 using Toybox.Application.Storage;
+import Toybox.WatchUi;
 import Toybox.Lang;
 using Toybox.AntPlus;
 class eucBLEDelegate extends Ble.BleDelegate {
   var device = null;
   var service = null;
   var char = null;
+  var char_w = null;
   var decoder = null;
   var lastPacketType;
   var radar;
@@ -29,6 +31,8 @@ class eucBLEDelegate extends Ble.BleDelegate {
       var cccd;
       service = device.getService(eucPM.EUC_SERVICE);
       char = service != null ? service.getCharacteristic(eucPM.EUC_CHAR) : null;
+      char_w =
+        service != null ? service.getCharacteristic(eucPM.EUC_CHAR_W) : null;
       if (service != null && char != null) {
         cccd = char.getDescriptor(Ble.cccdUuid());
         cccd.requestWrite([0x01, 0x00]b);
@@ -222,11 +226,24 @@ class eucBLEDelegate extends Ble.BleDelegate {
     if (decoder != null && eucData.wheelBrand == 5) {
       decoder.frameBuilder(self, value);
     }
+    /*
+    if (eucData.useRadar == true) {
+      var toneProfile = [new Attention.ToneProfile(500, 200)];
+
+      if (Attention has :ToneProfile) {
+        Attention.playTone({ :toneProfile => toneProfile });
+      }
+    }*/
+
     if (eucData.useRadar == true && radar != null) {
+      eucData.variaConnected = true;
       var target = radar.getRadarInfo();
       if (target.size() != 0) {
         Varia.processTarget(target);
       }
+    }
+    if (eucData.fastDF == true) {
+      WatchUi.requestUpdate();
     }
   }
 
@@ -271,8 +288,6 @@ class eucBLEDelegate extends Ble.BleDelegate {
 }
 */
 
-  var shouldAdd;
-
   function getChar() {
     return char;
   }
@@ -287,7 +302,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     // inmotion
     if (eucData.wheelBrand == 4 || eucData.wheelBrand == 5) {
       try {
-        char.requestWrite([0xaa, 0xaa, 0x14, 0x01, 0x04, 0x11]b, {
+        char_w.requestWrite([0xaa, 0xaa, 0x14, 0x01, 0x04, 0x11]b, {
           :writeType => Ble.WRITE_TYPE_DEFAULT,
         });
       } catch (e instanceof Lang.Exception) {}
@@ -303,7 +318,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   }
   function IM_reqStats() {
     try {
-      char.requestWrite([0xaa, 0xaa, 0x14, 0x01, 0x11, 0x04]b, {
+      char_w.requestWrite([0xaa, 0xaa, 0x14, 0x01, 0x11, 0x04]b, {
         :writeType => Ble.WRITE_TYPE_DEFAULT,
       });
     } catch (e instanceof Lang.Exception) {}

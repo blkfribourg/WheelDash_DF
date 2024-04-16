@@ -47,6 +47,9 @@
     <string id="currentCorrection1">Negative</string>
     <string id="currentCorrection2">Absolute</string>
 
+    <string id="useMiles">Use Miles</string>
+    <string id="useFahrenheit">Use Fahrenheit</string>
+
     <string id="voltageCorrectionFactor_p1">Voltage Correction Factor (Gotway/Begode only) (profile1)</string>
     <string id="voltageCorrectionFactor_p2">Voltage Correction Factor (Gotway/Begode only) (profile2)</string>
     <string id="voltageCorrectionFactor_p3">Voltage Correction Factor (Gotway/Begode only) (profile3)</string>
@@ -109,7 +112,8 @@
     <string id="power_units">W</string>
     <string id="temperature_graph_label">MB Temperature</string>
     <string id="temperature_label">MB Temperature</string>
-    <string id="temperature_units">°C</string>
+    <string id="temperature_unit">°C</string>
+     <string id="temperature_unit_F">°F</string>
     <string id="tripDistance_label">Trip distance</string>
     <string id="distanceUnits_km">km</string>
     <string id="distanceUnits_miles">miles</string>

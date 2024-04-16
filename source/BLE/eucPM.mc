@@ -45,7 +45,7 @@ module eucPM {
     try {
       Ble.registerProfile(eucProfileDef);
     } catch (e) {
-      Sys.println("e=" + e.getErrorMessage());
+      // Sys.println("e=" + e.getErrorMessage());
     }
   }
 
@@ -61,20 +61,11 @@ module eucPM {
   }
 
   function setManager() {
-    if (
-      eucData.wheelBrand == 0 ||
-      eucData.wheelBrand == 1 ||
-      eucData.wheelBrand == 2 ||
-      eucData.wheelBrand == 3
-    ) {
+    if (eucData.wheelBrand <= 3) {
       // System.println("GW PM");
       setGotwayOrVeteranOrKingsong();
     }
-    if (
-      eucData.wheelBrand == 4 ||
-      eucData.wheelBrand == 5 ||
-      eucData.wheelBrand == 6
-    ) {
+    if (eucData.wheelBrand >= 4) {
       setInmotionV2orVESC();
     }
   }

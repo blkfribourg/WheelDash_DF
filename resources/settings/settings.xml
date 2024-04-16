@@ -163,7 +163,22 @@
                     
                 </settingConfig>
             </setting>
-<!--
+            <!--
+            <setting
+            propertyKey="@Properties.useMiles"
+            title="@Strings.useMiles">
+            <settingConfig
+                type="boolean"
+            />
+        </setting>
+         <setting
+            propertyKey="@Properties.useFahrenheit"
+            title="@Strings.useFahrenheit">
+            <settingConfig
+                type="boolean"
+            />
+        </setting>
+
             <setting
                 propertyKey="@Properties.resumeDectectionMethod"
                 title="@Strings.resumeDectectionMethod">

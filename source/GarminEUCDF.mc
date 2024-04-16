@@ -27,8 +27,8 @@ class GarminEUCDF extends WatchUi.DataField {
   const SPEED_FIELD_ID = 0;
   const PWM_FIELD_ID = 1;
   const VOLTAGE_FIELD_ID = 2;
-  const CURRENT_FIELD_ID = 3;
-  const POWER_FIELD_ID = 4;
+  //const CURRENT_FIELD_ID = 3;
+  //const POWER_FIELD_ID = 4;
   const TEMP_FIELD_ID = 5;
   const TRIPDISTANCE_FIELD_ID = 6;
   const MAXSPEED_FIELD_ID = 7;
@@ -39,19 +39,21 @@ class GarminEUCDF extends WatchUi.DataField {
   const AVGSPEED_FIELD_ID = 12;
   const AVGCURRENT_FIELD_ID = 13;
   const AVGPOWER_FIELD_ID = 14;
-  /*
-  const SPEED_FIELD_ID_MILES = 16;
-  const TRIPDISTANCE_FIELD_ID_MILES = 17;
-  const MAXSPEED_FIELD_ID_MILES = 18;
-  const AVGSPEED_FIELD_ID_MILES = 19;
-  */
+
   const MINVOLTAGE_FIELD_ID = 16;
   const MAXVOLTAGE_FIELD_ID = 17;
   const MINBATTERY_FIELD_ID = 18;
-  const MAXBATTERY_FIELD_ID = 19;
-  const MINTEMP_FIELD_ID = 20;
+  // const MAXBATTERY_FIELD_ID = 19;
+  // const MINTEMP_FIELD_ID = 20;
   const EORBATTERY_FIELD_ID = 21;
-
+  /*
+  const SPEED_FIELD_ID_MILES = 22;
+  const TEMP_F_FIELD_ID = 23;
+  const TRIPDISTANCE_FIELD_ID_MILES = 24;
+  const MAXSPEED_FIELD_ID_MILES = 25;
+  const MAXTEMP_F_FIELD_ID = 26;
+  const AVGSPEED_FIELD_ID_MILES = 27;
+  */
   var mSpeedField = null;
   var mPWMField = null;
   var mVoltageField = null;
@@ -75,12 +77,13 @@ class GarminEUCDF extends WatchUi.DataField {
   var mEORBatteryField = null;
   var _alertDisplayed = false;
   var nb_Font;
-  private var cDrawables = {};
+  // private var cDrawables = {};
 
   function initialize(_bleDelegate) {
     bleDelegate = _bleDelegate;
     DataField.initialize();
     fieldsInitialize();
+
     //load custom number font
     if (eucData.fontID == 0) {
       nb_Font = WatchUi.loadResource(Rez.Fonts.Roboto);
@@ -144,6 +147,36 @@ class GarminEUCDF extends WatchUi.DataField {
     // startingMoment = _startingMoment;
   }
   function fieldsInitialize() {
+    /*
+    if (eucData.useMiles == true) {
+      mSpeedField = createField(
+        "speed",
+        SPEED_FIELD_ID_MILES,
+        FitContributor.DATA_TYPE_FLOAT,
+        { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "mph" }
+      );
+
+      mTripDistField = createField(
+        "TripDistance",
+        TRIPDISTANCE_FIELD_ID_MILES,
+        FitContributor.DATA_TYPE_FLOAT,
+        { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "miles" }
+      );
+      mMaxSpeedField = createField(
+        "Max_speed",
+        MAXSPEED_FIELD_ID_MILES,
+        FitContributor.DATA_TYPE_FLOAT,
+        { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "mph" }
+      );
+
+      mAvgSpeedField = createField(
+        "Avg_Speed",
+        AVGSPEED_FIELD_ID_MILES,
+        FitContributor.DATA_TYPE_FLOAT,
+        { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "mph" }
+      );
+    } else {
+      */
     mSpeedField = createField(
       "speed",
       SPEED_FIELD_ID,
@@ -151,38 +184,6 @@ class GarminEUCDF extends WatchUi.DataField {
       { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "km/h" }
     );
 
-    mPWMField = createField(
-      "PWM",
-      PWM_FIELD_ID,
-      FitContributor.DATA_TYPE_UINT8,
-      { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "%" }
-    );
-    mVoltageField = createField(
-      "Voltage",
-      VOLTAGE_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "V" }
-    );
-    /*
-    mCurrentField = createField(
-      "Current",
-      CURRENT_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "A" }
-    );
-    mPowerField = createField(
-      "Power",
-      POWER_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "W" }
-    );
-    */
-    mTempField = createField(
-      "Temperature",
-      TEMP_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "°C" }
-    );
     mTripDistField = createField(
       "TripDistance",
       TRIPDISTANCE_FIELD_ID,
@@ -196,32 +197,6 @@ class GarminEUCDF extends WatchUi.DataField {
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "km/h" }
     );
 
-    mMaxPWMField = createField(
-      "Max_PWM",
-      MAXPWM_FIELD_ID,
-      FitContributor.DATA_TYPE_UINT8,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
-    );
-    /*
-    mMaxCurrentField = createField(
-      "Max_Current",
-      MAXCURRENT_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "A" }
-    );
-    mMaxPowerField = createField(
-      "Max_Power",
-      MAXPOWER_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "W" }
-    );
-    */
-    mMaxTempField = createField(
-      "Max_Temp",
-      MAXTEMP_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "°C" }
-    );
     mAvgSpeedField = createField(
       "Avg_Speed",
       AVGSPEED_FIELD_ID,
@@ -229,19 +204,56 @@ class GarminEUCDF extends WatchUi.DataField {
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "km/h" }
     );
     /*
-    mAvgCurrentField = createField(
-      "Avg_Current",
-      AVGCURRENT_FIELD_ID,
+    }
+   
+    if (eucData.useFahrenheit == true) {
+      mMaxTempField = createField(
+        "Max_Temp",
+        MAXTEMP_F_FIELD_ID,
+        FitContributor.DATA_TYPE_FLOAT,
+        { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "°F" }
+      );
+      mTempField = createField(
+        "Temperature",
+        TEMP_F_FIELD_ID,
+        FitContributor.DATA_TYPE_FLOAT,
+        { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "°F" }
+      );
+    } else {
+      */
+    mMaxTempField = createField(
+      "Max_Temp",
+      MAXTEMP_FIELD_ID,
       FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "A" }
-    ); 
-    mAvgPowerField = createField(
-      "Avg_Power",
-      AVGPOWER_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "W" }
+      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "°C" }
     );
-   */
+    mTempField = createField(
+      "Temperature",
+      TEMP_FIELD_ID,
+      FitContributor.DATA_TYPE_FLOAT,
+      { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "°C" }
+    );
+    //}
+    mPWMField = createField(
+      "PWM",
+      PWM_FIELD_ID,
+      FitContributor.DATA_TYPE_UINT8,
+      { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "%" }
+    );
+    mVoltageField = createField(
+      "Voltage",
+      VOLTAGE_FIELD_ID,
+      FitContributor.DATA_TYPE_FLOAT,
+      { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "V" }
+    );
+
+    mMaxPWMField = createField(
+      "Max_PWM",
+      MAXPWM_FIELD_ID,
+      FitContributor.DATA_TYPE_UINT8,
+      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
+    );
+
     mMinVoltageField = createField(
       "Min_Voltage",
       MINVOLTAGE_FIELD_ID,
@@ -267,20 +279,6 @@ class GarminEUCDF extends WatchUi.DataField {
       FitContributor.DATA_TYPE_UINT8,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
     );
-    /*
-    mMaxBatteryField = createField(
-      "Max_Battery",
-      MAXBATTERY_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
-    );
-   
-    mMinTempField = createField(
-      "Min_Temp",
-      MINTEMP_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "°C" }
-    );*/
 
     // set fields to 0
 
@@ -309,6 +307,8 @@ class GarminEUCDF extends WatchUi.DataField {
   var minTemp = 255.0;
   var currentPWM = 0.0;
   var correctedSpeed = 0.0;
+  var correctedTotalDistance = 0.0;
+  var displayedTemperature = 0.0;
   var currentCurrent = 0.0;
   var currentVoltage = 0.0;
   var currentBatteryPerc = 0.0;
@@ -333,6 +333,8 @@ class GarminEUCDF extends WatchUi.DataField {
     currentBatteryPerc = eucData.getBatteryPercentage();
     currentPWM = eucData.getPWM();
     correctedSpeed = eucData.getCorrectedSpeed();
+    displayedTemperature = eucData.getTemperature();
+    correctedTotalDistance = eucData.getCorrectedTotalDistance();
     currentCurrent = eucData.getCurrent();
     currentPower = currentCurrent * currentVoltage;
 
@@ -341,7 +343,7 @@ class GarminEUCDF extends WatchUi.DataField {
     mVoltageField.setData(currentVoltage); // id 2
     //    mCurrentField.setData(currentCurrent); // id 3
     //    mPowerField.setData(currentPower); // id 4
-    mTempField.setData(eucData.temperature); // id 5
+    mTempField.setData(displayedTemperature); // id 5
     if (currentBatteryPerc > 0 && eucData.paired == true) {
       mEORBatteryField.setData(currentBatteryPerc);
     }
@@ -362,12 +364,12 @@ class GarminEUCDF extends WatchUi.DataField {
       //   mMaxPowerField.setData(maxPower); // id 10
     }
 
-    if (eucData.temperature > maxTemp) {
-      maxTemp = eucData.temperature;
+    if (displayedTemperature > maxTemp) {
+      maxTemp = displayedTemperature;
       mMaxTempField.setData(maxTemp); // id 11
     }
-    if (eucData.temperature < minTemp && eucData.temperature != 0.0) {
-      minTemp = eucData.temperature;
+    if (displayedTemperature < minTemp && eucData.temperature != 0.0) {
+      minTemp = displayedTemperature;
       // mMinTempField.setData(minTemp); // id 11
     }
     if (currentVoltage > maxVoltage && currentVoltage != 0.0) {
@@ -395,11 +397,9 @@ class GarminEUCDF extends WatchUi.DataField {
     if (elapsedTime != 0 && eucData.totalDistance > 0) {
       //if (elapsedTime.value() != 0 && eucData.totalDistance > 0) {
       if (startingEUCTripDistance == 0) {
-        startingEUCTripDistance = eucData.totalDistance;
+        startingEUCTripDistance = correctedTotalDistance;
       }
-      sessionDistance =
-        (eucData.totalDistance - startingEUCTripDistance) *
-        eucData.speedCorrectionFactor;
+      sessionDistance = correctedTotalDistance - startingEUCTripDistance;
       //avgSpeed = sessionDistance / (elapsedTime.value() / 3600.0);
       avgSpeed = sessionDistance / (elapsedTime / 3600.0);
     } else {
@@ -428,6 +428,8 @@ class GarminEUCDF extends WatchUi.DataField {
     minTemp = 255.0;
     currentPWM = 0.0;
     correctedSpeed = 0.0;
+    correctedTotalDistance = 0.0;
+    displayedTemperature = 0.0;
     currentCurrent = 0.0;
     currentVoltage = 0.0;
     currentBatteryPerc = 0.0;
@@ -464,11 +466,11 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     if (AppStorage.getSetting("field1") == 4) {
       field1 = "TEMP";
-      field1_value = valueRound(eucData.temperature, "%.1f");
+      field1_value = valueRound(displayedTemperature, "%.1f");
     }
     if (AppStorage.getSetting("field1") == 5) {
       field1 = "TT DIST";
-      field1_value = valueRound(eucData.totalDistance, "%.1f");
+      field1_value = valueRound(correctedTotalDistance, "%.1f");
     }
     if (AppStorage.getSetting("field1") == 6) {
       field1 = "PWM";
@@ -507,7 +509,7 @@ class GarminEUCDF extends WatchUi.DataField {
       field1_value = valueRound(maxCurrent, "%.1f");
     }
     if (AppStorage.getSetting("field1") == 15) {
-      field1 = "MAX CURR";
+      field1 = "AVG CURR";
       field1_value = valueRound(avgCurrent, "%.1f");
     }
     if (AppStorage.getSetting("field1") == 16) {
@@ -545,11 +547,11 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     if (AppStorage.getSetting("field2") == 4) {
       field2 = "TEMP";
-      field2_value = valueRound(eucData.temperature, "%.1f");
+      field2_value = valueRound(displayedTemperature, "%.1f");
     }
     if (AppStorage.getSetting("field2") == 5) {
       field2 = "TT DIST";
-      field2_value = valueRound(eucData.totalDistance, "%.1f");
+      field2_value = valueRound(correctedTotalDistance, "%.1f");
     }
     if (AppStorage.getSetting("field2") == 6) {
       field2 = "PWM";
@@ -604,7 +606,7 @@ class GarminEUCDF extends WatchUi.DataField {
       field2_value = valueRound(avgPower, "%.1f");
     }
     if (AppStorage.getSetting("field2") == 19) {
-      field2 = "MAX PWR %";
+      field2 = "MAX PWR";
       field2_value = valueRound(maxPower, "%.1f");
     }
 
@@ -626,11 +628,11 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     if (AppStorage.getSetting("field3") == 4) {
       field3 = "TEMP";
-      field3_value = valueRound(eucData.temperature, "%.1f");
+      field3_value = valueRound(displayedTemperature, "%.1f");
     }
     if (AppStorage.getSetting("field3") == 5) {
       field3 = "TT DIST";
-      field3_value = valueRound(eucData.totalDistance, "%.1f");
+      field3_value = valueRound(correctedTotalDistance, "%.1f");
     }
     if (AppStorage.getSetting("field3") == 6) {
       field3 = "PWM";
@@ -707,11 +709,11 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     if (AppStorage.getSetting("field4") == 4) {
       field4 = "TEMP";
-      field4_value = valueRound(eucData.temperature, "%.1f");
+      field4_value = valueRound(displayedTemperature, "%.1f");
     }
     if (AppStorage.getSetting("field4") == 5) {
       field4 = "TT DIST";
-      field4_value = valueRound(eucData.totalDistance, "%.1f");
+      field4_value = valueRound(correctedTotalDistance, "%.1f");
     }
     if (AppStorage.getSetting("field4") == 6) {
       field4 = "PWM";
@@ -788,11 +790,11 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     if (AppStorage.getSetting("field5") == 4) {
       field5 = "TEMP";
-      field5_value = valueRound(eucData.temperature, "%.1f");
+      field5_value = valueRound(displayedTemperature, "%.1f");
     }
     if (AppStorage.getSetting("field5") == 5) {
       field5 = "TT DIST";
-      field5_value = valueRound(eucData.totalDistance, "%.1f");
+      field5_value = valueRound(correctedTotalDistance, "%.1f");
     }
     if (AppStorage.getSetting("field5") == 6) {
       field5 = "PWM";
@@ -869,11 +871,11 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     if (AppStorage.getSetting("field6") == 4) {
       field6 = "TEMP";
-      field6_value = valueRound(eucData.temperature, "%.1f");
+      field6_value = valueRound(displayedTemperature, "%.1f");
     }
     if (AppStorage.getSetting("field6") == 5) {
       field6 = "TT DIST";
-      field6_value = valueRound(eucData.totalDistance, "%.1f");
+      field6_value = valueRound(correctedTotalDistance, "%.1f");
     }
     if (AppStorage.getSetting("field6") == 6) {
       field6 = "PWM";
@@ -965,7 +967,6 @@ class GarminEUCDF extends WatchUi.DataField {
       activityTimerTime = info.timerTime;
     }
 
-    // eucData.paired = true;
     if (eucData.paired == true) {
       if (
         eucData.wheelBrand == 4 ||
@@ -1034,7 +1035,7 @@ class GarminEUCDF extends WatchUi.DataField {
         PWMAlert = false;
       }
       if (
-        eucData.temperature > eucData.alarmThreshold_temp &&
+        displayedTemperature > eucData.alarmThreshold_temp &&
         eucData.alarmThreshold_temp != 0
       ) {
         tempAlert = true;
@@ -1106,21 +1107,21 @@ class GarminEUCDF extends WatchUi.DataField {
         alignAxe,
         yGap,
         Graphics.FONT_TINY,
-        "ElpsTm: " + activityElapsedTime,
+        "TrgNb: " + eucData.variaTargetNb,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
       dc.drawText(
         alignAxe - xGap,
         space + yGap,
         Graphics.FONT_TINY,
-        "ElpsDst: " + activityElapsedDist,
+        "TrgDst: " + eucData.variaTargetDist,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
       dc.drawText(
         alignAxe - 2 * xGap,
         2 * space + yGap,
         Graphics.FONT_TINY,
-        "AvgSpd: " + activityAvgSpd,
+        "VariaCon: " + eucData.variaConnected,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
       dc.drawText(

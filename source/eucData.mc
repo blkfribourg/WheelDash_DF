@@ -1,5 +1,6 @@
 module eucData {
   //var GUI = false;
+  var fastDF = true;
   var orangeColoringThreshold = 80;
   var redColoringThreshold = 90;
   var mainNumber = 0;
@@ -18,8 +19,10 @@ module eucData {
   var linesColor = 0xffffff;
   var drawLines = true;
   var wheelBrand;
-  var paired = false;
+  var paired = true;
   var debug = false;
+  var useMiles = false;
+  var useFahrenheit = false;
   // Calculated PWM variables :
   // PLEASE UPDATE WITH YOU OWN VALUES BEFORE USE !
   var rotationSpeed; // cutoff speed when freespin test performed
@@ -59,6 +62,9 @@ module eucData {
 
   // varia radar
   var useRadar = false;
+  var variaTargetDist = 0;
+  var variaTargetNb = 0;
+  var variaConnected = false;
 
   function getBatteryPercentage() {
     // using better battery formula from wheellog
@@ -253,9 +259,6 @@ module eucData {
 
     return currentCurrent;
   }
-  function getCorrectedSpeed() {
-    return speed * speedCorrectionFactor.toFloat();
-  }
 
   function getVoltage() {
     if (wheelBrand == 0) {
@@ -263,6 +266,35 @@ module eucData {
       return voltage * voltage_scaling;
     } else {
       return voltage;
+    }
+  }
+
+  function getCorrectedSpeed() {
+    if (useMiles == true) {
+      return speed * speedCorrectionFactor.toFloat() * 0.621371192;
+    } else {
+      return speed * speedCorrectionFactor.toFloat();
+    }
+  }
+  function getCorrectedTripDistance() {
+    if (useMiles == true) {
+      return tripDistance * speedCorrectionFactor.toFloat() * 0.621371192;
+    } else {
+      return tripDistance * speedCorrectionFactor.toFloat();
+    }
+  }
+  function getCorrectedTotalDistance() {
+    if (useMiles == true) {
+      return totalDistance * speedCorrectionFactor.toFloat() * 0.621371192;
+    } else {
+      return totalDistance * speedCorrectionFactor.toFloat();
+    }
+  }
+  function getTemperature() {
+    if (useFahrenheit == true) {
+      return temperature * 1.8 + 32.0;
+    } else {
+      return temperature;
     }
   }
 }

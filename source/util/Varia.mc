@@ -3,6 +3,7 @@ module Varia {
   function processTarget(_target) {
     var closestTargetDist = 200; // 200 meters should be enough to exceding varia max distance (reported max is 140m)
     var closestTargetId = -1;
+    eucData.variaTargetNb = _target.size();
     for (var i = 0; i < _target.size(); i++) {
       if (_target[i].range < closestTargetDist) {
         closestTargetDist = _target[i].range;
@@ -11,6 +12,7 @@ module Varia {
     }
     if (closestTargetId != -1) {
       // vehicule was detected
+      eucData.variaTargetDist = closestTargetDist;
       soundAlert(closestTargetDist);
     }
   }
@@ -24,7 +26,7 @@ module Varia {
     var soundFreq = maxTonePitch - pitchIncrement * distance;
     if (soundFreq > 0) {
       //should be
-      var toneProfile = [new Attention.ToneProfile(soundFreq, 200)];
+      var toneProfile = [new Attention.ToneProfile(soundFreq, 100)];
 
       if (Attention has :ToneProfile) {
         Attention.playTone({ :toneProfile => toneProfile });

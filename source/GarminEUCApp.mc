@@ -56,6 +56,8 @@ class GarminEUCApp extends Application.AppBase {
     eucData.logoOffsetx = AppStorage.getSetting("logoOffsetx");
     eucData.logoOffsety = AppStorage.getSetting("logoOffsety");
     eucData.drawLines = AppStorage.getSetting("drawLines");
+    eucData.useMiles = AppStorage.getSetting("useMiles");
+    eucData.useFahrenheit = AppStorage.getSetting("useFahrenheit");
 
     if (eucData.profile == 1) {
       eucData.wheelBrand = AppStorage.getSetting("wheelBrand_p1");
