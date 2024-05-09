@@ -41,6 +41,8 @@ class GarminEUCApp extends Application.AppBase {
   }
 
   function setSettings(profile) {
+    eucData.displayWind = AppStorage.getSetting("displayWind");
+    eucData.displayNorth = AppStorage.getSetting("displayNorth");
     eucData.useRadar = AppStorage.getSetting("useRadar");
     eucData.profile = AppStorage.getSetting("profile");
     eucData.debug = AppStorage.getSetting("debugView");
@@ -61,7 +63,7 @@ class GarminEUCApp extends Application.AppBase {
 
     if (eucData.profile == 1) {
       eucData.wheelBrand = AppStorage.getSetting("wheelBrand_p1");
-      eucData.gothPWN = AppStorage.getSetting("begodeCF_p1");
+      eucData.gothPWM = AppStorage.getSetting("begodeCF_p1");
       eucData.currentCorrection = AppStorage.getSetting("currentCorrection_p1");
       eucData.rotationSpeed = AppStorage.getSetting("rotationSpeed_PWM_p1");
       eucData.rotationVoltage = AppStorage.getSetting("rotationVoltage_PWM_p1");
@@ -84,7 +86,7 @@ class GarminEUCApp extends Application.AppBase {
       Storage.setValue("lastProfileIdx", profile);
     } else if (eucData.profile == 2) {
       eucData.wheelBrand = AppStorage.getSetting("wheelBrand_p2");
-      eucData.gothPWN = AppStorage.getSetting("begodeCF_p2");
+      eucData.gothPWM = AppStorage.getSetting("begodeCF_p2");
       eucData.currentCorrection = AppStorage.getSetting("currentCorrection_p2");
       eucData.rotationSpeed = AppStorage.getSetting("rotationSpeed_PWM_p2");
       eucData.rotationVoltage = AppStorage.getSetting("rotationVoltage_PWM_p2");
@@ -106,7 +108,7 @@ class GarminEUCApp extends Application.AppBase {
       );
     } else if (eucData.profile == 3) {
       eucData.wheelBrand = AppStorage.getSetting("wheelBrand_p3");
-      eucData.gothPWN = AppStorage.getSetting("begodeCF_p3");
+      eucData.gothPWM = AppStorage.getSetting("begodeCF_p3");
       eucData.currentCorrection = AppStorage.getSetting("currentCorrection_p3");
       eucData.rotationSpeed = AppStorage.getSetting("rotationSpeed_PWM_p3");
       eucData.rotationVoltage = AppStorage.getSetting("rotationVoltage_PWM_p3");

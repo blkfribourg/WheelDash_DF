@@ -4,6 +4,7 @@ import Toybox.WatchUi;
 import Toybox.Graphics;
 using Toybox.Math;
 import Toybox.System;
+import Toybox.Position;
 using Toybox.Application.Storage;
 class GarminEUCDF extends WatchUi.DataField {
   var fill_logo;
@@ -82,6 +83,7 @@ class GarminEUCDF extends WatchUi.DataField {
   function initialize(_bleDelegate) {
     bleDelegate = _bleDelegate;
     DataField.initialize();
+
     fieldsInitialize();
 
     //load custom number font
@@ -326,6 +328,8 @@ class GarminEUCDF extends WatchUi.DataField {
   var avgSpeed = 0.0;
   var avgCurrent = 0.0;
   var avgPower = 0.0;
+  var movingmsec = 0.0;
+  var avgMovingSpeed = 0.0;
 
   function updateFitData(garminInfo) {
     callNb++;
@@ -402,7 +406,15 @@ class GarminEUCDF extends WatchUi.DataField {
       sessionDistance = correctedTotalDistance - startingEUCTripDistance;
       //avgSpeed = sessionDistance / (elapsedTime.value() / 3600.0);
       avgSpeed = sessionDistance / (elapsedTime / 3600.0);
+
+      var minimalMovingSpeed = 2.5;
+
+      if (eucData.correctedSpeed > minimalMovingSpeed && movingmsec != 0) {
+        movingmsec = movingmsec + 1000.0; //Assuming refresh exactly every 1000ms, which is not true as far as I know
+        avgMovingSpeed = sessionDistance / (movingmsec / 3600000.0);
+      }
     } else {
+      movingmsec = 0.0;
       sessionDistance = 0.0;
       avgSpeed = 0.0;
     }
@@ -444,6 +456,7 @@ class GarminEUCDF extends WatchUi.DataField {
     minBatteryPerc = 101.0;
     maxBatteryPerc = 0.0;
     avgSpeed = 0.0;
+    avgMovingSpeed = 0.0;
     avgCurrent = 0.0;
     avgPower = 0.0;
   }
@@ -979,7 +992,7 @@ class GarminEUCDF extends WatchUi.DataField {
       if (delay < 0) {
         updateFitData(info);
         getFieldValues();
-        checkAlarms();
+        EUCAlarms.checkAlarms();
       } else {
         /*
         if (AppStorage.getSetting("resumeDectectionMethod") == 0) {
@@ -1016,81 +1029,6 @@ class GarminEUCDF extends WatchUi.DataField {
       if (delay == -30) {
         onTimerReset();
       }*/
-  }
-
-  var PWMAlert = false;
-  var tempAlert = false;
-  var speedAlert = false;
-  var displayingAlert = false;
-  var displayAlertTimer = 2;
-  var textAlert = "";
-  function checkAlarms() {
-    if (WatchUi.DataField has :showAlert) {
-      if (
-        currentPWM > eucData.alarmThreshold_PWM &&
-        eucData.alarmThreshold_PWM != 0
-      ) {
-        PWMAlert = true;
-      } else {
-        PWMAlert = false;
-      }
-      if (
-        displayedTemperature > eucData.alarmThreshold_temp &&
-        eucData.alarmThreshold_temp != 0
-      ) {
-        tempAlert = true;
-      } else {
-        tempAlert = false;
-      }
-      if (
-        correctedSpeed > eucData.alarmThreshold_speed &&
-        eucData.alarmThreshold_speed != 0
-      ) {
-        speedAlert = true;
-      } else {
-        speedAlert = false;
-      }
-      if (PWMAlert == true) {
-        textAlert = "!! PWM Alarm !!";
-      } else {
-        if (tempAlert == true) {
-          textAlert = "!! Temperature Alarm !!";
-        } else if (speedAlert == true) {
-          textAlert = "!! Speed Alarm !!";
-        }
-      }
-      if (!PWMAlert && !tempAlert && !speedAlert) {
-        displayingAlert = false;
-        displayAlertTimer = 2;
-      } else {
-        displayingAlert = true;
-        displayAlertTimer = displayAlertTimer - 1;
-        if (displayAlertTimer < -1) {
-          displayAlertTimer = 2;
-        } else {
-          vibrate();
-        }
-      }
-    }
-  }
-  function vibrate() {
-    if (Attention has :vibrate) {
-      Attention.vibrate([
-        new Attention.VibeProfile(100, 300),
-        new Attention.VibeProfile(0, 500),
-        new Attention.VibeProfile(100, 300),
-        new Attention.VibeProfile(0, 500),
-      ]);
-    }
-    if (Attention has :ToneProfile) {
-      var toneProfile = [
-        new Attention.ToneProfile(420, 300),
-        new Attention.ToneProfile(516, 300),
-        new Attention.ToneProfile(425, 300),
-        new Attention.ToneProfile(0, 1000),
-      ];
-      Attention.playTone({ :toneProfile => toneProfile });
-    }
   }
 
   // Update the field layout and display the field data
@@ -1409,7 +1347,11 @@ class GarminEUCDF extends WatchUi.DataField {
           field6_value,
           Graphics.TEXT_JUSTIFY_CENTER
         );
-        if (displayingAlert == true && displayAlertTimer > 0) {
+        if (
+          EUCAlarms.displayingAlert == true &&
+          EUCAlarms.displayAlertTimer > 0
+        ) {
+          EUCAlarms.displayAlertTimer = EUCAlarms.displayAlertTimer - 1;
           dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
           dc.fillRectangle(
             0,
@@ -1438,15 +1380,24 @@ class GarminEUCDF extends WatchUi.DataField {
               Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 +
               1
           );
-          dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_BLACK);
+          dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
           dc.drawText(
             dc.getWidth() / 2,
             dc.getHeight() / 2 -
               Graphics.getFontHeight(Graphics.FONT_SMALL) / 2,
             Graphics.FONT_SMALL,
-            textAlert,
+            EUCAlarms.textAlert,
             Graphics.TEXT_JUSTIFY_CENTER
           );
+        }
+
+        // North & Wind
+
+        if (eucData.displayNorth == true && Position.getInfo().accuracy >= 2) {
+          renderNorthOnUI(scr_width, dc);
+        }
+        if (eucData.displayWind == true && Position.getInfo().accuracy >= 2) {
+          renderWindnUI(scr_width, dc);
         }
       }
     }
@@ -1457,7 +1408,58 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     
 }*/
+  function renderNorthOnUI(screenDiam, dc) {
+    var rawNorth = Position.getInfo().heading;
+    if (rawNorth != null) {
+      var north = rawNorth * -57.2958;
+      var x1 = getXY(screenDiam, 0, screenDiam / 2 - 1, north, 1);
+      var x2 = getXY(
+        screenDiam,
+        0,
+        screenDiam / 2 - screenDiam / 30,
+        north - screenDiam / 150,
+        1
+      );
+      var x3 = getXY(
+        screenDiam,
+        0,
+        screenDiam / 2 - screenDiam / 30,
+        north + screenDiam / 150,
+        1
+      );
+      var pts = [x1, x2, x3];
+      dc.setColor(0xd53420, Graphics.COLOR_TRANSPARENT);
+      dc.fillPolygon(pts);
+    }
+  }
 
+  function renderWindnUI(screenDiam, dc) {
+    var windBearing = Weather.getCurrentConditions().windBearing;
+    var rawNorth = Toybox.Position.getInfo().heading;
+
+    if (rawNorth != null && windBearing != null) {
+      var north = rawNorth * -57.2958;
+      var wind = windBearing + north;
+      var x1 = getXY(screenDiam, 0, screenDiam / 2 - 1, wind, 1);
+      var x2 = getXY(
+        screenDiam,
+        0,
+        screenDiam / 2 - screenDiam / 30,
+        wind - screenDiam / 150,
+        1
+      );
+      var x3 = getXY(
+        screenDiam,
+        0,
+        screenDiam / 2 - screenDiam / 30,
+        wind + screenDiam / 150,
+        1
+      );
+      var pts = [x1, x2, x3];
+      dc.setColor(0x0077b6, Graphics.COLOR_TRANSPARENT);
+      dc.fillPolygon(pts);
+    }
+  }
   function drawBackground(dc) {
     if (fill_logo != null) {
       //dc.setColor(eucData.logoColor, Graphics.COLOR_TRANSPARENT);
@@ -1494,7 +1496,8 @@ class GarminEUCDF extends WatchUi.DataField {
       Storage.getValue("sumCurrent") != null &&
       Storage.getValue("sumPower") != null &&
       Storage.getValue("callNb") != null &&
-      Storage.getValue("startingEUCTripDistance") != null
+      Storage.getValue("startingEUCTripDistance") != null &&
+      Storage.getValue("avgMovingSpeed") != null
     ) {
       maxTemp = Storage.getValue("maxTemp");
       minTemp = Storage.getValue("minTemp");
@@ -1514,6 +1517,7 @@ class GarminEUCDF extends WatchUi.DataField {
       callNb = Storage.getValue("callNb");
       startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
       maxPWM = Storage.getValue("maxPWM");
+      avgMovingSpeed = Storage.getValue("avgMovingSpeed");
       // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
 
       // should only be required for max values
@@ -1548,6 +1552,7 @@ class GarminEUCDF extends WatchUi.DataField {
     Storage.setValue("sumCurrent", sumCurrent);
     Storage.setValue("sumPower", sumPower);
     Storage.setValue("callNb", callNb);
+    Storage.setValue("avgMovingSpeed", avgMovingSpeed);
     //Storage.setValue("startingMoment", startingMoment.value());
     Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
   }

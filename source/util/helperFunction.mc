@@ -21,6 +21,17 @@ function valueRound(value, format) {
   return rounded.format(format);
 }
 
+// Get a point coord on a circle
+function getXY(screenDiam, startingAngle, radius, angle, pos) {
+  var x =
+    screenDiam / 2 -
+    radius * Math.sin(Math.toRadians(startingAngle - angle * pos));
+  var y =
+    screenDiam / 2 -
+    radius * Math.cos(Math.toRadians(startingAngle - angle * pos));
+  return [x, y];
+}
+
 function splitstr(str as Lang.String, char) {
   var stringArray;
 
@@ -71,11 +82,12 @@ function shortFromBytesBE(bytes, starting) {
 function UInt32FromBytesBE(bytes, starting) {
   if (bytes.size() >= starting + 4) {
     return (
-      ((bytes[starting] & 0xff) << 24) |
-      ((bytes[starting + 1] & 0xff) << 16) |
-      ((bytes[starting + 2] & 0xff) << 8) |
-      (bytes[starting + 3] & 0xff)
-    );
+      (((bytes[starting] & 0xff) << 24) |
+        ((bytes[starting + 1] & 0xff) << 16) |
+        ((bytes[starting + 2] & 0xff) << 8) |
+        (bytes[starting + 3] & 0xff)) &
+      0xffffffffl
+    ).toNumber();
   }
   return 0;
 }

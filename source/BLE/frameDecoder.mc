@@ -92,16 +92,15 @@ class GwDecoder {
 
 class VeteranDecoder {
   function calculateCRC32(rawData, offset, crcLastIndex) {
-    var crc = 0xffffffff;
+    var crc = 0xffffffffl;
     for (var i = 0; i < crcLastIndex; i++) {
-      // https://stackoverflow.com/questions/5253194/implementing-logical-right-shift-in-c
-      var mask_8 = ~(-1 << 8) << (32 - 8);
-      var crc_shifted_8 = ~mask_8 & ((crc >> 8) | mask_8);
-
-      crc = crc_shifted_8 ^ crc32Table[(crc & 0xff) ^ rawData[i + offset]];
+      crc =
+        (crc >> 8) ^
+        (crc32Table[((crc & 0xff) ^ rawData[i + offset]).toNumber()] &
+          0xffffffffl);
     }
     crc ^= 0xffffffff;
-    return crc;
+    return crc.toNumber();
   }
 
   var crc32Table = [
@@ -172,8 +171,7 @@ class VeteranDecoder {
 
       if (
         ((size == 22 || size == 30) && c.toNumber() != 0) ||
-        (size == 23 && (c & 0xfe).toNumber() != 0) ||
-        (size == 31 && (c & 0xfc).toNumber() != 0)
+        (size == 23 && (c & 0xfe).toNumber() != 0)
       ) {
         state = "done";
         reset();

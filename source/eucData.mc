@@ -1,6 +1,6 @@
 module eucData {
   //var GUI = false;
-  var fastDF = true;
+
   var orangeColoringThreshold = 80;
   var redColoringThreshold = 90;
   var mainNumber = 0;
@@ -19,10 +19,12 @@ module eucData {
   var linesColor = 0xffffff;
   var drawLines = true;
   var wheelBrand;
-  var paired = true;
+  var paired = false;
   var debug = false;
   var useMiles = false;
   var useFahrenheit = false;
+  var displayNorth = false;
+  var displayWind = false;
   // Calculated PWM variables :
   // PLEASE UPDATE WITH YOU OWN VALUES BEFORE USE !
   var rotationSpeed; // cutoff speed when freespin test performed
@@ -43,7 +45,7 @@ module eucData {
   var PWM = 0;
   var hPWM = 0.0;
   var currentCorrection;
-  var gothPWN = false;
+  var gothPWM = false;
   var battery = 0;
   // Veteran specific
   var version = 0;
@@ -85,7 +87,7 @@ module eucData {
     // VETERAN ------------------------------------------------
     if (wheelBrand == 1) {
       if (version < 4) {
-        // not Patton
+        // models before Patton
         if (voltage > 100.2) {
           battery = 100.0;
         } else if (voltage > 81.6) {
@@ -95,13 +97,27 @@ module eucData {
         } else {
           battery = 0.0;
         }
-      } else {
+      }
+      if (version > 4 && version < 5) {
+        // Patton
         if (voltage > 125.25) {
           battery = 100.0;
         } else if (voltage > 102.0) {
           battery = (voltage - 99.75) / 0.255;
         } else if (voltage > 96.0) {
           battery = (voltage - 96.0) / 0.675;
+        } else {
+          battery = 0.0;
+        }
+      }
+      if (version > 5 && version < 6) {
+        // Lynx
+        if (voltage > 150.3) {
+          battery = 100.0;
+        } else if (voltage > 122.4) {
+          battery = (voltage - 119.7) / 0.306;
+        } else if (voltage > 115.2) {
+          battery = (voltage - 115.2) / 0.81;
         } else {
           battery = 0.0;
         }
@@ -119,6 +135,8 @@ module eucData {
         "KS-18LH",
         "KS-18LY",
         "KS-S18",
+        "KS-S16",
+        "KS-S16P",
       ];
       var KSwheels100v = ["KS-S19"];
       var KSwheels126v = ["KS-S20", "KS-S22"];
@@ -226,9 +244,8 @@ module eucData {
   function getPWM() {
     if (eucData.voltage != 0) {
       //Quick&dirty fix for now, need to rewrite this:
-      if (wheelBrand == 1 || wheelBrand == 2 || gothPWN == true) {
-        return hPWM;
-      } else {
+      if ((wheelBrand == 0 && gothPWM == false) || wheelBrand == 5) {
+        //  System.println("calcPwm");
         var CalculatedPWM =
           eucData.speed.toFloat() /
           ((rotationSpeed / rotationVoltage) *
@@ -236,6 +253,12 @@ module eucData {
             eucData.voltage_scaling *
             powerFactor);
         return CalculatedPWM * 100;
+      }
+
+      // 0 is begode/gotway, all other brands returns hPWM (Leaperkim / KS / OLD KS / IM / VESC)
+      else {
+        //   System.println("hwPwm");
+        return hPWM;
       }
     } else {
       return 0;

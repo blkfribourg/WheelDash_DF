@@ -92,6 +92,9 @@
 
    <string id="useRadar">Varia radar alerts</string>
    <string id="debugMode">Enable Debug Mode (view)</string>
+
+    <string id="displayNorth">Display North orientation (red triangle)</string>
+    <string id="displayWind">Display Wind bearing (blue triangle)</string>
     <!-- FIT Strings-->
 
     <string id="speed_graph_label">Speed</string>

@@ -163,6 +163,20 @@
                     
                 </settingConfig>
             </setting>
+            <setting
+            propertyKey="@Properties.displayNorth"
+            title="@Strings.displayNorth">
+                <settingConfig
+                    type="boolean"
+                />
+            </setting>
+            <setting
+            propertyKey="@Properties.displayWind"
+            title="@Strings.displayWind">
+                <settingConfig
+                    type="boolean"
+                />
+            </setting>
             <!--
             <setting
             propertyKey="@Properties.useMiles"
@@ -224,7 +238,7 @@
                     <settingConfig
                         type="numeric"
                         min="0"
-                        max="2"
+                        max="3"
                         errorMessage="@Strings.ErrorMessage" />
                 </setting>
                 <setting
@@ -337,7 +351,7 @@
                     <settingConfig
                         type="numeric"
                         min="0"
-                        max="2"
+                        max="3"
                         errorMessage="@Strings.ErrorMessage" />
                 </setting>
                 <setting
@@ -476,7 +490,7 @@
                     <settingConfig
                         type="numeric"
                         min="0"
-                        max="2"
+                        max="3"
                         errorMessage="@Strings.ErrorMessage" />
            
             </setting>

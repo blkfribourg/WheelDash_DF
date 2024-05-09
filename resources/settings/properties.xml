@@ -13,6 +13,8 @@
     <property id="useRadar" type="boolean">false</property>
     <property id ="useMiles" type="boolean">false</property>
     <property id ="useFahrenheit" type="boolean">false</property>
+    <property id="displayNorth" type="boolean">false</property>
+    <property id="displayWind" type="boolean">false</property>
 
     <property id="profile" type="number">1</property>
     <property id="wheelBrand_p1" type="number">0</property>
