@@ -10,6 +10,9 @@
     <property id="txtColor_unpr" type="string">ff8000</property>
     <property id="logoOffsetx" type="number">0</property>
     <property id="logoOffsety" type="number">0</property>
+    <property id="displayNorth" type="boolean">false</property>
+    <property id="displayWind" type="boolean">false</property>
+    
     <property id="profile" type="number">1</property>
     <property id="wheelBrand_p1" type="number">0</property>
     <property id="wheelName_p1" type="string">Profile 1</property>
@@ -23,6 +26,8 @@
     <property id="alarmThreshold_speed_p1" type="number">0</property>
     <property id="alarmThreshold_temp_p1" type="number">0</property>
     <property id="begodeCF_p1" type="boolean">false</property>
+   
+
 
     <property id="wheelBrand_p2" type="number">0</property>
     <property id="wheelName_p2" type="string">Profile 2</property>

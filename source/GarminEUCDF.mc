@@ -967,14 +967,11 @@ class GarminEUCDF extends WatchUi.DataField {
 
     eucData.paired = true;
     if (eucData.paired == true) {
-      if (eucData.wheelBrand == 4 || eucData.wheelBrand == 5) {
-        // inmotion/VESC send live req
-        IM_VESC_frameReq();
-      }
+      //EUCAlarms.checkAlarms();
       if (delay < 0) {
         updateFitData(info);
         getFieldValues();
-        checkAlarms();
+        //checkAlarms();
       } else {
         /*
         if (AppStorage.getSetting("resumeDectectionMethod") == 0) {
@@ -1012,7 +1009,7 @@ class GarminEUCDF extends WatchUi.DataField {
         onTimerReset();
       }*/
   }
-
+  /*
   var PWMAlert = false;
   var tempAlert = false;
   var speedAlert = false;
@@ -1087,7 +1084,7 @@ class GarminEUCDF extends WatchUi.DataField {
       Attention.playTone({ :toneProfile => toneProfile });
     }
   }
-
+*/
   // Update the field layout and display the field data
   function onUpdate(dc) {
     // DEBUG SCREEN
@@ -1404,7 +1401,10 @@ class GarminEUCDF extends WatchUi.DataField {
           field6_value,
           Graphics.TEXT_JUSTIFY_CENTER
         );
-        if (displayingAlert == true && displayAlertTimer > 0) {
+        if (
+          EUCAlarms.displayingAlert == true &&
+          EUCAlarms.displayAlertTimer > 0
+        ) {
           dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
           dc.fillRectangle(
             0,
@@ -1433,15 +1433,21 @@ class GarminEUCDF extends WatchUi.DataField {
               Graphics.getFontHeight(Graphics.FONT_SMALL) / 2 +
               1
           );
-          dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_BLACK);
+          dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
           dc.drawText(
             dc.getWidth() / 2,
             dc.getHeight() / 2 -
               Graphics.getFontHeight(Graphics.FONT_SMALL) / 2,
             Graphics.FONT_SMALL,
-            textAlert,
+            EUCAlarms.textAlert,
             Graphics.TEXT_JUSTIFY_CENTER
           );
+        }
+        if (eucData.displayNorth == true && Position.getInfo().accuracy >= 2) {
+          renderNorthOnUI(scr_width, dc);
+        }
+        if (eucData.displayWind == true && Position.getInfo().accuracy >= 2) {
+          renderWindOnUI(scr_width, dc);
         }
       }
     }
@@ -1452,7 +1458,58 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     
 }*/
+  function renderNorthOnUI(screenDiam, dc) {
+    var rawNorth = Position.getInfo().heading;
+    if (rawNorth != null) {
+      var north = rawNorth * -57.2958;
+      var x1 = getXY(screenDiam, 0, screenDiam / 2 - 1, north, 1);
+      var x2 = getXY(
+        screenDiam,
+        0,
+        screenDiam / 2 - screenDiam / 30,
+        north - screenDiam / 150,
+        1
+      );
+      var x3 = getXY(
+        screenDiam,
+        0,
+        screenDiam / 2 - screenDiam / 30,
+        north + screenDiam / 150,
+        1
+      );
+      var pts = [x1, x2, x3];
+      dc.setColor(0xd53420, Graphics.COLOR_TRANSPARENT);
+      dc.fillPolygon(pts);
+    }
+  }
 
+  function renderWindOnUI(screenDiam, dc) {
+    var windBearing = Weather.getCurrentConditions().windBearing;
+    var rawNorth = Toybox.Position.getInfo().heading;
+
+    if (rawNorth != null && windBearing != null) {
+      var north = rawNorth * -57.2958;
+      var wind = windBearing + north;
+      var x1 = getXY(screenDiam, 0, screenDiam / 2 - 1, wind, 1);
+      var x2 = getXY(
+        screenDiam,
+        0,
+        screenDiam / 2 - screenDiam / 30,
+        wind - screenDiam / 150,
+        1
+      );
+      var x3 = getXY(
+        screenDiam,
+        0,
+        screenDiam / 2 - screenDiam / 30,
+        wind + screenDiam / 150,
+        1
+      );
+      var pts = [x1, x2, x3];
+      dc.setColor(0x0077b6, Graphics.COLOR_TRANSPARENT);
+      dc.fillPolygon(pts);
+    }
+  }
   function drawBackground(dc) {
     if (fill_logo != null) {
       //dc.setColor(eucData.logoColor, Graphics.COLOR_TRANSPARENT);

@@ -207,6 +207,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     ) {
       decoder.processFrame(value);
     }
+    EUCAlarms.checkAlarms();
   }
 
   function sendCmd(cmd) {

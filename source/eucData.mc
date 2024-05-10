@@ -20,6 +20,9 @@ module eucData {
   var wheelBrand;
   var paired = false;
   var debug = false;
+
+  var displayNorth = false;
+  var displayWind = false;
   // Calculated PWM variables :
   // PLEASE UPDATE WITH YOU OWN VALUES BEFORE USE !
   var rotationSpeed; // cutoff speed when freespin test performed

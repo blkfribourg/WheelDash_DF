@@ -163,6 +163,20 @@
                     
                 </settingConfig>
             </setting>
+            <setting
+            propertyKey="@Properties.displayNorth"
+            title="@Strings.displayNorth">
+                <settingConfig
+                    type="boolean"
+                />
+            </setting>
+            <setting
+            propertyKey="@Properties.displayWind"
+            title="@Strings.displayWind">
+                <settingConfig
+                    type="boolean"
+                />
+            </setting>
 <!--
             <setting
                 propertyKey="@Properties.resumeDectectionMethod"

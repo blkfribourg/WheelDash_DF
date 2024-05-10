@@ -1,5 +1,5 @@
 <strings>
-    <string id="AppName">WheelDash DF (dev)</string>
+    <string id="AppName">WheelDash DF (beta)</string>
     <!-- Strings, that are used in Connect IQ Settings menu, like 
         one you see in Garmin Express or Garmin Connect Mobile -->
     <string id="debugView">Debug View</string>
@@ -86,7 +86,9 @@
     <string id="alarmThreshold_temp_p3">Temperature that trigger an alarm (profile3)</string>
     <string id="alarmThreshold_temp_ErrorMessage">Value out of range</string>
 
-   <string id="debugMode">Enable Debug Mode (view)</string>
+    <string id="debugMode">Enable Debug Mode (view)</string>
+    <string id="displayNorth">Display North orientation (red triangle)</string>
+    <string id="displayWind">Display Wind bearing (blue triangle)</string>
     <!-- FIT Strings-->
 
     <string id="speed_graph_label">Speed</string>

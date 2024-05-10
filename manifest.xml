@@ -5,7 +5,7 @@
         Use "Monkey C: Edit Application" from the Visual Studio Code command palette
         to update the application attributes.
     -->
-    <iq:application id="11687288-d1f1-43e9-aaa4-2f5cce1fb17e" type="datafield" name="@Strings.AppName" entry="GarminEUCApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.0.0">
+    <iq:application id="ce0d151a-deac-4bb7-9329-4ee661af8623" type="datafield" name="@Strings.AppName" entry="GarminEUCApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.1.0">
         <!-- 
              df id  : d7399422-2a19-4d1c-9b30-b9bd962e9ac5
              dev id : 11687288-d1f1-43e9-aaa4-2f5cce1fb17e-->
@@ -64,6 +64,7 @@
             <iq:uses-permission id="BluetoothLowEnergy"/>
             <iq:uses-permission id="DataFieldAlert"/>
             <iq:uses-permission id="FitContributor"/>
+            <iq:uses-permission id="Positioning"/>
         </iq:permissions>
         <!--
             Use "Monkey C: Edit Languages" from the Visual Studio Code command
