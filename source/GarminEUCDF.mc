@@ -10,8 +10,6 @@ class GarminEUCDF extends WatchUi.DataField {
   var empty_logo;
   var delay = 3;
   var firstCall = true;
-  var bleDelegate;
-  var IM_count = 0;
   hidden var field1 = "NC";
   hidden var field2 = "NC";
   hidden var field3 = "NC";
@@ -77,8 +75,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var nb_Font;
   private var cDrawables = {};
 
-  function initialize(_bleDelegate) {
-    bleDelegate = _bleDelegate;
+  function initialize() {
     DataField.initialize();
     fieldsInitialize();
     //load custom number font
@@ -965,13 +962,12 @@ class GarminEUCDF extends WatchUi.DataField {
       activityTimerTime = info.timerTime;
     }
 
-    eucData.paired = true;
+    //eucData.paired = true;
     if (eucData.paired == true) {
-      //EUCAlarms.checkAlarms();
       if (delay < 0) {
         updateFitData(info);
         getFieldValues();
-        //checkAlarms();
+        // checkAlarms();
       } else {
         /*
         if (AppStorage.getSetting("resumeDectectionMethod") == 0) {
@@ -1009,82 +1005,7 @@ class GarminEUCDF extends WatchUi.DataField {
         onTimerReset();
       }*/
   }
-  /*
-  var PWMAlert = false;
-  var tempAlert = false;
-  var speedAlert = false;
-  var displayingAlert = false;
-  var displayAlertTimer = 2;
-  var textAlert = "";
-  function checkAlarms() {
-    if (WatchUi.DataField has :showAlert) {
-      if (
-        currentPWM > eucData.alarmThreshold_PWM &&
-        eucData.alarmThreshold_PWM != 0
-      ) {
-        PWMAlert = true;
-      } else {
-        PWMAlert = false;
-      }
-      if (
-        eucData.temperature > eucData.alarmThreshold_temp &&
-        eucData.alarmThreshold_temp != 0
-      ) {
-        tempAlert = true;
-      } else {
-        tempAlert = false;
-      }
-      if (
-        correctedSpeed > eucData.alarmThreshold_speed &&
-        eucData.alarmThreshold_speed != 0
-      ) {
-        speedAlert = true;
-      } else {
-        speedAlert = false;
-      }
-      if (PWMAlert == true) {
-        textAlert = "!! PWM Alarm !!";
-      } else {
-        if (tempAlert == true) {
-          textAlert = "!! Temperature Alarm !!";
-        } else if (speedAlert == true) {
-          textAlert = "!! Speed Alarm !!";
-        }
-      }
-      if (!PWMAlert && !tempAlert && !speedAlert) {
-        displayingAlert = false;
-        displayAlertTimer = 2;
-      } else {
-        displayingAlert = true;
-        displayAlertTimer = displayAlertTimer - 1;
-        if (displayAlertTimer < -1) {
-          displayAlertTimer = 2;
-        } else {
-          vibrate();
-        }
-      }
-    }
-  }
-  function vibrate() {
-    if (Attention has :vibrate) {
-      Attention.vibrate([
-        new Attention.VibeProfile(100, 300),
-        new Attention.VibeProfile(0, 500),
-        new Attention.VibeProfile(100, 300),
-        new Attention.VibeProfile(0, 500),
-      ]);
-    }
-    if (Attention has :ToneProfile) {
-      var toneProfile = [
-        new Attention.ToneProfile(420, 300),
-        new Attention.ToneProfile(516, 300),
-        new Attention.ToneProfile(425, 300),
-        new Attention.ToneProfile(0, 1000),
-      ];
-      Attention.playTone({ :toneProfile => toneProfile });
-    }
-  }
-*/
+
   // Update the field layout and display the field data
   function onUpdate(dc) {
     // DEBUG SCREEN
@@ -1692,23 +1613,5 @@ class GarminEUCDF extends WatchUi.DataField {
       maxPWM = Storage.getValue("maxPWM");
       // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
     }*/
-  }
-
-  function IM_VESC_frameReq() {
-    if (eucData.wheelBrand == 4) {
-      if (IM_count > 0 && bleDelegate != null) {
-        bleDelegate.lastPacketType = "live";
-        bleDelegate.IM_VESC_reqLiveData();
-        IM_count = IM_count - 1;
-      }
-      if (IM_count <= 0 && bleDelegate != null) {
-        bleDelegate.lastPacketType = "stats";
-        bleDelegate.IM_reqStats();
-        IM_count = 30;
-      }
-    }
-    if (eucData.wheelBrand == 5) {
-      bleDelegate.IM_VESC_reqLiveData();
-    }
   }
 }

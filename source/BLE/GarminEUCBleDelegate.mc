@@ -7,7 +7,6 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var service = null;
   var char = null;
   var decoder = null;
-  var lastPacketType;
 
   function initialize(_decoder) {
     BleDelegate.initialize();
@@ -141,27 +140,6 @@ class eucBLEDelegate extends Ble.BleDelegate {
               }
             }
           }
-          if (eucData.wheelBrand == 4) {
-            // V11 or V12 only for now
-
-            var advName = result.getDeviceName();
-            if (advName != null) {
-              var advModel = advName.substring(0, 3);
-              if (advModel.equals("V11") || advModel.equals("V12")) {
-                eucData.model = advModel;
-                wheelFound = true;
-              }
-            }
-          }
-          if (eucData.wheelBrand == 5) {
-            // V11 only for now
-            var advName = result.getDeviceName();
-            if (advName != null) {
-              if (advName.substring(0, 4).equals("VESC")) {
-                wheelFound = true;
-              }
-            }
-          }
           if (wheelFound == true) {
             storeSR(result);
             Ble.setScanState(Ble.SCAN_STATE_OFF);
@@ -261,25 +239,5 @@ class eucBLEDelegate extends Ble.BleDelegate {
     if (device != null) {
       Ble.unpairDevice(device);
     }
-  }
-
-  function IM_VESC_reqLiveData() {
-    // inmotion
-    if (eucData.wheelBrand == 4) {
-      char.requestWrite([0xaa, 0xaa, 0x14, 0x01, 0x04, 0x11]b, {
-        :writeType => Ble.WRITE_TYPE_DEFAULT,
-      });
-    }
-    // VESC
-    if (eucData.wheelBrand == 5) {
-      char.requestWrite([0x02, 0x01, 0x2f, 0xd5, 0x8d, 0x03]b, {
-        :writeType => Ble.WRITE_TYPE_DEFAULT,
-      });
-    }
-  }
-  function IM_reqStats() {
-    char.requestWrite([0xaa, 0xaa, 0x14, 0x01, 0x11, 0x04]b, {
-      :writeType => Ble.WRITE_TYPE_DEFAULT,
-    });
   }
 }
