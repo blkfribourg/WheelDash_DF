@@ -177,6 +177,15 @@
                     type="boolean"
                 />
             </setting>
+            <setting
+            propertyKey="@Properties.vibeIntensity"
+            title="@Strings.vibeIntensity">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="100"
+            />
+        </setting>
 <!--
             <setting
                 propertyKey="@Properties.resumeDectectionMethod"
@@ -284,6 +293,15 @@
         <setting
             propertyKey="@Properties.alarmThreshold_PWM_p1"
             title="@Strings.alarmThreshold_PWM_p1">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="100"
+                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+        </setting>
+        <setting
+            propertyKey="@Properties.alarmThreshold2_PWM_p1"
+            title="@Strings.alarmThreshold2_PWM_p1">
             <settingConfig
                 type="numeric"
                 min="0"
@@ -403,6 +421,15 @@
                 errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
         </setting>
         <setting
+            propertyKey="@Properties.alarmThreshold2_PWM_p2"
+            title="@Strings.alarmThreshold2_PWM_p2">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="100"
+                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+        </setting>
+        <setting
             propertyKey="@Properties.alarmThreshold_speed_p2"
             title="@Strings.alarmThreshold_speed_p2">
             <settingConfig
@@ -508,6 +535,15 @@
         <setting
             propertyKey="@Properties.alarmThreshold_PWM_p3"
             title="@Strings.alarmThreshold_PWM_p3">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="100"
+                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+        </setting>
+        <setting
+            propertyKey="@Properties.alarmThreshold2_PWM_p3"
+            title="@Strings.alarmThreshold2_PWM_p3">
             <settingConfig
                 type="numeric"
                 min="0"

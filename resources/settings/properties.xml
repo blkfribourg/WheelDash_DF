@@ -12,6 +12,7 @@
     <property id="logoOffsety" type="number">0</property>
     <property id="displayNorth" type="boolean">false</property>
     <property id="displayWind" type="boolean">false</property>
+    <property id="vibeIntensity" type="number">90</property>
     
     <property id="profile" type="number">1</property>
     <property id="wheelBrand_p1" type="number">0</property>
@@ -23,6 +24,7 @@
     <property id="speedCorrectionFactor_p1" type="float">1.0</property>
     <property id="currentCorrection_p1" type="number">0</property>
     <property id="alarmThreshold_PWM_p1" type="number">80</property>
+    <property id="alarmThreshold2_PWM_p1" type="number">0</property>
     <property id="alarmThreshold_speed_p1" type="number">0</property>
     <property id="alarmThreshold_temp_p1" type="number">0</property>
     <property id="begodeCF_p1" type="boolean">false</property>
@@ -38,6 +40,7 @@
     <property id="speedCorrectionFactor_p2" type="float">1.0</property>
     <property id="currentCorrection_p2" type="number">0</property>
     <property id="alarmThreshold_PWM_p2" type="number">80</property>
+    <property id="alarmThreshold2_PWM_p2" type="number">0</property>
     <property id="alarmThreshold_speed_p2" type="number">0</property>
     <property id="alarmThreshold_temp_p2" type="number">0</property>
     <property id="begodeCF_p2" type="boolean">false</property>
@@ -51,6 +54,7 @@
     <property id="speedCorrectionFactor_p3" type="float">1.0</property>
     <property id="currentCorrection_p3" type="number">0</property>
     <property id="alarmThreshold_PWM_p3" type="number">80</property>
+    <property id="alarmThreshold2_PWM_p3" type="number">0</property>
     <property id="alarmThreshold_speed_p3" type="number">0</property>
     <property id="alarmThreshold_temp_p3" type="number">0</property>
     <property id="begodeCF_p3" type="boolean">false</property>

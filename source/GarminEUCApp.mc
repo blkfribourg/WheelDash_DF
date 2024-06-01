@@ -20,6 +20,8 @@ class GarminEUCApp extends Application.AppBase {
     //profileMenu= createMenu(["Profile1","Profile2","Profile3"],"Profile Selection");
     // end of sandbox
     setSettings(currentProfile);
+    //init alarms
+    EUCAlarms.alarmsInit();
   }
 
   // Return the initial view of your application here
@@ -43,6 +45,7 @@ class GarminEUCApp extends Application.AppBase {
   function setSettings(profile) {
     eucData.displayNorth = AppStorage.getSetting("displayNorth");
     eucData.displayWind = AppStorage.getSetting("displayWind");
+    eucData.vibeIntensity = AppStorage.getSetting("vibeIntensity");
     eucData.profile = AppStorage.getSetting("profile");
     eucData.debug = AppStorage.getSetting("debugView");
     eucData.logoFill = AppStorage.getSetting("logoFill");
@@ -74,6 +77,9 @@ class GarminEUCApp extends Application.AppBase {
       eucData.alarmThreshold_PWM = AppStorage.getSetting(
         "alarmThreshold_PWM_p1"
       );
+      eucData.alarmThreshold2_PWM = AppStorage.getSetting(
+        "alarmThreshold2_PWM_p1"
+      );
       eucData.alarmThreshold_speed = AppStorage.getSetting(
         "alarmThreshold_speed_p1"
       );
@@ -97,6 +103,9 @@ class GarminEUCApp extends Application.AppBase {
       eucData.alarmThreshold_PWM = AppStorage.getSetting(
         "alarmThreshold_PWM_p2"
       );
+      eucData.alarmThreshold2_PWM = AppStorage.getSetting(
+        "alarmThreshold2_PWM_p2"
+      );
       eucData.alarmThreshold_speed = AppStorage.getSetting(
         "alarmThreshold_speed_p2"
       );
@@ -118,6 +127,9 @@ class GarminEUCApp extends Application.AppBase {
       );
       eucData.alarmThreshold_PWM = AppStorage.getSetting(
         "alarmThreshold_PWM_p3"
+      );
+      eucData.alarmThreshold2_PWM = AppStorage.getSetting(
+        "alarmThreshold2_PWM_p3"
       );
       eucData.alarmThreshold_speed = AppStorage.getSetting(
         "alarmThreshold_speed_p3"

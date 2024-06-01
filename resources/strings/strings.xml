@@ -13,6 +13,7 @@
     <string id="font">Field value font</string>
     <string id="font0">Roboto</string>
     <string id="font1">Rajdhani</string>
+    <string id="vibeIntensity">Alarms vibration intensity</string>
     <string id="logoOffsetx">Logo offset x</string>
     <string id="logoOffsety">Logo offset y</string>
     <string id="wheelBrand0">Gotway/Begode</string>
@@ -39,6 +40,16 @@
     <string id="wheelBrand_p1">Wheel brand (profile1)</string>
     <string id="wheelBrand_p2">Wheel brand (profile2)</string>
     <string id="wheelBrand_p3">Wheel brand (profile3)</string>
+
+
+	<string id="alarmThreshold_PWM_p1">Percentage of PWM that trigger 1st alarm (Profile 1)</string>
+    <string id="alarmThreshold_PWM_p2">Percentage of PWM that trigger 1st alarm (Profile 2)</string>
+    <string id="alarmThreshold_PWM_p3">Percentage of PWM that trigger 1st alarm (Profile 3)</string>
+    <string id="alarmThreshold2_PWM_p1">Percentage of PWM that trigger 2nd alarm (Profile 1)</string>
+    <string id="alarmThreshold2_PWM_p2">Percentage of PWM that trigger 2nd alarm (Profile 2)</string>
+    <string id="alarmThreshold2_PWM_p3">Percentage of PWM that trigger 2nd alarm (Profile 3)</string>
+    <string id="alarmThreshold_PWM_ErrorMessage">Value out of range</string>
+
     <string id="currentCorrection_p1">Current correction type (profile1)</string>
     <string id="currentCorrection_p2">Current correction type (profile2)</string>
     <string id="currentCorrection_p3">Current correction type (profile3)</string>

@@ -1322,10 +1322,7 @@ class GarminEUCDF extends WatchUi.DataField {
           field6_value,
           Graphics.TEXT_JUSTIFY_CENTER
         );
-        if (
-          EUCAlarms.displayingAlert == true &&
-          EUCAlarms.displayAlertTimer > 0
-        ) {
+        if (EUCAlarms.displayingAlert == true) {
           dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
           dc.fillRectangle(
             0,
