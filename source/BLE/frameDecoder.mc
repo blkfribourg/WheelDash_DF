@@ -166,8 +166,7 @@ class VeteranDecoder {
 
       if (
         ((size == 22 || size == 30) && c.toNumber() != 0) ||
-        (size == 23 && (c & 0xfe).toNumber() != 0) ||
-        (size == 31 && (c & 0xfc).toNumber() != 0)
+        (size == 23 && (c & 0xfe).toNumber() != 0)
       ) {
         state = "done";
         reset();

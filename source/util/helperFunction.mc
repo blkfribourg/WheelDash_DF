@@ -16,9 +16,13 @@ function string_to_byte_array(plain_text) {
 
 //Just a round function with formating
 function valueRound(value, format) {
-  var rounded;
-  rounded = Math.round(value * 100) / 100;
-  return rounded.format(format);
+  if (value != null) {
+    var rounded;
+    rounded = Math.round(value * 100) / 100;
+    return rounded.format(format);
+  } else {
+    return "--";
+  }
 }
 
 // Get a point coord on a circle
