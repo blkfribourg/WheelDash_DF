@@ -18,7 +18,7 @@ module eucData {
   var linesColor = 0xffffff;
   var drawLines = true;
   var wheelBrand;
-  var paired = false;
+  var paired = true;
   var debug = false;
 
   var displayNorth = false;

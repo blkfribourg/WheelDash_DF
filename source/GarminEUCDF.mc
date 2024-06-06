@@ -10,18 +10,11 @@ class GarminEUCDF extends WatchUi.DataField {
   var empty_logo;
   var delay = 3;
   var firstCall = true;
-  hidden var field1 = "NC";
-  hidden var field2 = "NC";
-  hidden var field3 = "NC";
-  hidden var field4 = "NC";
-  hidden var field5 = "NC";
-  hidden var field6 = "NC";
-  hidden var field1_value = 0;
-  hidden var field2_value = 0;
-  hidden var field3_value = 0;
-  hidden var field4_value = 0;
-  hidden var field5_value = 0;
-  hidden var field6_value = 0;
+
+  var fieldNB;
+  var fieldIDs;
+  var fieldNames;
+  var fieldValues;
   const SPEED_FIELD_ID = 0;
   const PWM_FIELD_ID = 1;
   const VOLTAGE_FIELD_ID = 2;
@@ -141,6 +134,24 @@ class GarminEUCDF extends WatchUi.DataField {
     // startingMoment = _startingMoment;
   }
   function fieldsInitialize() {
+    fieldIDs = [
+      AppStorage.getSetting("field1"),
+      AppStorage.getSetting("field2"),
+      AppStorage.getSetting("field3"),
+      AppStorage.getSetting("field4"),
+      AppStorage.getSetting("field5"),
+      AppStorage.getSetting("field6"),
+      AppStorage.getSetting("field7"),
+      AppStorage.getSetting("field8"),
+    ];
+    fieldNB = AppStorage.getSetting("fieldNB");
+
+    fieldNames = new [fieldNB];
+    fieldValues = new [fieldNB];
+    for (var i = 0; i < fieldNB; i++) {
+      fieldNames[i] = "NC";
+      fieldValues[i] = "--";
+    }
     mSpeedField = createField(
       "speed",
       SPEED_FIELD_ID,
@@ -304,8 +315,6 @@ class GarminEUCDF extends WatchUi.DataField {
   var maxPower = 0.0;
   var maxTemp = -255.0;
   var minTemp = 255.0;
-  var currentPWM = 0.0;
-  var correctedSpeed = 0.0;
   var currentCurrent = 0.0;
   var currentVoltage = 0.0;
   var currentBatteryPerc = 0.0;
@@ -328,13 +337,13 @@ class GarminEUCDF extends WatchUi.DataField {
     callNb++;
     currentVoltage = eucData.getVoltage();
     currentBatteryPerc = eucData.getBatteryPercentage();
-    currentPWM = eucData.getPWM();
-    correctedSpeed = eucData.getCorrectedSpeed();
+    eucData.PWM = eucData.getPWM();
+    eucData.correctedSpeed = eucData.getCorrectedSpeed();
     currentCurrent = eucData.getCurrent();
     currentPower = currentCurrent * currentVoltage;
 
-    mSpeedField.setData(correctedSpeed); // id 0
-    mPWMField.setData(currentPWM); //id 1
+    mSpeedField.setData(eucData.correctedSpeed); // id 0
+    mPWMField.setData(eucData.PWM); //id 1
     mVoltageField.setData(currentVoltage); // id 2
     //    mCurrentField.setData(currentCurrent); // id 3
     //    mPowerField.setData(currentPower); // id 4
@@ -342,12 +351,12 @@ class GarminEUCDF extends WatchUi.DataField {
     if (currentBatteryPerc > 0 && eucData.paired == true) {
       mEORBatteryField.setData(currentBatteryPerc);
     }
-    if (correctedSpeed > maxSpeed) {
-      maxSpeed = correctedSpeed;
+    if (eucData.correctedSpeed > maxSpeed) {
+      maxSpeed = eucData.correctedSpeed;
       mMaxSpeedField.setData(maxSpeed); // id 7
     }
-    if (currentPWM > maxPWM) {
-      maxPWM = currentPWM;
+    if (eucData.PWM > maxPWM) {
+      maxPWM = eucData.PWM;
       mMaxPWMField.setData(maxPWM); // id 8
     }
     if (currentCurrent > maxCurrent) {
@@ -423,8 +432,8 @@ class GarminEUCDF extends WatchUi.DataField {
     maxPower = 0.0;
     maxTemp = -255.0;
     minTemp = 255.0;
-    currentPWM = 0.0;
-    correctedSpeed = 0.0;
+    eucData.PWM = 0.0;
+    eucData.correctedSpeed = 0.0;
     currentCurrent = 0.0;
     currentVoltage = 0.0;
     currentBatteryPerc = 0.0;
@@ -443,490 +452,103 @@ class GarminEUCDF extends WatchUi.DataField {
     avgPower = 0.0;
   }
   function getFieldValues() {
-    if (AppStorage.getSetting("field1") == 0) {
-      field1 = "SPEED";
-      field1_value = valueRound(correctedSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 1) {
-      field1 = "VOLTAGE";
-      field1_value = valueRound(currentVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 2) {
-      field1 = "TRP DIST";
-      field1_value = valueRound(sessionDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 3) {
-      field1 = "CURR";
-      field1_value = valueRound(currentCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 4) {
-      field1 = "TEMP";
-      field1_value = valueRound(eucData.temperature, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 5) {
-      field1 = "TT DIST";
-      field1_value = valueRound(eucData.totalDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 6) {
-      field1 = "PWM";
-      field1_value = valueRound(currentPWM, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 7) {
-      field1 = "BATT %";
-      field1_value = valueRound(currentBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 8) {
-      field1 = "MIN TEMP";
-      field1_value = valueRound(minTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 9) {
-      field1 = "MAX TEMP";
-      field1_value = valueRound(maxTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 10) {
-      field1 = "MAX SPD";
-      field1_value = valueRound(maxSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 11) {
-      field1 = "AVG SPD";
-      field1_value = valueRound(avgSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 12) {
-      field1 = "MIN VOLT";
-      field1_value = valueRound(minVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 13) {
-      field1 = "MAX VOLT";
-      field1_value = valueRound(maxVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 14) {
-      field1 = "MAX CURR";
-      field1_value = valueRound(maxCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 15) {
-      field1 = "MAX CURR";
-      field1_value = valueRound(avgCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 16) {
-      field1 = "MIN BATT %";
-      field1_value = valueRound(minBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 17) {
-      field1 = "MAX BATT %";
-      field1_value = valueRound(maxBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 18) {
-      field1 = "AVG PWR";
-      field1_value = valueRound(avgPower, "%.1f");
-    }
-    if (AppStorage.getSetting("field1") == 19) {
-      field1 = "MAX PWR %";
-      field1_value = valueRound(maxPower, "%.1f");
-    }
-
-    if (AppStorage.getSetting("field2") == 0) {
-      field2 = "SPEED";
-      field2_value = valueRound(correctedSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 1) {
-      field2 = "VOLTAGE";
-      field2_value = valueRound(currentVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 2) {
-      field2 = "TRP DIST";
-      field2_value = valueRound(sessionDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 3) {
-      field2 = "CURR";
-      field2_value = valueRound(currentCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 4) {
-      field2 = "TEMP";
-      field2_value = valueRound(eucData.temperature, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 5) {
-      field2 = "TT DIST";
-      field2_value = valueRound(eucData.totalDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 6) {
-      field2 = "PWM";
-      field2_value = valueRound(currentPWM, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 7) {
-      field2 = "BATT %";
-      field2_value = valueRound(currentBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 8) {
-      field2 = "MIN TEMP";
-      field2_value = valueRound(minTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 9) {
-      field2 = "MAX TEMP";
-      field2_value = valueRound(maxTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 10) {
-      field2 = "MAX SPD";
-      field2_value = valueRound(maxSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 11) {
-      field2 = "AVG SPD";
-      field2_value = valueRound(avgSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 12) {
-      field2 = "MIN VOLT";
-      field2_value = valueRound(minVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 13) {
-      field2 = "MAX VOLT";
-      field2_value = valueRound(maxVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 14) {
-      field2 = "MAX CURR";
-      field2_value = valueRound(maxCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 15) {
-      field2 = "MAX CURR";
-      field2_value = valueRound(avgCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 16) {
-      field2 = "MIN BATT %";
-      field2_value = valueRound(minBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 17) {
-      field2 = "MAX BATT %";
-      field2_value = valueRound(maxBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 18) {
-      field2 = "AVG PWR";
-      field2_value = valueRound(avgPower, "%.1f");
-    }
-    if (AppStorage.getSetting("field2") == 19) {
-      field2 = "MAX PWR %";
-      field2_value = valueRound(maxPower, "%.1f");
-    }
-
-    if (AppStorage.getSetting("field3") == 0) {
-      field3 = "SPEED";
-      field3_value = valueRound(correctedSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 1) {
-      field3 = "VOLTAGE";
-      field3_value = valueRound(currentVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 2) {
-      field3 = "TRP DIST";
-      field3_value = valueRound(sessionDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 3) {
-      field3 = "CURR";
-      field3_value = valueRound(currentCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 4) {
-      field3 = "TEMP";
-      field3_value = valueRound(eucData.temperature, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 5) {
-      field3 = "TT DIST";
-      field3_value = valueRound(eucData.totalDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 6) {
-      field3 = "PWM";
-      field3_value = valueRound(currentPWM, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 7) {
-      field3 = "BATT %";
-      field3_value = valueRound(currentBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 8) {
-      field3 = "MIN TEMP";
-      field3_value = valueRound(minTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 9) {
-      field3 = "MAX TEMP";
-      field3_value = valueRound(maxTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 10) {
-      field3 = "MAX SPD";
-      field3_value = valueRound(maxSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 11) {
-      field3 = "AVG SPD";
-      field3_value = valueRound(avgSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 12) {
-      field3 = "MIN VOLT";
-      field3_value = valueRound(minVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 13) {
-      field3 = "MAX VOLT";
-      field3_value = valueRound(maxVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 14) {
-      field3 = "MAX CURR";
-      field3_value = valueRound(maxCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 15) {
-      field3 = "MAX CURR";
-      field3_value = valueRound(avgCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 16) {
-      field3 = "MIN BATT %";
-      field3_value = valueRound(minBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 17) {
-      field3 = "MAX BATT %";
-      field3_value = valueRound(maxBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 18) {
-      field3 = "AVG PWR";
-      field3_value = valueRound(avgPower, "%.1f");
-    }
-    if (AppStorage.getSetting("field3") == 19) {
-      field3 = "MAX PWR %";
-      field3_value = valueRound(maxPower, "%.1f");
-    }
-
-    if (AppStorage.getSetting("field4") == 0) {
-      field4 = "SPEED";
-      field4_value = valueRound(correctedSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 1) {
-      field4 = "VOLTAGE";
-      field4_value = valueRound(currentVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 2) {
-      field4 = "TRP DIST";
-      field4_value = valueRound(sessionDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 3) {
-      field4 = "CURR";
-      field4_value = valueRound(currentCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 4) {
-      field4 = "TEMP";
-      field4_value = valueRound(eucData.temperature, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 5) {
-      field4 = "TT DIST";
-      field4_value = valueRound(eucData.totalDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 6) {
-      field4 = "PWM";
-      field4_value = valueRound(currentPWM, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 7) {
-      field4 = "BATT %";
-      field4_value = valueRound(currentBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 8) {
-      field4 = "MIN TEMP";
-      field4_value = valueRound(minTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 9) {
-      field4 = "MAX TEMP";
-      field4_value = valueRound(maxTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 10) {
-      field4 = "MAX SPD";
-      field4_value = valueRound(maxSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 11) {
-      field4 = "AVG SPD";
-      field4_value = valueRound(avgSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 12) {
-      field4 = "MIN VOLT";
-      field4_value = valueRound(minVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 13) {
-      field4 = "MAX VOLT";
-      field4_value = valueRound(maxVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 14) {
-      field4 = "MAX CURR";
-      field4_value = valueRound(maxCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 15) {
-      field4 = "MAX CURR";
-      field4_value = valueRound(avgCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 16) {
-      field4 = "MIN BATT %";
-      field4_value = valueRound(minBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 17) {
-      field4 = "MAX BATT %";
-      field4_value = valueRound(maxBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 18) {
-      field4 = "AVG PWR";
-      field4_value = valueRound(avgPower, "%.1f");
-    }
-    if (AppStorage.getSetting("field4") == 19) {
-      field4 = "MAX PWR %";
-      field4_value = valueRound(maxPower, "%.1f");
-    }
-
-    if (AppStorage.getSetting("field5") == 0) {
-      field5 = "SPEED";
-      field5_value = valueRound(correctedSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 1) {
-      field5 = "VOLTAGE";
-      field5_value = valueRound(currentVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 2) {
-      field5 = "TRP DIST";
-      field5_value = valueRound(sessionDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 3) {
-      field5 = "CURR";
-      field5_value = valueRound(currentCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 4) {
-      field5 = "TEMP";
-      field5_value = valueRound(eucData.temperature, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 5) {
-      field5 = "TT DIST";
-      field5_value = valueRound(eucData.totalDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 6) {
-      field5 = "PWM";
-      field5_value = valueRound(currentPWM, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 7) {
-      field5 = "BATT %";
-      field5_value = valueRound(currentBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 8) {
-      field5 = "MIN TEMP";
-      field5_value = valueRound(minTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 9) {
-      field5 = "MAX TEMP";
-      field5_value = valueRound(maxTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 10) {
-      field5 = "MAX SPD";
-      field5_value = valueRound(maxSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 11) {
-      field5 = "AVG SPD";
-      field5_value = valueRound(avgSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 12) {
-      field5 = "MIN VOLT";
-      field5_value = valueRound(minVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 13) {
-      field5 = "MAX VOLT";
-      field5_value = valueRound(maxVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 14) {
-      field5 = "MAX CURR";
-      field5_value = valueRound(maxCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 15) {
-      field5 = "MAX CURR";
-      field5_value = valueRound(avgCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 16) {
-      field5 = "MIN BATT %";
-      field5_value = valueRound(minBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 17) {
-      field5 = "MAX BATT %";
-      field5_value = valueRound(maxBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 18) {
-      field5 = "AVG PWR";
-      field5_value = valueRound(avgPower, "%.1f");
-    }
-    if (AppStorage.getSetting("field5") == 19) {
-      field5 = "MAX PWR %";
-      field5_value = valueRound(maxPower, "%.1f");
-    }
-
-    if (AppStorage.getSetting("field6") == 0) {
-      field6 = "SPEED";
-      field6_value = valueRound(correctedSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 1) {
-      field6 = "VOLTAGE";
-      field6_value = valueRound(currentVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 2) {
-      field6 = "TRP DIST";
-      field6_value = valueRound(sessionDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 3) {
-      field6 = "CURR";
-      field6_value = valueRound(currentCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 4) {
-      field6 = "TEMP";
-      field6_value = valueRound(eucData.temperature, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 5) {
-      field6 = "TT DIST";
-      field6_value = valueRound(eucData.totalDistance, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 6) {
-      field6 = "PWM";
-      field6_value = valueRound(currentPWM, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 7) {
-      field6 = "BATT %";
-      field6_value = valueRound(currentBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 8) {
-      field6 = "MIN TEMP";
-      field6_value = valueRound(minTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 9) {
-      field6 = "MAX TEMP";
-      field6_value = valueRound(maxTemp, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 10) {
-      field6 = "MAX SPD";
-      field6_value = valueRound(maxSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 11) {
-      field6 = "AVG SPD";
-      field6_value = valueRound(avgSpeed, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 12) {
-      field6 = "MIN VOLT";
-      field6_value = valueRound(minVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 13) {
-      field6 = "MAX VOLT";
-      field6_value = valueRound(maxVoltage, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 14) {
-      field6 = "MAX CURR";
-      field6_value = valueRound(maxCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 15) {
-      field6 = "MAX CURR";
-      field6_value = valueRound(avgCurrent, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 16) {
-      field6 = "MIN BATT %";
-      field6_value = valueRound(minBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 17) {
-      field6 = "MAX BATT %";
-      field6_value = valueRound(maxBatteryPerc, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 18) {
-      field6 = "AVG PWR";
-      field6_value = valueRound(avgPower, "%.1f");
-    }
-    if (AppStorage.getSetting("field6") == 19) {
-      field6 = "MAX PWR %";
-      field6_value = valueRound(maxPower, "%.1f");
+    for (var field_id = 0; field_id < fieldNB; field_id++) {
+      if (fieldIDs[field_id] == 0) {
+        fieldNames[field_id] = "SPEED";
+        fieldValues[field_id] = valueRound(eucData.correctedSpeed, "%.1f");
+      }
+      if (fieldIDs[field_id] == 1) {
+        fieldNames[field_id] = "VOLTAGE";
+        fieldValues[field_id] = valueRound(currentVoltage, "%.1f");
+      }
+      if (fieldIDs[field_id] == 2) {
+        fieldNames[field_id] = "TRP DIST";
+        fieldValues[field_id] = valueRound(sessionDistance, "%.1f");
+      }
+      if (fieldIDs[field_id] == 3) {
+        fieldNames[field_id] = "CURR";
+        fieldValues[field_id] = valueRound(currentCurrent, "%.1f");
+      }
+      if (fieldIDs[field_id] == 4) {
+        fieldNames[field_id] = "TEMP";
+        fieldValues[field_id] = valueRound(eucData.temperature, "%.1f");
+      }
+      if (fieldIDs[field_id] == 5) {
+        fieldNames[field_id] = "TT DIST";
+        fieldValues[field_id] = valueRound(eucData.totalDistance, "%.1f");
+      }
+      if (fieldIDs[field_id] == 6) {
+        fieldNames[field_id] = "PWM";
+        fieldValues[field_id] = valueRound(eucData.PWM, "%.1f");
+      }
+      if (fieldIDs[field_id] == 7) {
+        fieldNames[field_id] = "BATT %";
+        fieldValues[field_id] = valueRound(currentBatteryPerc, "%.1f");
+      }
+      if (fieldIDs[field_id] == 8) {
+        fieldNames[field_id] = "MIN TEMP";
+        fieldValues[field_id] = valueRound(minTemp, "%.1f");
+      }
+      if (fieldIDs[field_id] == 9) {
+        fieldNames[field_id] = "MAX TEMP";
+        fieldValues[field_id] = valueRound(maxTemp, "%.1f");
+      }
+      if (fieldIDs[field_id] == 10) {
+        fieldNames[field_id] = "MAX SPD";
+        fieldValues[field_id] = valueRound(maxSpeed, "%.1f");
+      }
+      if (fieldIDs[field_id] == 11) {
+        fieldNames[field_id] = "AVG SPD";
+        fieldValues[field_id] = valueRound(avgSpeed, "%.1f");
+      }
+      if (fieldIDs[field_id] == 12) {
+        fieldNames[field_id] = "MIN VOLT";
+        fieldValues[field_id] = valueRound(minVoltage, "%.1f");
+      }
+      if (fieldIDs[field_id] == 13) {
+        fieldNames[field_id] = "MAX VOLT";
+        fieldValues[field_id] = valueRound(maxVoltage, "%.1f");
+      }
+      if (fieldIDs[field_id] == 14) {
+        fieldNames[field_id] = "MAX CURR";
+        fieldValues[field_id] = valueRound(maxCurrent, "%.1f");
+      }
+      if (fieldIDs[field_id] == 15) {
+        fieldNames[field_id] = "MAX CURR";
+        fieldValues[field_id] = valueRound(avgCurrent, "%.1f");
+      }
+      if (fieldIDs[field_id] == 16) {
+        fieldNames[field_id] = "MIN BATT %";
+        fieldValues[field_id] = valueRound(minBatteryPerc, "%.1f");
+      }
+      if (fieldIDs[field_id] == 17) {
+        fieldNames[field_id] = "MAX BATT %";
+        fieldValues[field_id] = valueRound(maxBatteryPerc, "%.1f");
+      }
+      if (fieldIDs[field_id] == 18) {
+        fieldNames[field_id] = "AVG PWR";
+        fieldValues[field_id] = valueRound(avgPower, "%.1f");
+      }
+      if (fieldIDs[field_id] == 19) {
+        fieldNames[field_id] = "MAX PWR %";
+        fieldValues[field_id] = valueRound(maxPower, "%.1f");
+      }
+      if (fieldIDs[field_id] == 20) {
+        fieldNames[field_id] = "VEH SPD";
+        var targetSpeed = eucData.variaTargetSpeed;
+        if (targetSpeed != null) {
+          targetSpeed = targetSpeed * 3.6; //Km/h only here, should implement mph when adding imperial unit support
+        }
+        fieldValues[field_id] = valueRound(targetSpeed, "%.1f");
+      }
+      if (fieldIDs[field_id] == 21) {
+        fieldNames[field_id] = "VEH DST";
+        fieldValues[field_id] = valueRound(eucData.variaTargetDist, "%.1f");
+      }
+      if (fieldIDs[field_id] == 22) {
+        fieldNames[field_id] = "VEH NB";
+        fieldValues[field_id] = valueRound(eucData.variaTargetNb, "%1d");
+      }
     }
   }
   // Calculate the data to display in the field here
@@ -967,7 +589,7 @@ class GarminEUCDF extends WatchUi.DataField {
       if (delay < 0) {
         updateFitData(info);
         getFieldValues();
-        // checkAlarms();
+        EUCAlarms.checkAlarms();
       } else {
         /*
         if (AppStorage.getSetting("resumeDectectionMethod") == 0) {
@@ -1034,7 +656,7 @@ class GarminEUCDF extends WatchUi.DataField {
         alignAxe - 2 * xGap,
         2 * space + yGap,
         Graphics.FONT_TINY,
-        "AvgSpd: " + activityAvgSpd,
+        "RdConn: " + eucData.variaConnected,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
       dc.drawText(
@@ -1105,223 +727,302 @@ class GarminEUCDF extends WatchUi.DataField {
           Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
         );
       } else {
-        /*
-        // Should rewrite layout for 240x240 round watches,
-        if (eucData.GUI == true) {
-          // GUI
-          var CurrentTime = System.getClockTime();
-          cDrawables[:TimeDate].setText(
-            CurrentTime.hour.format("%d") + ":" + CurrentTime.min.format("%02d")
-          );
-
-          cDrawables[:TimeDate].setColor(Graphics.COLOR_WHITE);
-
-          // Update label drawables
-          cDrawables[:TimeDate].setText(
-            // Update time
-            System.getClockTime().hour.format("%d") +
-              ":" +
-              System.getClockTime().min.format("%02d")
-          );
-          var batteryPercentage = eucData.getBatteryPercentage();
-
-          cDrawables[:BatteryNumber].setText(
-            valueRound(batteryPercentage, "%.1f") + "%"
-          );
-          cDrawables[:TemperatureNumber].setText(
-            valueRound(eucData.temperature, "%.1f").toString() + "°C"
-          );
-          // cDrawables[:BottomSubtitle].setText(diplayStats());
-         
-
-          var speedNumberStr = "";
-
-          if (eucData.mainNumber == 0) {
-            var speedNumberVal = "";
-            speedNumberVal = eucData.correctedSpeed;
-            if (speedNumberVal > 100) {
-              speedNumberStr = valueRound(
-                eucData.correctedSpeed,
-                "%d"
-              ).toString();
-            } else {
-              speedNumberStr = valueRound(
-                eucData.correctedSpeed,
-                "%.1f"
-              ).toString();
-            }
-          }
-          if (eucData.mainNumber == 1) {
-            var speedNumberVal;
-            speedNumberVal = eucData.PWM;
-            if (speedNumberVal > 100) {
-              speedNumberStr = valueRound(eucData.PWM, "%d").toString();
-            } else {
-              speedNumberStr = valueRound(eucData.PWM, "%.1f").toString();
-            }
-          }
-          if (eucData.mainNumber == 2) {
-            var speedNumberVal;
-            speedNumberVal = eucData.getBatteryPercentage();
-            if (speedNumberVal > 100) {
-              speedNumberStr = valueRound(speedNumberVal, "%d").toString();
-            } else {
-              speedNumberStr = valueRound(speedNumberVal, "%.1f").toString();
-            }
-          }
-          cDrawables[:SpeedNumber].setText(speedNumberStr);
-          //cDrawables[:SpeedArc].setValues(WheelData.currentSpeed.toFloat(), WheelData.speedLimit);
-          if (eucData.topBar == 0) {
-            cDrawables[:SpeedArc].setValues(eucData.PWM.toFloat(), 100);
-          } else {
-            cDrawables[:SpeedArc].setValues(
-              eucData.correctedSpeed.toFloat(),
-              eucData.maxDisplayedSpeed
-            );
-          }
-
-          cDrawables[:BatteryArc].setValues(batteryPercentage, 100);
-          cDrawables[:TemperatureArc].setValues(
-            eucData.temperature,
-            eucData.maxTemperature
-          );
-          cDrawables[:TimeDate].setColor(Graphics.COLOR_WHITE);
-          cDrawables[:SpeedNumber].setColor(Graphics.COLOR_WHITE);
-          cDrawables[:BatteryNumber].setColor(Graphics.COLOR_WHITE);
-          cDrawables[:TemperatureNumber].setColor(Graphics.COLOR_WHITE);
-          cDrawables[:BottomSubtitle].setColor(Graphics.COLOR_WHITE);
-
-          // END OF GUI
-          
-        } else {*/
-        var gap;
         var scr_height = dc.getHeight();
         var scr_width = dc.getWidth();
-        var fieldNameFont = Graphics.FONT_XTINY;
-        var fieldValueFont = nb_Font;
-        var fieldNameFontHeight = Graphics.getFontHeight(fieldNameFont);
-        var fieldValueFontHeight = Graphics.getFontHeight(fieldValueFont);
-        if (scr_width < 260) {
-          gap = dc.getWidth() / 80;
-          fieldNameFontHeight = fieldNameFontHeight - 4;
-        } else {
-          gap = dc.getWidth() / 40;
-        }
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-        dc.clear();
-        drawBackground(dc);
-        if (eucData.drawLines) {
-          dc.setColor(eucData.linesColor, Graphics.COLOR_BLACK);
-          dc.drawLine(gap, scr_height / 2, scr_width - gap, scr_height / 2);
-          dc.drawLine(
+        if (fieldNB == 6) {
+          var gap;
+          var fieldNameFont = Graphics.FONT_XTINY;
+          var fieldValueFont = nb_Font;
+          var fieldNameFontHeight = Graphics.getFontHeight(fieldNameFont);
+          var fieldValueFontHeight = Graphics.getFontHeight(fieldValueFont);
+          if (scr_width < 260) {
+            gap = dc.getWidth() / 80;
+            fieldNameFontHeight = fieldNameFontHeight - 4;
+          } else {
+            gap = dc.getWidth() / 40;
+          }
+          dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+          dc.clear();
+          drawBackground(dc);
+          if (eucData.drawLines) {
+            dc.setColor(eucData.linesColor, Graphics.COLOR_BLACK);
+            dc.drawLine(gap, scr_height / 2, scr_width - gap, scr_height / 2);
+            dc.drawLine(
+              scr_width / 2,
+              2 * gap + (fieldNameFontHeight + fieldValueFontHeight),
+              scr_width / 2,
+              scr_height / 2 - 2 * gap
+            );
+            dc.drawLine(
+              scr_width / 2,
+              scr_height / 2 + 2 * gap,
+              scr_width / 2,
+              scr_height -
+                2 * gap -
+                (fieldNameFontHeight + fieldValueFontHeight)
+            );
+          }
+          if (eucData.paired == true) {
+            dc.setColor(eucData.txtColor, Graphics.COLOR_TRANSPARENT);
+          } else {
+            dc.setColor(eucData.txtColor_unpr, Graphics.COLOR_TRANSPARENT);
+          }
+
+          dc.drawText(
             scr_width / 2,
-            2 * gap + (fieldNameFontHeight + fieldValueFontHeight),
-            scr_width / 2,
-            scr_height / 2 - 2 * gap
+            gap,
+            fieldNameFont,
+            fieldNames[0],
+            Graphics.TEXT_JUSTIFY_CENTER
           );
-          dc.drawLine(
+          dc.drawText(
             scr_width / 2,
-            scr_height / 2 + 2 * gap,
+            gap + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[0],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
+            scr_width / 4,
+            scr_height / 4,
+            fieldNameFont,
+            fieldNames[1],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          dc.drawText(
+            scr_width / 4,
+            scr_height / 4 + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[1],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
+            scr_width - scr_width / 4,
+            scr_height / 4,
+            fieldNameFont,
+            fieldNames[2],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          dc.drawText(
+            scr_width - scr_width / 4,
+            scr_height / 4 + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[2],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
+            scr_width / 4,
+            scr_height / 2 + gap,
+            fieldNameFont,
+            fieldNames[3],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          dc.drawText(
+            scr_width / 4,
+            scr_height / 2 + gap + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[3],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
+            scr_width - scr_width / 4,
+            scr_height / 2 + gap,
+            fieldNameFont,
+            fieldNames[4],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          dc.drawText(
+            scr_width - scr_width / 4,
+            scr_height / 2 + gap + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[4],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
             scr_width / 2,
-            scr_height - 2 * gap - (fieldNameFontHeight + fieldValueFontHeight)
+            scr_height - gap - fieldNameFontHeight - fieldValueFontHeight,
+            fieldNameFont,
+            fieldNames[5],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
+            scr_width / 2,
+            scr_height - gap - fieldValueFontHeight,
+            fieldValueFont,
+            fieldValues[5],
+            Graphics.TEXT_JUSTIFY_CENTER
           );
         }
-        if (eucData.paired == true) {
-          dc.setColor(eucData.txtColor, Graphics.COLOR_TRANSPARENT);
-        } else {
-          dc.setColor(eucData.txtColor_unpr, Graphics.COLOR_TRANSPARENT);
+        // 8 fields layout
+        if (fieldNB == 8) {
+          var gap;
+          var fieldNameFont = Graphics.FONT_XTINY;
+          var fieldValueFont = nb_Font;
+          var fieldNameFontHeight = Graphics.getFontHeight(fieldNameFont);
+          var fieldValueFontHeight = Graphics.getFontHeight(fieldValueFont);
+          if (scr_width < 260) {
+            gap = dc.getWidth() / 80;
+            fieldNameFontHeight = fieldNameFontHeight - 4;
+          } else {
+            gap = dc.getWidth() / 80;
+          }
+          dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+          dc.clear();
+          drawBackground(dc);
+          if (eucData.drawLines) {
+            dc.setColor(eucData.linesColor, Graphics.COLOR_BLACK);
+            dc.drawLine(
+              gap,
+              scr_height / 2.6,
+              scr_width - gap,
+              scr_height / 2.6
+            );
+            dc.drawLine(
+              scr_width / 2,
+              2 * gap + fieldValueFontHeight,
+              scr_width / 2,
+              scr_height / 2.6 - 2 * gap
+            );
+            dc.drawLine(
+              scr_width / 2,
+              scr_height / 2.6 + 2 * gap,
+              scr_width / 2,
+              scr_height / 1.6 - 2 * gap
+            );
+            dc.drawLine(
+              gap,
+              scr_height / 1.6,
+              scr_width - gap,
+              scr_height / 1.6
+            );
+            dc.drawLine(
+              scr_width / 2,
+              scr_height / 1.6 + 2 * gap,
+              scr_width / 2,
+              scr_height - (2 * gap + fieldValueFontHeight)
+            );
+          }
+          if (eucData.paired == true) {
+            dc.setColor(eucData.txtColor, Graphics.COLOR_TRANSPARENT);
+          } else {
+            dc.setColor(eucData.txtColor_unpr, Graphics.COLOR_TRANSPARENT);
+          }
+
+          //1st field doesn't have a name
+          dc.drawText(
+            scr_width / 2,
+            gap,
+            fieldValueFont,
+            fieldValues[0],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
+            scr_width / 3.7,
+            scr_height / 6.4,
+            fieldNameFont,
+            fieldNames[1],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          dc.drawText(
+            scr_width / 3.7,
+            scr_height / 6.4 + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[1],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
+            scr_width - scr_width / 3.7,
+            scr_height / 6.4,
+            fieldNameFont,
+            fieldNames[2],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          dc.drawText(
+            scr_width - scr_width / 3.7,
+            scr_height / 6.4 + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[2],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
+            scr_width / 4.5,
+            scr_height / 2.6 + gap,
+            fieldNameFont,
+            fieldNames[3],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          dc.drawText(
+            scr_width / 4.5,
+            scr_height / 2.6 + gap + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[3],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
+            scr_width - scr_width / 4.5,
+            scr_height / 2.6 + gap,
+            fieldNameFont,
+            fieldNames[4],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          dc.drawText(
+            scr_width - scr_width / 4.5,
+            scr_height / 2.6 + gap + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[4],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          //
+          dc.drawText(
+            scr_width / 3.7,
+            scr_height / 1.6 + gap,
+            fieldNameFont,
+            fieldNames[5],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          dc.drawText(
+            scr_width / 3.7,
+            scr_height / 1.6 + gap + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[5],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+
+          dc.drawText(
+            scr_width - scr_width / 3.7,
+            scr_height / 1.6 + gap,
+            fieldNameFont,
+            fieldNames[6],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          dc.drawText(
+            scr_width - scr_width / 3.7,
+            scr_height / 1.6 + gap + fieldNameFontHeight,
+            fieldValueFont,
+            fieldValues[6],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
+          //
+
+          dc.drawText(
+            scr_width / 2,
+            scr_height - gap - fieldValueFontHeight,
+            fieldValueFont,
+            fieldValues[7],
+            Graphics.TEXT_JUSTIFY_CENTER
+          );
         }
-
-        dc.drawText(
-          scr_width / 2,
-          gap,
-          fieldNameFont,
-          field1,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-        dc.drawText(
-          scr_width / 2,
-          gap + fieldNameFontHeight,
-          fieldValueFont,
-          field1_value,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-
-        dc.drawText(
-          scr_width / 4,
-          scr_height / 4,
-          fieldNameFont,
-          field2,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-        dc.drawText(
-          scr_width / 4,
-          scr_height / 4 + fieldNameFontHeight,
-          fieldValueFont,
-          field2_value,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-
-        dc.drawText(
-          scr_width - scr_width / 4,
-          scr_height / 4,
-          fieldNameFont,
-          field3,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-        dc.drawText(
-          scr_width - scr_width / 4,
-          scr_height / 4 + fieldNameFontHeight,
-          fieldValueFont,
-          field3_value,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-
-        dc.drawText(
-          scr_width / 4,
-          scr_height / 2 + gap,
-          fieldNameFont,
-          field4,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-        dc.drawText(
-          scr_width / 4,
-          scr_height / 2 + gap + fieldNameFontHeight,
-          fieldValueFont,
-          field4_value,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-
-        dc.drawText(
-          scr_width - scr_width / 4,
-          scr_height / 2 + gap,
-          fieldNameFont,
-          field5,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-        dc.drawText(
-          scr_width - scr_width / 4,
-          scr_height / 2 + gap + fieldNameFontHeight,
-          fieldValueFont,
-          field5_value,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-
-        dc.drawText(
-          scr_width / 2,
-          scr_height - gap - fieldNameFontHeight - fieldValueFontHeight,
-          fieldNameFont,
-          field6,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
-
-        dc.drawText(
-          scr_width / 2,
-          scr_height - gap - fieldValueFontHeight,
-          fieldValueFont,
-          field6_value,
-          Graphics.TEXT_JUSTIFY_CENTER
-        );
         if (EUCAlarms.displayingAlert == true) {
           dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
           dc.fillRectangle(

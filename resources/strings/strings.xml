@@ -151,13 +151,19 @@
     <string id="maxBattery_label">Session max battery %</string>
     <string id="EORBattery_label">End of ride battery %</string>
 
-    
+    <string id="fieldNB">Datafield-like view field number</string>
+   
+    <string id="fieldNB6">6</string>
+    <string id="fieldNB8">8</string>
+
     <string id="field1">field1</string>
-     <string id="field2">field2</string>
-      <string id="field3">field3</string>
-       <string id="field4">field4</string>
-        <string id="field5">field5</string>
-         <string id="field6">field6</string>
+    <string id="field2">field2</string>
+    <string id="field3">field3</string>
+    <string id="field4">field4</string>
+    <string id="field5">field5</string>
+    <string id="field6">field6</string>
+    <string id="field7">field7</string>
+    <string id="field8">field8</string>
          <string id="eucdata0">Speed</string>
          <string id="eucdata1">Voltage</string>
          <string id="eucdata2">Trip distance</string>

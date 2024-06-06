@@ -230,6 +230,10 @@ module EUCAlarms {
     }
     //Speed alarm
     if (eucData.alarmThreshold_speed != 0) {
+      System.println("speedCheck");
+      System.println(eucData.correctedSpeed);
+      System.println(PWMAlarm);
+      System.println(tempAlarm);
       if (
         eucData.correctedSpeed > eucData.alarmThreshold_speed &&
         triggerAlarm == true &&

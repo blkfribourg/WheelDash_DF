@@ -1,6 +1,13 @@
 <settings>
  
-
+<setting
+            propertyKey="@Properties.fieldNB"
+            title="@Strings.fieldNB">  
+                <settingConfig type="list">
+                    <listEntry value="6">@Strings.fieldNB6</listEntry>
+                    <listEntry value="8">@Strings.fieldNB8</listEntry>
+                </settingConfig>
+        </setting>
  <setting
                 propertyKey="@Properties.field1"
                 title="@Strings.field1">
@@ -139,6 +146,60 @@
              <setting
                 propertyKey="@Properties.field6"
                 title="@Strings.field6">
+                <settingConfig type="list">
+                    <listEntry value="0">@Strings.eucdata0</listEntry>
+                    <listEntry value="1">@Strings.eucdata1</listEntry>
+                    <listEntry value="2">@Strings.eucdata2</listEntry>
+                    <listEntry value="3">@Strings.eucdata3</listEntry>
+                    <listEntry value="4">@Strings.eucdata4</listEntry>
+                    <listEntry value="5">@Strings.eucdata5</listEntry>
+                    <listEntry value="6">@Strings.eucdata6</listEntry>
+                    <listEntry value="7">@Strings.eucdata7</listEntry>
+					<listEntry value="8">@Strings.eucdata8</listEntry>
+                    <listEntry value="9">@Strings.eucdata9</listEntry>
+                    <listEntry value="10">@Strings.eucdata10</listEntry>
+                    <listEntry value="11">@Strings.eucdata11</listEntry>
+                    <listEntry value="12">@Strings.eucdata12</listEntry>
+                    <listEntry value="13">@Strings.eucdata13</listEntry>
+                    <listEntry value="14">@Strings.eucdata14</listEntry>
+                    <listEntry value="15">@Strings.eucdata15</listEntry>
+					<listEntry value="16">@Strings.eucdata16</listEntry>
+                    <listEntry value="17">@Strings.eucdata17</listEntry>
+                    <listEntry value="18">@Strings.eucdata18</listEntry>
+                    <listEntry value="19">@Strings.eucdata19</listEntry>
+                    
+                </settingConfig>
+            </setting>
+            <setting
+                propertyKey="@Properties.field7"
+                title="@Strings.field7">
+                <settingConfig type="list">
+                    <listEntry value="0">@Strings.eucdata0</listEntry>
+                    <listEntry value="1">@Strings.eucdata1</listEntry>
+                    <listEntry value="2">@Strings.eucdata2</listEntry>
+                    <listEntry value="3">@Strings.eucdata3</listEntry>
+                    <listEntry value="4">@Strings.eucdata4</listEntry>
+                    <listEntry value="5">@Strings.eucdata5</listEntry>
+                    <listEntry value="6">@Strings.eucdata6</listEntry>
+                    <listEntry value="7">@Strings.eucdata7</listEntry>
+					<listEntry value="8">@Strings.eucdata8</listEntry>
+                    <listEntry value="9">@Strings.eucdata9</listEntry>
+                    <listEntry value="10">@Strings.eucdata10</listEntry>
+                    <listEntry value="11">@Strings.eucdata11</listEntry>
+                    <listEntry value="12">@Strings.eucdata12</listEntry>
+                    <listEntry value="13">@Strings.eucdata13</listEntry>
+                    <listEntry value="14">@Strings.eucdata14</listEntry>
+                    <listEntry value="15">@Strings.eucdata15</listEntry>
+					<listEntry value="16">@Strings.eucdata16</listEntry>
+                    <listEntry value="17">@Strings.eucdata17</listEntry>
+                    <listEntry value="18">@Strings.eucdata18</listEntry>
+                    <listEntry value="19">@Strings.eucdata19</listEntry>
+                    
+                </settingConfig>
+            </setting>
+            <setting
+                propertyKey="@Properties.field8"
+                title="@Strings.field8">
                 <settingConfig type="list">
                     <listEntry value="0">@Strings.eucdata0</listEntry>
                     <listEntry value="1">@Strings.eucdata1</listEntry>

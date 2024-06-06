@@ -21,7 +21,7 @@ function valueRound(value, format) {
     rounded = Math.round(value * 100) / 100;
     return rounded.format(format);
   } else {
-    return "--";
+    return "";
   }
 }
 

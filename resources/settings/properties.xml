@@ -13,6 +13,7 @@
     <property id="displayNorth" type="boolean">false</property>
     <property id="displayWind" type="boolean">false</property>
     <property id="vibeIntensity" type="number">90</property>
+    <property id ="fieldNB" type="number">6</property>
     
     <property id="profile" type="number">1</property>
     <property id="wheelBrand_p1" type="number">0</property>
@@ -66,7 +67,9 @@
     <property id="field4" type="number">3</property>
     <property id="field5" type="number">4</property>
     <property id="field6" type="number">5</property>
-    <property id="resumeDectectionMethod" type="number">0</property>
+    <property id="field7" type="number">6</property>
+    <property id="field8" type="number">7</property>
+    
     
     
     
