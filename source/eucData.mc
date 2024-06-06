@@ -18,7 +18,7 @@ module eucData {
   var linesColor = 0xffffff;
   var drawLines = true;
   var wheelBrand;
-  var paired = true;
+  var paired = false;
   var debug = false;
 
   var displayNorth = false;
@@ -63,10 +63,13 @@ module eucData {
   var vibeIntensity = 90;
 
   //Varia
-  var variaTargetNb;
-  var variaTargetDist;
-  var variaTargetSpeed;
-  var variaConnected = false;
+  var variaTargetNb = 0;
+  var variaTargetDist = 0;
+  var variaTargetSpeed = 0;
+  var timerState = -1;
+  var variaCloseAlarmDistThr = 15;
+  var variaFarAlarmDistThr = 50;
+
   var useRadar = false;
 
   function getBatteryPercentage() {

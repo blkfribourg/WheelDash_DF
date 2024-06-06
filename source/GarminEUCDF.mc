@@ -295,7 +295,7 @@ class GarminEUCDF extends WatchUi.DataField {
     // V0.0.38
     mSpeedField.setData(0.0);
     mPWMField.setData(0.0);
-    mVoltageField.setData(0.0);
+    //mVoltageField.setData(0.0);
     mTempField.setData(0.0);
     mTripDistField.setData(0.0);
     mMaxSpeedField.setData(0.0);
@@ -561,6 +561,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var activityTimerTime = "";
   var reset = "no";
   // Calculate the data to display in the field here
+  //var fakeVariaObj;
   function compute(info) {
     if (info.elapsedTime != null) {
       activityElapsedTime = info.elapsedTime;
@@ -583,14 +584,25 @@ class GarminEUCDF extends WatchUi.DataField {
     if (info.timerTime != null) {
       activityTimerTime = info.timerTime;
     }
+    eucData.timerState = activityTimerState;
 
     //eucData.paired = true;
     if (eucData.paired == true) {
       if (delay < 0) {
         updateFitData(info);
         getFieldValues();
+        /*
         EUCAlarms.checkAlarms();
+        
+        if (fakeVariaObj != null) {
+          fakeVariaObj = variaMove(fakeVariaObj);
+          Varia.processTarget(fakeVariaObj);
+          Varia.processTarget(fakeVariaObj);
+          Varia.processTarget(fakeVariaObj);
+          Varia.processTarget(fakeVariaObj);
+        }*/
       } else {
+        //  fakeVariaObj = fakeVaria(3);
         /*
         if (AppStorage.getSetting("resumeDectectionMethod") == 0) {
           if (info.elapsedTime == null || info.elapsedTime < 300000) {
@@ -656,7 +668,7 @@ class GarminEUCDF extends WatchUi.DataField {
         alignAxe - 2 * xGap,
         2 * space + yGap,
         Graphics.FONT_TINY,
-        "RdConn: " + eucData.variaConnected,
+        "CarNb: " + eucData.variaTargetNb,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
       dc.drawText(

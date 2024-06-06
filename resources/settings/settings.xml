@@ -32,6 +32,9 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -59,6 +62,9 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -86,6 +92,9 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -113,6 +122,9 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
                    
                 </settingConfig>
             </setting>
@@ -140,6 +152,9 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
                    
                 </settingConfig>
             </setting>
@@ -167,6 +182,9 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -194,6 +212,9 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -221,6 +242,9 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -245,6 +269,31 @@
                 type="numeric"
                 min="0"
                 max="100"
+            />
+        </setting>
+         <setting
+            propertyKey="@Properties.useRadar"
+            title="@Strings.useRadar">
+                <settingConfig
+                    type="boolean"
+                />
+            </setting>
+         <setting
+            propertyKey="@Properties.variaFarAlarmDistThr"
+            title="@Strings.variaFarAlarmDistThr">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="150"
+            />
+        </setting>
+         <setting
+            propertyKey="@Properties.variaCloseAlarmDistThr"
+            title="@Strings.variaCloseAlarmDistThr">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="150"
             />
         </setting>
 <!--

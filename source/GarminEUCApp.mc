@@ -43,6 +43,13 @@ class GarminEUCApp extends Application.AppBase {
   }
 
   function setSettings(profile) {
+    eucData.useRadar = AppStorage.getSetting("useRadar");
+    eucData.variaCloseAlarmDistThr = AppStorage.getSetting(
+      "variaCloseAlarmDistThr"
+    );
+    eucData.variaFarAlarmDistThr = AppStorage.getSetting(
+      "variaFarAlarmDistThr"
+    );
     eucData.displayNorth = AppStorage.getSetting("displayNorth");
     eucData.displayWind = AppStorage.getSetting("displayWind");
     eucData.vibeIntensity = AppStorage.getSetting("vibeIntensity");

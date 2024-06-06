@@ -7,7 +7,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var service = null;
   var char = null;
   var decoder = null;
-
+  var radar = null;
   function initialize(_decoder) {
     BleDelegate.initialize();
     char = eucPM.EUC_CHAR;
@@ -16,6 +16,9 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
+    if (eucData.useRadar == true) {
+      radar = new AntPlus.BikeRadar(null);
+    }
   }
 
   function onConnectedStateChanged(device, state) {
@@ -186,6 +189,13 @@ class eucBLEDelegate extends Ble.BleDelegate {
       decoder.processFrame(value);
     }
     EUCAlarms.checkAlarms();
+    if (eucData.useRadar == true && radar != null && eucData.timerState == 3) {
+      try {
+        Varia.processTarget(radar.getRadarInfo()); // surrounding by try because varia may disconnect (unexpected crashes were observed)
+      } catch (e instanceof Lang.Exception) {
+        // System.println(e.getErrorMessage());
+      }
+    }
   }
 
   function sendCmd(cmd) {

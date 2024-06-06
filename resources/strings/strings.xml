@@ -14,6 +14,8 @@
     <string id="font0">Roboto</string>
     <string id="font1">Rajdhani</string>
     <string id="vibeIntensity">Alarms vibration intensity</string>
+    <string id="useRadar">Varia radar (or supported ANT+ radar)</string>
+    
     <string id="logoOffsetx">Logo offset x</string>
     <string id="logoOffsety">Logo offset y</string>
     <string id="wheelBrand0">Gotway/Begode</string>
@@ -100,6 +102,9 @@
     <string id="debugMode">Enable Debug Mode (view)</string>
     <string id="displayNorth">Display North orientation (red triangle)</string>
     <string id="displayWind">Display Wind bearing (blue triangle)</string>
+
+    <string id="variaCloseAlarmDistThr">Varia close distance alarm threshold</string>
+    <string id="variaFarAlarmDistThr">Varia far distance alarm threshold</string>
     <!-- FIT Strings-->
 
     <string id="speed_graph_label">Speed</string>
@@ -184,6 +189,9 @@
           <string id="eucdata17">Max Battery</string>
           <string id="eucdata18">Avg Power</string>
           <string id="eucdata19">Max Power</string>
+          <string id="eucdata20">Nearest Vehicule Speed (varia)</string>
+          <string id="eucdata21">Nearest Vehicule Distance (varia)</string>
+          <string id="eucdata22">Vehicule Number (varia)</string>
 
 
 

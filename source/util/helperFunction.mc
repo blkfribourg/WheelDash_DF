@@ -157,3 +157,57 @@ function sArray2nArray(sArray) {
   nArray[1] = sArray[1].toNumber() + eucData.logoOffsety;
   return nArray;
 }
+
+class fakeVariaTarget {
+  var range = 0;
+  var threat = 0;
+  var threatSide = 0;
+  var speed = 0;
+
+  function assign() {
+    range = random(0, 100);
+    speed = random(0, 25);
+    threat = 1;
+    threatSide = 0;
+  }
+}
+
+function fakeVaria(vehiculeNb) {
+  var fakeTargetArray = [];
+
+  for (var i = 0; i < 8; i++) {
+    var target = new fakeVariaTarget();
+    if (i < vehiculeNb) {
+      target.assign();
+    }
+    fakeTargetArray.add(target);
+  }
+  return fakeTargetArray;
+}
+
+function variaMove(targetArray) {
+  // System.println(targetArray.size());
+  for (var i = 0; i < targetArray.size(); i++) {
+    var remainingDist = targetArray[i].range - targetArray[i].speed;
+    if (remainingDist > 0) {
+      targetArray[i].range = remainingDist;
+    } else {
+      if (i + 1 < targetArray.size() - 1) {
+        targetArray[i].range = targetArray[i + 1].range;
+        targetArray[i].speed = targetArray[i + 1].speed;
+        targetArray[i].threat = targetArray[i + 1].threat;
+      } else {
+        targetArray[i].range = 0;
+        targetArray[i].speed = 0;
+        targetArray[i].threat = 0;
+      }
+    }
+  }
+
+  //targetArray.remove(new fakeVariaTarget());
+
+  return targetArray;
+}
+function random(min, max) {
+  return (Math.rand() % max) + 1;
+}
