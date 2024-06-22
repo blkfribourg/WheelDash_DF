@@ -2,6 +2,7 @@ import Toybox.Lang;
 using Toybox.StringUtil;
 using Toybox.Math;
 using Toybox.System;
+import Toybox.Time;
 
 // convert string to byte, used when sending string command via BLE
 function string_to_byte_array(plain_text) {
@@ -21,7 +22,7 @@ function valueRound(value, format) {
     rounded = Math.round(value * 100) / 100;
     return rounded.format(format);
   } else {
-    return "";
+    return "--";
   }
 }
 
@@ -158,6 +159,7 @@ function sArray2nArray(sArray) {
   return nArray;
 }
 
+// varia sim
 class fakeVariaTarget {
   var range = 0;
   var threat = 0;
@@ -188,7 +190,7 @@ function fakeVaria(vehiculeNb) {
 function variaMove(targetArray) {
   // System.println(targetArray.size());
   for (var i = 0; i < targetArray.size(); i++) {
-    var remainingDist = targetArray[i].range - targetArray[i].speed;
+    var remainingDist = targetArray[i].range - targetArray[i].speed / 5;
     if (remainingDist > 0) {
       targetArray[i].range = remainingDist;
     } else {

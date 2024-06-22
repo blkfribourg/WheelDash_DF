@@ -7,7 +7,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var service = null;
   var char = null;
   var decoder = null;
-  var radar = null;
+
   function initialize(_decoder) {
     BleDelegate.initialize();
     char = eucPM.EUC_CHAR;
@@ -17,7 +17,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
     if (eucData.useRadar == true) {
-      radar = new AntPlus.BikeRadar(null);
+      eucData.radar = new AntPlus.BikeRadar(null);
     }
   }
 
@@ -46,7 +46,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
         eucData.paired = false;
       }
     } else {
-      Ble.unpairDevice(device);
+      try {
+        Ble.unpairDevice(device);
+      } catch (e instanceof Lang.Exception) {
+        // System.println(e.getErrorMessage());
+      }
       Ble.setScanState(Ble.SCAN_STATE_SCANNING);
       eucData.paired = false;
     }
@@ -189,9 +193,13 @@ class eucBLEDelegate extends Ble.BleDelegate {
       decoder.processFrame(value);
     }
     EUCAlarms.checkAlarms();
-    if (eucData.useRadar == true && radar != null && eucData.timerState == 3) {
+    if (
+      eucData.useRadar == true &&
+      eucData.radar != null &&
+      eucData.timerState == 3
+    ) {
       try {
-        Varia.processTarget(radar.getRadarInfo()); // surrounding by try because varia may disconnect (unexpected crashes were observed)
+        Varia.processTarget(eucData.radar.getRadarInfo()); // surrounding by try because varia may disconnect (unexpected crashes were observed)
       } catch (e instanceof Lang.Exception) {
         // System.println(e.getErrorMessage());
       }

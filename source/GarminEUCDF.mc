@@ -42,6 +42,8 @@ class GarminEUCDF extends WatchUi.DataField {
   const MAXBATTERY_FIELD_ID = 19;
   const MINTEMP_FIELD_ID = 20;
   const EORBATTERY_FIELD_ID = 21;
+  const VEH_RELATIVE_SPD_ID = 22;
+  const VEH_TOTAL_CNT_ID = 23;
 
   var mSpeedField = null;
   var mPWMField = null;
@@ -64,8 +66,11 @@ class GarminEUCDF extends WatchUi.DataField {
   var mMinBatteryField = null;
   var mMaxBatteryField = null;
   var mEORBatteryField = null;
+  var mVehRelativeSpdField = null;
+  var mVehTotalCntField = null;
   var _alertDisplayed = false;
   var nb_Font;
+  var computeAMS = false;
   private var cDrawables = {};
 
   function initialize() {
@@ -119,7 +124,8 @@ class GarminEUCDF extends WatchUi.DataField {
     _minBatteryPerc,
     _sessionDistance,
     _avgSpeed,
-    _maxPWM
+    _maxPWM,
+    _movingmsec
     // _startingMoment
   ) {
     maxTemp = _maxTemp;
@@ -131,6 +137,7 @@ class GarminEUCDF extends WatchUi.DataField {
     sessionDistance = _sessionDistance;
     avgSpeed = _avgSpeed;
     maxPWM = _maxPWM;
+    movingmsec = _movingmsec;
     // startingMoment = _startingMoment;
   }
   function fieldsInitialize() {
@@ -145,6 +152,11 @@ class GarminEUCDF extends WatchUi.DataField {
       AppStorage.getSetting("field8"),
     ];
     fieldNB = AppStorage.getSetting("fieldNB");
+
+    if (fieldIDs.slice(0, fieldNB).indexOf(12) != -1) {
+      computeAMS = true;
+      //compute avg moving speed
+    }
 
     fieldNames = new [fieldNB];
     fieldValues = new [fieldNB];
@@ -275,6 +287,20 @@ class GarminEUCDF extends WatchUi.DataField {
       FitContributor.DATA_TYPE_UINT8,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
     );
+    if (eucData.useRadar == true) {
+      mVehRelativeSpdField = createField(
+        "VehRelativeSpd",
+        VEH_RELATIVE_SPD_ID,
+        FitContributor.DATA_TYPE_UINT8,
+        { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
+      );
+      mVehTotalCntField = createField(
+        "VehTotalCnt",
+        VEH_TOTAL_CNT_ID,
+        FitContributor.DATA_TYPE_UINT8,
+        { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
+      );
+    }
     /*
     mMaxBatteryField = createField(
       "Max_Battery",
@@ -332,13 +358,15 @@ class GarminEUCDF extends WatchUi.DataField {
   var avgSpeed = 0.0;
   var avgCurrent = 0.0;
   var avgPower = 0.0;
-
+  var movingmsec = 0.0;
+  var averageMovingSpeed = 0.0;
   function updateFitData(garminInfo) {
     callNb++;
     currentVoltage = eucData.getVoltage();
     currentBatteryPerc = eucData.getBatteryPercentage();
     eucData.PWM = eucData.getPWM();
     eucData.correctedSpeed = eucData.getCorrectedSpeed();
+
     currentCurrent = eucData.getCurrent();
     currentPower = currentCurrent * currentVoltage;
 
@@ -420,8 +448,19 @@ class GarminEUCDF extends WatchUi.DataField {
     sumPower = sumPower + currentPower;
     avgCurrent = sumCurrent / callNb;
     avgPower = sumPower / callNb;
+
+    if (computeAMS == true) {
+      if (eucData.correctedSpeed > 2.5) {
+        movingmsec = movingmsec + 1000;
+        averageMovingSpeed = sessionDistance / (movingmsec / 3600000.0);
+      }
+    }
     //mAvgCurrentField.setData(sumCurrent / callNb); // id 13
     //mAvgPowerField.setData(sumPower / callNb); // id 14
+    if (eucData.useRadar == true) {
+      mVehRelativeSpdField.setData(eucData.variaTargetSpeed);
+      mVehTotalCntField.setData(eucData.totalVehCount);
+    }
   }
   function resetVariables() {
     //System.println("reset variables");
@@ -502,38 +541,42 @@ class GarminEUCDF extends WatchUi.DataField {
         fieldValues[field_id] = valueRound(avgSpeed, "%.1f");
       }
       if (fieldIDs[field_id] == 12) {
+        fieldNames[field_id] = "AVG MV SPD";
+        fieldValues[field_id] = valueRound(averageMovingSpeed, "%.1f");
+      }
+      if (fieldIDs[field_id] == 13) {
         fieldNames[field_id] = "MIN VOLT";
         fieldValues[field_id] = valueRound(minVoltage, "%.1f");
       }
-      if (fieldIDs[field_id] == 13) {
+      if (fieldIDs[field_id] == 14) {
         fieldNames[field_id] = "MAX VOLT";
         fieldValues[field_id] = valueRound(maxVoltage, "%.1f");
       }
-      if (fieldIDs[field_id] == 14) {
+      if (fieldIDs[field_id] == 15) {
         fieldNames[field_id] = "MAX CURR";
         fieldValues[field_id] = valueRound(maxCurrent, "%.1f");
       }
-      if (fieldIDs[field_id] == 15) {
+      if (fieldIDs[field_id] == 16) {
         fieldNames[field_id] = "MAX CURR";
         fieldValues[field_id] = valueRound(avgCurrent, "%.1f");
       }
-      if (fieldIDs[field_id] == 16) {
+      if (fieldIDs[field_id] == 17) {
         fieldNames[field_id] = "MIN BATT %";
         fieldValues[field_id] = valueRound(minBatteryPerc, "%.1f");
       }
-      if (fieldIDs[field_id] == 17) {
+      if (fieldIDs[field_id] == 18) {
         fieldNames[field_id] = "MAX BATT %";
         fieldValues[field_id] = valueRound(maxBatteryPerc, "%.1f");
       }
-      if (fieldIDs[field_id] == 18) {
+      if (fieldIDs[field_id] == 19) {
         fieldNames[field_id] = "AVG PWR";
         fieldValues[field_id] = valueRound(avgPower, "%.1f");
       }
-      if (fieldIDs[field_id] == 19) {
-        fieldNames[field_id] = "MAX PWR %";
+      if (fieldIDs[field_id] == 20) {
+        fieldNames[field_id] = "MAX PWR";
         fieldValues[field_id] = valueRound(maxPower, "%.1f");
       }
-      if (fieldIDs[field_id] == 20) {
+      if (fieldIDs[field_id] == 21) {
         fieldNames[field_id] = "VEH SPD";
         var targetSpeed = eucData.variaTargetSpeed;
         if (targetSpeed != null) {
@@ -541,13 +584,24 @@ class GarminEUCDF extends WatchUi.DataField {
         }
         fieldValues[field_id] = valueRound(targetSpeed, "%.1f");
       }
-      if (fieldIDs[field_id] == 21) {
+      if (fieldIDs[field_id] == 22) {
         fieldNames[field_id] = "VEH DST";
         fieldValues[field_id] = valueRound(eucData.variaTargetDist, "%.1f");
       }
-      if (fieldIDs[field_id] == 22) {
+      if (fieldIDs[field_id] == 23) {
         fieldNames[field_id] = "VEH NB";
         fieldValues[field_id] = valueRound(eucData.variaTargetNb, "%1d");
+      }
+      if (fieldIDs[field_id] == 24) {
+        fieldNames[field_id] = "RD V";
+        fieldValues[field_id] = valueRound(getVariaVoltage(), "%1d");
+      }
+      if (fieldIDs[field_id] == 25) {
+        fieldNames[field_id] = "TIME";
+        var CurrentTime = System.getClockTime();
+
+        fieldValues[field_id] =
+          CurrentTime.hour.format("%d") + ":" + CurrentTime.min.format("%02d");
       }
     }
   }
@@ -626,8 +680,19 @@ class GarminEUCDF extends WatchUi.DataField {
       //System.println(info.averageSpeed);
 
       delay = delay - 1;
-    }
-    /*
+    } else {
+      if (
+        eucData.useRadar == true &&
+        eucData.radar != null &&
+        eucData.timerState == 3
+      ) {
+        try {
+          Varia.processTarget(eucData.radar.getRadarInfo()); // surrounding by try because varia may disconnect (unexpected crashes were observed)
+        } catch (e instanceof Lang.Exception) {
+          // System.println(e.getErrorMessage());
+        }
+      }
+      /*
       delay = delay - 1; //to remove
       if (delay == -10) {
         onTimerStart();
@@ -638,6 +703,26 @@ class GarminEUCDF extends WatchUi.DataField {
       if (delay == -30) {
         onTimerReset();
       }*/
+    }
+  }
+  function getVariaVoltage() {
+    var variaVoltage = null;
+    var batteryStats = null;
+    if (
+      eucData.useRadar == true &&
+      eucData.radar != null &&
+      eucData.timerState == 3
+    ) {
+      try {
+        batteryStats = eucData.radar.getBatteryStatus(null);
+        if (batteryStats != null) {
+          variaVoltage = batteryStats.batteryVoltage;
+        }
+      } catch (e instanceof Lang.Exception) {
+        // System.println(e.getErrorMessage());
+      }
+    }
+    return variaVoltage;
   }
 
   // Update the field layout and display the field data
@@ -1074,11 +1159,12 @@ class GarminEUCDF extends WatchUi.DataField {
             Graphics.TEXT_JUSTIFY_CENTER
           );
         }
-        if (eucData.displayNorth == true && Position.getInfo().accuracy >= 2) {
-          renderNorthOnUI(scr_width, dc);
-        }
+
         if (eucData.displayWind == true && Position.getInfo().accuracy >= 2) {
           renderWindOnUI(scr_width, dc);
+        }
+        if (eucData.displayNorth == true && Position.getInfo().accuracy >= 2) {
+          renderNorthOnUI(scr_width, dc);
         }
       }
     }
@@ -1093,52 +1179,86 @@ class GarminEUCDF extends WatchUi.DataField {
     var rawNorth = Position.getInfo().heading;
     if (rawNorth != null) {
       var north = rawNorth * -57.2958;
+      var ratio = 454.0 / screenDiam;
+
+      var arrow_width = (screenDiam * ratio) / 110;
+
+      var arrow_heigth = screenDiam / 2 - screenDiam / 20;
+      var arrow_heigth2 = screenDiam / 2 - screenDiam / 25;
+
       var x1 = getXY(screenDiam, 0, screenDiam / 2 - 1, north, 1);
-      var x2 = getXY(
-        screenDiam,
-        0,
-        screenDiam / 2 - screenDiam / 30,
-        north - screenDiam / 150,
-        1
-      );
-      var x3 = getXY(
-        screenDiam,
-        0,
-        screenDiam / 2 - screenDiam / 30,
-        north + screenDiam / 150,
-        1
-      );
-      var pts = [x1, x2, x3];
+      var x2 = getXY(screenDiam, 0, arrow_heigth, north - arrow_width, 1);
+      var x3 = getXY(screenDiam, 0, arrow_heigth2, north, 1);
+      var x4 = getXY(screenDiam, 0, arrow_heigth, north + arrow_width, 1);
+      //var ptsStroke = [x1, x2, x3];
+      var ptsFill = [x1, x2, x3, x4];
       dc.setColor(0xd53420, Graphics.COLOR_TRANSPARENT);
-      dc.fillPolygon(pts);
+      /*  dc.setPenWidth(1);
+      dc.drawLine(
+        ptsStroke[0][0],
+        ptsStroke[0][1],
+        ptsStroke[1][0],
+        ptsStroke[1][1]
+      );
+      dc.drawLine(
+        ptsStroke[1][0],
+        ptsStroke[1][1],
+        ptsStroke[2][0],
+        ptsStroke[2][1]
+      );
+      dc.drawLine(
+        ptsStroke[2][0],
+        ptsStroke[2][1],
+        ptsStroke[0][0],
+        ptsStroke[0][1]
+      );*/
+      dc.fillPolygon(ptsFill);
     }
   }
 
   function renderWindOnUI(screenDiam, dc) {
-    var windBearing = Weather.getCurrentConditions().windBearing;
-    var rawNorth = Toybox.Position.getInfo().heading;
+    var wx = Weather.getCurrentConditions();
+    if (wx != null) {
+      var windBearing = Weather.getCurrentConditions().windBearing;
+      var rawNorth = Toybox.Position.getInfo().heading;
 
-    if (rawNorth != null && windBearing != null) {
-      var north = rawNorth * -57.2958;
-      var wind = windBearing + north;
-      var x1 = getXY(screenDiam, 0, screenDiam / 2 - 1, wind, 1);
-      var x2 = getXY(
-        screenDiam,
-        0,
-        screenDiam / 2 - screenDiam / 30,
-        wind - screenDiam / 150,
-        1
+      if (rawNorth != null && windBearing != null) {
+        var north = rawNorth * -57.2958;
+        var wind = windBearing + north;
+
+        var ratio = 454.0 / screenDiam;
+        var arrow_width = (screenDiam * ratio) / 110;
+        var arrow_heigth = screenDiam / 2 - screenDiam / 20;
+        var arrow_heigth2 = screenDiam / 2 - screenDiam / 25;
+
+        var x1 = getXY(screenDiam, 0, screenDiam / 2 - 1, wind, 1);
+        var x2 = getXY(screenDiam, 0, arrow_heigth, wind - arrow_width, 1);
+        var x3 = getXY(screenDiam, 0, arrow_heigth2, wind, 1);
+        var x4 = getXY(screenDiam, 0, arrow_heigth, wind + arrow_width, 1);
+        //var ptsStroke = [x1, x3, x4];
+        var ptsFill = [x1, x2, x3, x4];
+        dc.setColor(0x0077b6, Graphics.COLOR_TRANSPARENT);
+        /* dc.setPenWidth(1);
+      dc.drawLine(
+        ptsStroke[0][0],
+        ptsStroke[0][1],
+        ptsStroke[1][0],
+        ptsStroke[1][1]
       );
-      var x3 = getXY(
-        screenDiam,
-        0,
-        screenDiam / 2 - screenDiam / 30,
-        wind + screenDiam / 150,
-        1
+      dc.drawLine(
+        ptsStroke[1][0],
+        ptsStroke[1][1],
+        ptsStroke[2][0],
+        ptsStroke[2][1]
       );
-      var pts = [x1, x2, x3];
-      dc.setColor(0x0077b6, Graphics.COLOR_TRANSPARENT);
-      dc.fillPolygon(pts);
+      dc.drawLine(
+        ptsStroke[2][0],
+        ptsStroke[2][1],
+        ptsStroke[0][0],
+        ptsStroke[0][1]
+      );*/
+        dc.fillPolygon(ptsFill);
+      }
     }
   }
   function drawBackground(dc) {
@@ -1168,7 +1288,7 @@ class GarminEUCDF extends WatchUi.DataField {
       Storage.getValue("sessionDistance") != null &&
       Storage.getValue("avgSpeed") != null &&
       Storage.getValue("maxPWM") != null &&
-      //Storage.getValue("startingMoment") != null &&
+      Storage.getValue("movingmsec") != null &&
       Storage.getValue("avgCurrent") != null &&
       Storage.getValue("avgPower") != null &&
       Storage.getValue("maxSpeed") != null &&
@@ -1197,7 +1317,7 @@ class GarminEUCDF extends WatchUi.DataField {
       callNb = Storage.getValue("callNb");
       startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
       maxPWM = Storage.getValue("maxPWM");
-      // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
+      movingmsec = Storage.getValue("movingmsec");
 
       // should only be required for max values
       mMaxSpeedField.setData(maxSpeed);
@@ -1231,97 +1351,9 @@ class GarminEUCDF extends WatchUi.DataField {
     Storage.setValue("sumCurrent", sumCurrent);
     Storage.setValue("sumPower", sumPower);
     Storage.setValue("callNb", callNb);
-    //Storage.setValue("startingMoment", startingMoment.value());
+    Storage.setValue("movingmsec", movingmsec);
     Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
   }
-  function onTimerStart() {
-    // System.println("start");
-    /*
-    if (
-      Storage.getValue("maxTemp") != null &&
-      Storage.getValue("minTemp") != null &&
-      Storage.getValue("maxVoltage") != null &&
-      Storage.getValue("minVoltage") != null &&
-      Storage.getValue("maxBatteryPerc") != null &&
-      Storage.getValue("minBatteryPerc") != null &&
-      Storage.getValue("sessionDistance") != null &&
-      Storage.getValue("avgSpeed") != null &&
-      Storage.getValue("maxPWM") != null &&
-      //Storage.getValue("startingMoment") != null &&
-      Storage.getValue("avgCurrent") != null &&
-      Storage.getValue("avgPower") != null &&
-      Storage.getValue("maxSpeed") != null &&
-      Storage.getValue("maxPower") != null &&
-      Storage.getValue("maxCurrent") != null &&
-      Storage.getValue("sumCurrent") != null &&
-      Storage.getValue("sumPower") != null &&
-      Storage.getValue("callNb") != null &&
-      Storage.getValue("startingEUCTripDistance") != null
-    ) {
-      maxTemp = Storage.getValue("maxTemp");
-      minTemp = Storage.getValue("minTemp");
-      maxVoltage = Storage.getValue("maxVoltage");
-      minVoltage = Storage.getValue("minVoltage");
-      maxBatteryPerc = Storage.getValue("maxBatteryPerc");
-      minBatteryPerc = Storage.getValue("minBatteryPerc");
-      sessionDistance = Storage.getValue("sessionDistance");
-      avgSpeed = Storage.getValue("avgSpeed");
-      avgCurrent = Storage.getValue("avgCurrent");
-      avgPower = Storage.getValue("avgPower");
-      maxSpeed = Storage.getValue("maxSpeed");
-      maxCurrent = Storage.getValue("maxCurrent");
-      maxPower = Storage.getValue("maxPower");
-      sumCurrent = Storage.getValue("sumCurrent");
-      sumPower = Storage.getValue("sumPower");
-      callNb = Storage.getValue("callNb");
-      startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
-      maxPWM = Storage.getValue("maxPWM");
-      // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
-    }*/
-  }
-  function onTimerResume() {
-    /*
-    //System.println("resume");
-    if (
-      Storage.getValue("maxTemp") != null &&
-      Storage.getValue("minTemp") != null &&
-      Storage.getValue("maxVoltage") != null &&
-      Storage.getValue("minVoltage") != null &&
-      Storage.getValue("maxBatteryPerc") != null &&
-      Storage.getValue("minBatteryPerc") != null &&
-      Storage.getValue("sessionDistance") != null &&
-      Storage.getValue("avgSpeed") != null &&
-      Storage.getValue("maxPWM") != null &&
-      // Storage.getValue("startingMoment") != null &&
-      Storage.getValue("avgCurrent") != null &&
-      Storage.getValue("avgPower") != null &&
-      Storage.getValue("maxSpeed") != null &&
-      Storage.getValue("maxPower") != null &&
-      Storage.getValue("maxCurrent") != null &&
-      Storage.getValue("sumCurrent") != null &&
-      Storage.getValue("sumPower") != null &&
-      Storage.getValue("callNb") != null &&
-      Storage.getValue("startingEUCTripDistance") != null
-    ) {
-      maxTemp = Storage.getValue("maxTemp");
-      minTemp = Storage.getValue("minTemp");
-      maxVoltage = Storage.getValue("maxVoltage");
-      minVoltage = Storage.getValue("minVoltage");
-      maxBatteryPerc = Storage.getValue("maxBatteryPerc");
-      minBatteryPerc = Storage.getValue("minBatteryPerc");
-      sessionDistance = Storage.getValue("sessionDistance");
-      avgSpeed = Storage.getValue("avgSpeed");
-      avgCurrent = Storage.getValue("avgCurrent");
-      avgPower = Storage.getValue("avgPower");
-      maxSpeed = Storage.getValue("maxSpeed");
-      maxCurrent = Storage.getValue("maxCurrent");
-      maxPower = Storage.getValue("maxPower");
-      sumCurrent = Storage.getValue("sumCurrent");
-      sumPower = Storage.getValue("sumPower");
-      callNb = Storage.getValue("callNb");
-      startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
-      maxPWM = Storage.getValue("maxPWM");
-      // startingMoment = new Time.Moment(Storage.getValue("startingMoment"));
-    }*/
-  }
+  function onTimerStart() {}
+  function onTimerResume() {}
 }

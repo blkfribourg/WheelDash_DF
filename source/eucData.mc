@@ -23,6 +23,7 @@ module eucData {
 
   var displayNorth = false;
   var displayWind = false;
+
   // Calculated PWM variables :
   // PLEASE UPDATE WITH YOU OWN VALUES BEFORE USE !
   var rotationSpeed; // cutoff speed when freespin test performed
@@ -56,6 +57,7 @@ module eucData {
   var cpuLoad = 0;
 
   //alarms
+  var motorbikeHeadset = false;
   var alarmThreshold_PWM = 0;
   var alarmThreshold2_PWM = 0;
   var alarmThreshold_speed = 0;
@@ -63,6 +65,8 @@ module eucData {
   var vibeIntensity = 90;
 
   //Varia
+  var radar = null;
+  var totalVehCount = 0;
   var variaTargetNb = 0;
   var variaTargetDist = 0;
   var variaTargetSpeed = 0;

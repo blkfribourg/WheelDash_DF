@@ -44,6 +44,7 @@ class GarminEUCApp extends Application.AppBase {
 
   function setSettings(profile) {
     eucData.useRadar = AppStorage.getSetting("useRadar");
+    eucData.motorbikeHeadset = AppStorage.getSetting("motorbikeHeadset");
     eucData.variaCloseAlarmDistThr = AppStorage.getSetting(
       "variaCloseAlarmDistThr"
     );

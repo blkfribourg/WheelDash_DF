@@ -79,37 +79,47 @@ module EUCAlarms {
 
   function initTones() {
     if (Attention has :ToneProfile) {
-      PWMTone = [
-        new Attention.ToneProfile(435, 250),
-        new Attention.ToneProfile(0, 250),
-        new Attention.ToneProfile(435, 250),
-        new Attention.ToneProfile(0, 250),
-      ];
-      PWMDangerTone = [
-        new Attention.ToneProfile(535, 125),
-        new Attention.ToneProfile(0, 125),
-        new Attention.ToneProfile(535, 125),
-        new Attention.ToneProfile(0, 125),
-        new Attention.ToneProfile(535, 125),
-        new Attention.ToneProfile(0, 125),
-        new Attention.ToneProfile(535, 125),
-        new Attention.ToneProfile(0, 125),
-      ];
-      speedTone = [
-        new Attention.ToneProfile(420, 350),
-        new Attention.ToneProfile(0, 150),
-        new Attention.ToneProfile(516, 100),
-        new Attention.ToneProfile(0, 150),
-        new Attention.ToneProfile(420, 100),
-        new Attention.ToneProfile(0, 150),
-      ];
-      tempTone = [
-        new Attention.ToneProfile(435, 500),
-        new Attention.ToneProfile(0, 200),
-        new Attention.ToneProfile(488, 100),
-        new Attention.ToneProfile(0, 200),
-      ];
-      killTone = [new Attention.ToneProfile(10000, 1)];
+      if (eucData.motorbikeHeadset == true) {
+        PWMTone = Attention.TONE_INTERVAL_ALERT;
+
+        PWMDangerTone = Attention.TONE_TIME_ALERT;
+
+        speedTone = Attention.TONE_CANARY;
+
+        tempTone = Attention.TONE_ALERT_HI;
+      } else {
+        PWMTone = [
+          new Attention.ToneProfile(435, 250),
+          new Attention.ToneProfile(0, 250),
+          new Attention.ToneProfile(435, 250),
+          new Attention.ToneProfile(0, 250),
+        ];
+        PWMDangerTone = [
+          new Attention.ToneProfile(535, 125),
+          new Attention.ToneProfile(0, 125),
+          new Attention.ToneProfile(535, 125),
+          new Attention.ToneProfile(0, 125),
+          new Attention.ToneProfile(535, 125),
+          new Attention.ToneProfile(0, 125),
+          new Attention.ToneProfile(535, 125),
+          new Attention.ToneProfile(0, 125),
+        ];
+        speedTone = [
+          new Attention.ToneProfile(420, 350),
+          new Attention.ToneProfile(0, 150),
+          new Attention.ToneProfile(516, 100),
+          new Attention.ToneProfile(0, 150),
+          new Attention.ToneProfile(420, 100),
+          new Attention.ToneProfile(0, 150),
+        ];
+        tempTone = [
+          new Attention.ToneProfile(435, 500),
+          new Attention.ToneProfile(0, 200),
+          new Attention.ToneProfile(488, 100),
+          new Attention.ToneProfile(0, 200),
+        ];
+        killTone = [new Attention.ToneProfile(10000, 1)];
+      }
     }
   }
 
@@ -139,7 +149,7 @@ module EUCAlarms {
         vibeKilled = true;
       }
       if (killTone != null && triggerAlarm == false && toneKilled == false) {
-        Attention.playTone({ :toneProfile => killTone });
+        playSound(killTone);
         toneKilled = true;
       }
     }
@@ -167,7 +177,7 @@ module EUCAlarms {
             vibeKilled = false;
           }
           if (PWMTone != null) {
-            Attention.playTone({ :toneProfile => PWMTone });
+            playSound(PWMTone);
             toneKilled = false;
           }
           PWMAlarm = true;
@@ -178,7 +188,7 @@ module EUCAlarms {
             vibeKilled = false;
           }
           if (PWMDangerTone != null) {
-            Attention.playTone({ :toneProfile => PWMDangerTone });
+            playSound(PWMDangerTone);
             toneKilled = false;
           }
           nextTrigger = new Time.Moment(Time.now().value());
@@ -194,7 +204,7 @@ module EUCAlarms {
             vibeKilled = false;
           }
           if (PWMTone != null) {
-            Attention.playTone({ :toneProfile => PWMTone });
+            playSound(PWMTone);
             toneKilled = false;
           }
           PWMAlarm = true;
@@ -219,7 +229,7 @@ module EUCAlarms {
           vibeKilled = false;
         }
         if (tempTone != null) {
-          Attention.playTone({ :toneProfile => tempTone });
+          playSound(tempTone);
           toneKilled = false;
         }
         tempAlarm = true;
@@ -249,7 +259,7 @@ module EUCAlarms {
           vibeKilled = false;
         }
         if (speedTone != null) {
-          Attention.playTone({ :toneProfile => speedTone });
+          playSound(speedTone);
           toneKilled = false;
         }
         speedAlarm = true;
@@ -259,5 +269,14 @@ module EUCAlarms {
       }
     }
     setAlarmType();
+  }
+
+  function playSound(tone) {
+    if (tone instanceof Lang.Number) {
+      Attention.playTone(tone as Attention.Tone);
+    }
+    if (tone instanceof Lang.Array) {
+      Attention.playTone({ :toneProfile => tone as Lang.Array });
+    }
   }
 }

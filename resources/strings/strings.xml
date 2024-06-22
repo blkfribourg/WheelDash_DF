@@ -14,6 +14,7 @@
     <string id="font0">Roboto</string>
     <string id="font1">Rajdhani</string>
     <string id="vibeIntensity">Alarms vibration intensity</string>
+    <string id="motorbikeHeadset">Alternative audio alarms (motorbikeHeadset)</string>
     <string id="useRadar">Varia radar (or supported ANT+ radar)</string>
     
     <string id="logoOffsetx">Logo offset x</string>
@@ -129,6 +130,8 @@
     <string id="tripDistance_label">Trip distance</string>
     <string id="distanceUnits_km">km</string>
     <string id="distanceUnits_miles">miles</string>
+    <string id="no_units"> </string>
+    
     <string id="maxSpeed_label">Session max speed</string>
     
     <string id="maxPWM_label">Session max PWM</string>
@@ -155,6 +158,9 @@
     <string id="minBattery_label">Session min battery %</string>
     <string id="maxBattery_label">Session max battery %</string>
     <string id="EORBattery_label">End of ride battery %</string>
+    <string id="VehRelativeSpd_label">Relative Approach Speed (Varia)</string>
+    <string id="VehTotalCnt_label">Vehicle Count (Varia)</string>
+    
 
     <string id="fieldNB">Datafield-like view field number</string>
    
@@ -181,18 +187,21 @@
           <string id="eucdata9">Max temp.</string>
           <string id="eucdata10">Max speed</string>
           <string id="eucdata11">Avg Speed</string>
-         <string id="eucdata12">Min Voltage</string>
-         <string id="eucdata13">Max Voltage</string>
-          <string id="eucdata14">Max Current</string>
-          <string id="eucdata15">Avg Current</string>
-          <string id="eucdata16">Min Battery</string>
-          <string id="eucdata17">Max Battery</string>
-          <string id="eucdata18">Avg Power</string>
-          <string id="eucdata19">Max Power</string>
-          <string id="eucdata20">Nearest Vehicule Speed (varia)</string>
-          <string id="eucdata21">Nearest Vehicule Distance (varia)</string>
-          <string id="eucdata22">Vehicule Number (varia)</string>
-
+          <string id="eucdata12">Avg Moving Speed</string>
+          <string id="eucdata13">Min Voltage</string>
+          <string id="eucdata14">Max Voltage</string>
+          <string id="eucdata15">Max Current</string>
+          <string id="eucdata16">Avg Current</string>
+          <string id="eucdata17">Min Battery</string>
+          <string id="eucdata18">Max Battery</string>
+          <string id="eucdata19">Avg Power</string>
+          <string id="eucdata20">Max Power</string>
+          <string id="eucdata21">Nearest Vehicule Speed (varia)</string>
+          <string id="eucdata22">Nearest Vehicule Distance (varia)</string>
+          <string id="eucdata23">Vehicule Number (varia)</string>
+          <string id="eucdata24">Radar Battery (varia)</string>
+          <string id="eucdata25">Current Time</string>
+           
 
 
 

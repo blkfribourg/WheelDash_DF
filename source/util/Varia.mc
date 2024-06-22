@@ -36,6 +36,10 @@ module Varia {
           eucData.variaTargetDist = 0;
           eucData.variaTargetSpeed = 0;
         }
+        if (prevCount > veh_count) {
+          eucData.totalVehCount =
+            eucData.totalVehCount + (prevCount - veh_count);
+        }
         prevCount = veh_count;
       }
     }

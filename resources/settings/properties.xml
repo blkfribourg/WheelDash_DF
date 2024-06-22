@@ -13,6 +13,7 @@
     <property id="displayNorth" type="boolean">false</property>
     <property id="displayWind" type="boolean">false</property>
     <property id="vibeIntensity" type="number">90</property>
+    <property id="motorbikeHeadset" type="boolean">false</property>
     <property id="useRadar" type="boolean">false</property>
     <property id="variaFarAlarmDistThr" type="number">60</property>
     <property id="variaCloseAlarmDistThr" type="number">20</property>

@@ -102,8 +102,14 @@
 
 -->
      <fitField id="21" displayInChart="false" displayInActivitySummary="true" sortOrder = "12" precision="2"
-        dataLabel="@Strings.EORBattery_label"
+        dataLabel="@Strings.EORBattery_label" 
         unitLabel="@Strings.percentage_units"/>
+        <fitField id="22" displayInChart="true" displayInActivitySummary="true" sortOrder = "13" precision="2"
+        dataLabel="@Strings.VehRelativeSpd_label" chartTitle="@Strings.VehRelativeSpd_label" fillColor="#27ae60"
+        unitLabel="@Strings.no_units"/>
+        <fitField id="23" displayInChart="true" displayInActivitySummary="true" sortOrder = "14" precision="2"
+        dataLabel="@Strings.VehTotalCnt_label" chartTitle="@Strings.VehTotalCnt_label" fillColor="#e74c3c"
+        unitLabel="@Strings.no_units"/>
     </fitContributions>
 
 </resources>
