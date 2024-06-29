@@ -594,7 +594,7 @@ class GarminEUCDF extends WatchUi.DataField {
       }
       if (fieldIDs[field_id] == 24) {
         fieldNames[field_id] = "RD V";
-        fieldValues[field_id] = valueRound(getVariaVoltage(), "%1d");
+        fieldValues[field_id] = valueRound(getVariaVoltage(), "%.1f");
       }
       if (fieldIDs[field_id] == 25) {
         fieldNames[field_id] = "TIME";
