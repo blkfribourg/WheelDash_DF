@@ -131,6 +131,7 @@
     <string id="distanceUnits_km">km</string>
     <string id="distanceUnits_miles">miles</string>
     <string id="no_units"> </string>
+    <string id="percentagePerDist_units">%/km</string>
     
     <string id="maxSpeed_label">Session max speed</string>
     
@@ -145,6 +146,8 @@
     <string id="minTemperature_label">Session min temp.</string>
 
     <string id="avgSpeed_label">Session average speed</string>
+    <string id="avgMvSpeed_label">Session average moving speed</string>
+    
     
     <string id="avgCurrent_label">Session average current</string>
     <string id="avgCurrent_units">A</string>
@@ -158,6 +161,7 @@
     <string id="minBattery_label">Session min battery %</string>
     <string id="maxBattery_label">Session max battery %</string>
     <string id="EORBattery_label">End of ride battery %</string>
+    <string id="AvgUsedBattery_label">Battery used %/km</string>
     <string id="VehRelativeSpd_label">Relative Approach Speed (Varia)</string>
     <string id="VehTotalCnt_label">Vehicle Count (Varia)</string>
     
