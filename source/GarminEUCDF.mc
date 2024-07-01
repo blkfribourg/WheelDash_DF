@@ -18,32 +18,37 @@ class GarminEUCDF extends WatchUi.DataField {
   const SPEED_FIELD_ID = 0;
   const PWM_FIELD_ID = 1;
   const VOLTAGE_FIELD_ID = 2;
-  const CURRENT_FIELD_ID = 3;
+
   const POWER_FIELD_ID = 4;
   const TEMP_FIELD_ID = 5;
   const TRIPDISTANCE_FIELD_ID = 6;
-  const MAXSPEED_FIELD_ID = 7;
-  const MAXPWM_FIELD_ID = 8;
-  const MAXCURRENT_FIELD_ID = 9;
-  const MAXPOWER_FIELD_ID = 10;
-  const MAXTEMP_FIELD_ID = 11;
-  const AVGSPEED_FIELD_ID = 12;
-  const AVGCURRENT_FIELD_ID = 13;
-  const AVGPOWER_FIELD_ID = 14;
-  /*
-  const SPEED_FIELD_ID_MILES = 16;
-  const TRIPDISTANCE_FIELD_ID_MILES = 17;
-  const MAXSPEED_FIELD_ID_MILES = 18;
-  const AVGSPEED_FIELD_ID_MILES = 19;
-  */
-  const MINVOLTAGE_FIELD_ID = 16;
-  const MAXVOLTAGE_FIELD_ID = 17;
-  const MINBATTERY_FIELD_ID = 18;
-  const MAXBATTERY_FIELD_ID = 19;
-  const MINTEMP_FIELD_ID = 20;
-  const EORBATTERY_FIELD_ID = 21;
-  const VEH_RELATIVE_SPD_ID = 22;
-  const VEH_TOTAL_CNT_ID = 23;
+
+  const AVGMVSPEED_FIELD_ID = 7;
+  const AVGSPEED_FIELD_ID = 8;
+  const MAXSPEED_FIELD_ID = 9;
+
+  const MAXPWM_FIELD_ID = 10;
+  const AVGCURRENT_FIELD_ID = 11;
+
+  const MAXCURRENT_FIELD_ID = 12;
+  const AVGPOWER_FIELD_ID = 13;
+  const MAXPOWER_FIELD_ID = 14;
+
+  const MINTEMP_FIELD_ID = 15;
+  const MAXTEMP_FIELD_ID = 16;
+
+  const MINVOLTAGE_FIELD_ID = 17;
+  const MAXVOLTAGE_FIELD_ID = 18;
+
+  const MINBATTERY_FIELD_ID = 19;
+  const MAXBATTERY_FIELD_ID = 20;
+
+  const AVGUSEDBATTERY_FIELD_ID = 21;
+
+  const EORBATTERY_FIELD_ID = 22;
+
+  const VEH_RELATIVE_SPD_ID = 23;
+  const VEH_TOTAL_CNT_ID = 24;
 
   var mSpeedField = null;
   var mPWMField = null;
@@ -52,6 +57,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var mPowerField = null;
   var mTempField = null;
   var mTripDistField = null;
+  var mAvgMvSpeedField = null;
   var mMaxSpeedField = null;
   var mMaxPWMField = null;
   var mMaxCurrentField = null;
@@ -65,12 +71,13 @@ class GarminEUCDF extends WatchUi.DataField {
   var mMaxVoltageField = null;
   var mMinBatteryField = null;
   var mMaxBatteryField = null;
+  var mAvgUsedBatteryField = null;
   var mEORBatteryField = null;
   var mVehRelativeSpdField = null;
   var mVehTotalCntField = null;
   var _alertDisplayed = false;
   var nb_Font;
-  var computeAMS = false;
+
   private var cDrawables = {};
 
   function initialize() {
@@ -153,11 +160,6 @@ class GarminEUCDF extends WatchUi.DataField {
     ];
     fieldNB = AppStorage.getSetting("fieldNB");
 
-    if (fieldIDs.slice(0, fieldNB).indexOf(12) != -1) {
-      computeAMS = true;
-      //compute avg moving speed
-    }
-
     fieldNames = new [fieldNB];
     fieldValues = new [fieldNB];
     for (var i = 0; i < fieldNB; i++) {
@@ -183,20 +185,6 @@ class GarminEUCDF extends WatchUi.DataField {
       FitContributor.DATA_TYPE_FLOAT,
       { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "V" }
     );
-    /*
-    mCurrentField = createField(
-      "Current",
-      CURRENT_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "A" }
-    );
-    mPowerField = createField(
-      "Power",
-      POWER_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "W" }
-    );
-    */
     mTempField = createField(
       "Temperature",
       TEMP_FIELD_ID,
@@ -208,6 +196,12 @@ class GarminEUCDF extends WatchUi.DataField {
       TRIPDISTANCE_FIELD_ID,
       FitContributor.DATA_TYPE_FLOAT,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "km" }
+    );
+    mAvgMvSpeedField = createField(
+      "AvgMvSpeed",
+      AVGMVSPEED_FIELD_ID,
+      FitContributor.DATA_TYPE_FLOAT,
+      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "km/h" }
     );
     mMaxSpeedField = createField(
       "Max_speed",
@@ -222,99 +216,51 @@ class GarminEUCDF extends WatchUi.DataField {
       FitContributor.DATA_TYPE_UINT8,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
     );
-    /*
-    mMaxCurrentField = createField(
-      "Max_Current",
-      MAXCURRENT_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "A" }
-    );
-    mMaxPowerField = createField(
-      "Max_Power",
-      MAXPOWER_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "W" }
-    );
-    */
-    mMaxTempField = createField(
-      "Max_Temp",
-      MAXTEMP_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "°C" }
-    );
+
     mAvgSpeedField = createField(
       "Avg_Speed",
       AVGSPEED_FIELD_ID,
       FitContributor.DATA_TYPE_FLOAT,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "km/h" }
     );
-    /*
-    mAvgCurrentField = createField(
-      "Avg_Current",
-      AVGCURRENT_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "A" }
-    ); 
-    mAvgPowerField = createField(
-      "Avg_Power",
-      AVGPOWER_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "W" }
-    );
-   */
-    mMinVoltageField = createField(
-      "Min_Voltage",
-      MINVOLTAGE_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "V" }
-    );
-    mMaxVoltageField = createField(
-      "Max_Voltage",
-      MAXVOLTAGE_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "V" }
-    );
 
-    mMinBatteryField = createField(
-      "Min_Battery",
-      MINBATTERY_FIELD_ID,
-      FitContributor.DATA_TYPE_UINT8,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
-    );
     mEORBatteryField = createField(
       "EORBattery",
       EORBATTERY_FIELD_ID,
       FitContributor.DATA_TYPE_UINT8,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
     );
-    if (eucData.useRadar == true) {
-      mVehRelativeSpdField = createField(
-        "VehRelativeSpd",
-        VEH_RELATIVE_SPD_ID,
-        FitContributor.DATA_TYPE_UINT8,
-        { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
-      );
-      mVehTotalCntField = createField(
-        "VehTotalCnt",
-        VEH_TOTAL_CNT_ID,
-        FitContributor.DATA_TYPE_UINT8,
-        { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
-      );
-    }
-    /*
-    mMaxBatteryField = createField(
-      "Max_Battery",
-      MAXBATTERY_FIELD_ID,
+    mAvgUsedBatteryField = createField(
+      "AvgUsedBattery",
+      AVGUSEDBATTERY_FIELD_ID,
       FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
+      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%/km" }
     );
-   
-    mMinTempField = createField(
-      "Min_Temp",
-      MINTEMP_FIELD_ID,
-      FitContributor.DATA_TYPE_FLOAT,
-      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "°C" }
-    );*/
+
+    if (eucData.useRadar == true) {
+      var RadarConnState = -1;
+      if (eucData.radar != null) {
+        try {
+          RadarConnState = eucData.radar.getDeviceState().state;
+          if (RadarConnState > 0) {
+            mVehRelativeSpdField = createField(
+              "VehRelativeSpd",
+              VEH_RELATIVE_SPD_ID,
+              FitContributor.DATA_TYPE_UINT8,
+              { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
+            );
+            mVehTotalCntField = createField(
+              "VehTotalCnt",
+              VEH_TOTAL_CNT_ID,
+              FitContributor.DATA_TYPE_UINT16,
+              { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
+            );
+          }
+        } catch (e instanceof Lang.Exception) {
+          // System.println(e.getErrorMessage());
+        }
+      }
+    }
 
     // set fields to 0
 
@@ -326,12 +272,12 @@ class GarminEUCDF extends WatchUi.DataField {
     mTripDistField.setData(0.0);
     mMaxSpeedField.setData(0.0);
     mMaxPWMField.setData(0.0);
-    mMaxTempField.setData(0.0);
+    //mMaxTempField.setData(0.0);
     mAvgSpeedField.setData(0.0);
-    mMinVoltageField.setData(0.0);
-    mMaxVoltageField.setData(0.0);
+    // mMinVoltageField.setData(0.0);
+    // mMaxVoltageField.setData(0.0);
     //  mMaxBatteryField.setData(0.0);
-    mMinBatteryField.setData(0.0);
+    //   mMinBatteryField.setData(0.0);
     //mMinTempField.setData(0.0);
   }
 
@@ -360,6 +306,10 @@ class GarminEUCDF extends WatchUi.DataField {
   var avgPower = 0.0;
   var movingmsec = 0.0;
   var averageMovingSpeed = 0.0;
+  var avgUsedBattery = 0.0;
+  var batteryUsageCount = 0;
+  var EUCBatteryPercStart = null;
+  var batteryUsg = null;
   function updateFitData(garminInfo) {
     callNb++;
     currentVoltage = eucData.getVoltage();
@@ -398,19 +348,20 @@ class GarminEUCDF extends WatchUi.DataField {
 
     if (eucData.temperature > maxTemp) {
       maxTemp = eucData.temperature;
-      mMaxTempField.setData(maxTemp); // id 11
+      //      mMaxTempField.setData(maxTemp); // id 11
     }
     if (eucData.temperature < minTemp && eucData.temperature != 0.0) {
       minTemp = eucData.temperature;
       // mMinTempField.setData(minTemp); // id 11
     }
+
     if (currentVoltage > maxVoltage && currentVoltage != 0.0) {
       maxVoltage = currentVoltage;
-      mMaxVoltageField.setData(maxVoltage);
+      //     mMaxVoltageField.setData(maxVoltage);
     }
     if (currentVoltage < minVoltage && currentVoltage != 0.0) {
       minVoltage = currentVoltage;
-      mMinVoltageField.setData(minVoltage);
+      //   mMinVoltageField.setData(minVoltage);
     }
 
     if (currentBatteryPerc > maxBatteryPerc) {
@@ -419,7 +370,7 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     if (currentBatteryPerc < minBatteryPerc && currentBatteryPerc != 0.0) {
       minBatteryPerc = currentBatteryPerc;
-      mMinBatteryField.setData(minBatteryPerc);
+      // mMinBatteryField.setData(minBatteryPerc);
     }
 
     // var currentMoment = new Time.Moment(Time.now().value());
@@ -449,14 +400,34 @@ class GarminEUCDF extends WatchUi.DataField {
     avgCurrent = sumCurrent / callNb;
     avgPower = sumPower / callNb;
 
-    if (computeAMS == true) {
-      if (eucData.correctedSpeed > 2.5) {
-        movingmsec = movingmsec + 1000;
-        averageMovingSpeed = sessionDistance / (movingmsec / 3600000.0);
+    if (eucData.correctedSpeed > 2.5) {
+      movingmsec = movingmsec + 1000;
+      averageMovingSpeed = sessionDistance / (movingmsec / 3600000.0);
+    }
+
+    mAvgMvSpeedField.setData(averageMovingSpeed);
+    //mAvgPowerField.setData(sumPower / callNb); // id 14
+
+    if (currentBatteryPerc > 0) {
+      if (EUCBatteryPercStart == null) {
+        EUCBatteryPercStart = currentBatteryPerc;
+        batteryUsageCount = 1;
+      } else {
+        if (EUCBatteryPercStart > currentBatteryPerc) {
+          batteryUsageCount++;
+          avgUsedBattery =
+            (avgUsedBattery + (EUCBatteryPercStart - currentBatteryPerc)) /
+            batteryUsageCount.toFloat();
+        } else {
+          EUCBatteryPercStart = currentBatteryPerc;
+        }
+      }
+      if (sessionDistance > 0) {
+        batteryUsg = avgUsedBattery / sessionDistance;
+        mAvgUsedBatteryField.setData(batteryUsg);
       }
     }
-    //mAvgCurrentField.setData(sumCurrent / callNb); // id 13
-    //mAvgPowerField.setData(sumPower / callNb); // id 14
+
     if (eucData.useRadar == true) {
       mVehRelativeSpdField.setData(eucData.variaTargetSpeed);
       mVehTotalCntField.setData(eucData.totalVehCount);
@@ -525,58 +496,62 @@ class GarminEUCDF extends WatchUi.DataField {
         fieldValues[field_id] = valueRound(currentBatteryPerc, "%.1f");
       }
       if (fieldIDs[field_id] == 8) {
+        fieldNames[field_id] = "BATT USG";
+        fieldValues[field_id] = valueRound(batteryUsg, "%.1f");
+      }
+      if (fieldIDs[field_id] == 9) {
         fieldNames[field_id] = "MIN TEMP";
         fieldValues[field_id] = valueRound(minTemp, "%.1f");
       }
-      if (fieldIDs[field_id] == 9) {
+      if (fieldIDs[field_id] == 10) {
         fieldNames[field_id] = "MAX TEMP";
         fieldValues[field_id] = valueRound(maxTemp, "%.1f");
       }
-      if (fieldIDs[field_id] == 10) {
+      if (fieldIDs[field_id] == 11) {
         fieldNames[field_id] = "MAX SPD";
         fieldValues[field_id] = valueRound(maxSpeed, "%.1f");
       }
-      if (fieldIDs[field_id] == 11) {
+      if (fieldIDs[field_id] == 12) {
         fieldNames[field_id] = "AVG SPD";
         fieldValues[field_id] = valueRound(avgSpeed, "%.1f");
       }
-      if (fieldIDs[field_id] == 12) {
+      if (fieldIDs[field_id] == 13) {
         fieldNames[field_id] = "AVG MV SPD";
         fieldValues[field_id] = valueRound(averageMovingSpeed, "%.1f");
       }
-      if (fieldIDs[field_id] == 13) {
+      if (fieldIDs[field_id] == 14) {
         fieldNames[field_id] = "MIN VOLT";
         fieldValues[field_id] = valueRound(minVoltage, "%.1f");
       }
-      if (fieldIDs[field_id] == 14) {
+      if (fieldIDs[field_id] == 15) {
         fieldNames[field_id] = "MAX VOLT";
         fieldValues[field_id] = valueRound(maxVoltage, "%.1f");
       }
-      if (fieldIDs[field_id] == 15) {
+      if (fieldIDs[field_id] == 16) {
         fieldNames[field_id] = "MAX CURR";
         fieldValues[field_id] = valueRound(maxCurrent, "%.1f");
       }
-      if (fieldIDs[field_id] == 16) {
+      if (fieldIDs[field_id] == 17) {
         fieldNames[field_id] = "MAX CURR";
         fieldValues[field_id] = valueRound(avgCurrent, "%.1f");
       }
-      if (fieldIDs[field_id] == 17) {
+      if (fieldIDs[field_id] == 18) {
         fieldNames[field_id] = "MIN BATT %";
         fieldValues[field_id] = valueRound(minBatteryPerc, "%.1f");
       }
-      if (fieldIDs[field_id] == 18) {
+      if (fieldIDs[field_id] == 19) {
         fieldNames[field_id] = "MAX BATT %";
         fieldValues[field_id] = valueRound(maxBatteryPerc, "%.1f");
       }
-      if (fieldIDs[field_id] == 19) {
+      if (fieldIDs[field_id] == 20) {
         fieldNames[field_id] = "AVG PWR";
         fieldValues[field_id] = valueRound(avgPower, "%.1f");
       }
-      if (fieldIDs[field_id] == 20) {
+      if (fieldIDs[field_id] == 21) {
         fieldNames[field_id] = "MAX PWR";
         fieldValues[field_id] = valueRound(maxPower, "%.1f");
       }
-      if (fieldIDs[field_id] == 21) {
+      if (fieldIDs[field_id] == 22) {
         fieldNames[field_id] = "VEH SPD";
         var targetSpeed = eucData.variaTargetSpeed;
         if (targetSpeed != null) {
@@ -584,19 +559,19 @@ class GarminEUCDF extends WatchUi.DataField {
         }
         fieldValues[field_id] = valueRound(targetSpeed, "%.1f");
       }
-      if (fieldIDs[field_id] == 22) {
+      if (fieldIDs[field_id] == 23) {
         fieldNames[field_id] = "VEH DST";
         fieldValues[field_id] = valueRound(eucData.variaTargetDist, "%.1f");
       }
-      if (fieldIDs[field_id] == 23) {
+      if (fieldIDs[field_id] == 24) {
         fieldNames[field_id] = "VEH NB";
         fieldValues[field_id] = valueRound(eucData.variaTargetNb, "%1d");
       }
-      if (fieldIDs[field_id] == 24) {
+      if (fieldIDs[field_id] == 25) {
         fieldNames[field_id] = "RD V";
         fieldValues[field_id] = valueRound(getVariaVoltage(), "%.1f");
       }
-      if (fieldIDs[field_id] == 25) {
+      if (fieldIDs[field_id] == 26) {
         fieldNames[field_id] = "TIME";
         var CurrentTime = System.getClockTime();
 
@@ -1318,6 +1293,14 @@ class GarminEUCDF extends WatchUi.DataField {
       startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
       maxPWM = Storage.getValue("maxPWM");
       movingmsec = Storage.getValue("movingmsec");
+      avgUsedBattery = Storage.getValue("avgUsedBattery");
+      if (eucData.useRadar == true) {
+        if (Storage.getValue("totalVehCount") == null) {
+          eucData.totalVehCount = 0;
+        } else {
+          eucData.totalVehCount = Storage.getValue("totalVehCount");
+        }
+      }
 
       // should only be required for max values
       mMaxSpeedField.setData(maxSpeed);
@@ -1353,6 +1336,10 @@ class GarminEUCDF extends WatchUi.DataField {
     Storage.setValue("callNb", callNb);
     Storage.setValue("movingmsec", movingmsec);
     Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
+    Storage.setValue("avgUsedBattery", avgUsedBattery);
+    if (eucData.useRadar == true) {
+      Storage.setValue("totalVehCount", eucData.totalVehCount);
+    }
   }
   function onTimerStart() {}
   function onTimerResume() {}
