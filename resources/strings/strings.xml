@@ -187,24 +187,25 @@
           <string id="eucdata5">Total Distance</string>
           <string id="eucdata6">PWM</string>
           <string id="eucdata7">Battery %</string>
-          <string id="eucdata8">Min temp.</string>
-          <string id="eucdata9">Max temp.</string>
-          <string id="eucdata10">Max speed</string>
-          <string id="eucdata11">Avg Speed</string>
-          <string id="eucdata12">Avg Moving Speed</string>
-          <string id="eucdata13">Min Voltage</string>
-          <string id="eucdata14">Max Voltage</string>
-          <string id="eucdata15">Max Current</string>
-          <string id="eucdata16">Avg Current</string>
-          <string id="eucdata17">Min Battery</string>
-          <string id="eucdata18">Max Battery</string>
-          <string id="eucdata19">Avg Power</string>
-          <string id="eucdata20">Max Power</string>
-          <string id="eucdata21">Nearest Vehicule Speed (varia)</string>
-          <string id="eucdata22">Nearest Vehicule Distance (varia)</string>
-          <string id="eucdata23">Vehicule Number (varia)</string>
-          <string id="eucdata24">Radar Voltage (varia)</string>
-          <string id="eucdata25">Current Time</string>
+          <string id="eucdata8">Battery usag (%/km)</string>
+          <string id="eucdata9">Min temp.</string>
+          <string id="eucdata10">Max temp.</string>
+          <string id="eucdata11">Max speed</string>
+          <string id="eucdata12">Avg Speed</string>
+          <string id="eucdata13">Avg Moving Speed</string>
+          <string id="eucdata14">Min Voltage</string>
+          <string id="eucdata15">Max Voltage</string>
+          <string id="eucdata16">Max Current</string>
+          <string id="eucdata17">Avg Current</string>
+          <string id="eucdata18">Min Battery</string>
+          <string id="eucdata19">Max Battery</string>
+          <string id="eucdata20">Avg Power</string>
+          <string id="eucdata21">Max Power</string>
+          <string id="eucdata22">Nearest Vehicule Speed (varia)</string>
+          <string id="eucdata23">Nearest Vehicule Distance (varia)</string>
+          <string id="eucdata24">Vehicule Number (varia)</string>
+          <string id="eucdata25">Radar Voltage (varia)</string>
+          <string id="eucdata26">Current Time</string>
            
 
 
