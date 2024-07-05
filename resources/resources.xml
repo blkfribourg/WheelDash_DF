@@ -2,55 +2,63 @@
  <fitContributions>
         <fitField id="0" displayInChart="true" sortOrder = "0" precision="0"
         chartTitle="@Strings.speed_graph_label" dataLabel="@Strings.speed_label"
-        unitLabel="@Strings.speed_units_kmh" fillColor="#9b59b6" />
+        unitLabel="@Strings.speed_unit_kmh" fillColor="#9b59b6" />
 
         <fitField id="1" displayInChart="true" sortOrder = "1" precision="2"
         chartTitle="@Strings.pwm_graph_label" dataLabel="@Strings.pwm_label"
-        unitLabel="@Strings.percentage_units" fillColor="#3498db" />
+        unitLabel="@Strings.percentage_unit" fillColor="#3498db" />
 
         <fitField id="2" displayInChart="true" sortOrder = "2" precision="2"
         chartTitle="@Strings.voltage_graph_label" dataLabel="@Strings.voltage_label"
-        unitLabel="@Strings.voltage_units" fillColor="#f39c12" />
+        unitLabel="@Strings.voltage_unit" fillColor="#f39c12" />
  
         <fitField id="5" displayInChart="true" sortOrder = "3" precision="2"
         chartTitle="@Strings.temperature_graph_label" dataLabel="@Strings.temperature_label"
-        unitLabel="@Strings.temperature_units" fillColor="#e67e22" />
+        unitLabel="@Strings.temperature_unit" fillColor="#e67e22" />
 
         <fitField id="6" displayInChart="false" displayInActivitySummary="true" sortOrder = "4" precision="2"
         dataLabel="@Strings.tripDistance_label"
-        unitLabel="@Strings.distanceUnits_km"/>
+        unitLabel="@Strings.distanceunit_km"/>
         
-        <fitField id="7" displayInChart="false" displayInActivitySummary="true" sortOrder = "6" precision="2"
+        <fitField id="7" displayInChart="false" displayInActivitySummary="true" sortOrder = "5" precision="2"
         dataLabel="@Strings.avgMvSpeed_label"
-        unitLabel="@Strings.speed_units_kmh"/>
+        unitLabel="@Strings.speed_unit_kmh"/>
         
-        <fitField id="8" displayInChart="false" displayInActivitySummary="true" sortOrder = "7" precision="2"
+        <fitField id="8" displayInChart="false" displayInActivitySummary="true" sortOrder = "6" precision="2"
         dataLabel="@Strings.avgSpeed_label"
-        unitLabel="@Strings.speed_units_kmh"/>
+        unitLabel="@Strings.speed_unit_kmh"/>
 
-        <fitField id="9" displayInChart="false" displayInActivitySummary="true" sortOrder = "8" precision="2"
+        <fitField id="9" displayInChart="false" displayInActivitySummary="true" sortOrder = "7" precision="2"
         dataLabel="@Strings.maxSpeed_label"
-        unitLabel="@Strings.speed_units_kmh"/>
+        unitLabel="@Strings.speed_unit_kmh"/>
 
-        <fitField id="10" displayInChart="false" displayInActivitySummary="true" sortOrder = "9" precision="0"
+        <fitField id="10" displayInChart="false" displayInActivitySummary="true" sortOrder = "8" precision="0"
         dataLabel="@Strings.maxPWM_label"
-        unitLabel="@Strings.percentage_units"/>
+        unitLabel="@Strings.percentage_unit"/>
 
-        <fitField id="21" displayInChart="false" displayInActivitySummary="true" sortOrder = "10" precision="2"
+        <fitField id="21" displayInChart="false" displayInActivitySummary="true" sortOrder = "9" precision="2"
         dataLabel="@Strings.AvgUsedBattery_label" 
-        unitLabel="@Strings.percentagePerDist_units"/>
+        unitLabel="@Strings.percentagePerDist_unit"/>
 
-        <fitField id="22" displayInChart="false" displayInActivitySummary="true" sortOrder = "11" precision="0"
+         <fitField id="16" displayInChart="false" displayInActivitySummary="true" sortOrder = "10" precision="2"
+        dataLabel="@Strings.maxTemperature_label"
+        unitLabel="@Strings.temperature_unit"/>
+
+        <fitField id="19" displayInChart="false" displayInActivitySummary="true" sortOrder = "11" precision="2"
+        dataLabel="@Strings.minBattery_label"
+        unitLabel="@Strings.percentage_unit"/>
+
+        <fitField id="22" displayInChart="false" displayInActivitySummary="true" sortOrder = "12" precision="0"
         dataLabel="@Strings.EORBattery_label" 
-        unitLabel="@Strings.percentage_units"/>
+        unitLabel="@Strings.percentage_unit"/>
 
-        <fitField id="23" displayInChart="true" displayInActivitySummary="true" sortOrder = "12" precision="0"
+        <fitField id="23" displayInChart="true" displayInActivitySummary="true" sortOrder = "13" precision="0"
         dataLabel="@Strings.VehRelativeSpd_label" chartTitle="@Strings.VehRelativeSpd_label" fillColor="#27ae60"
-        unitLabel="@Strings.no_units"/>
+        unitLabel="@Strings.no_unit"/>
 
-        <fitField id="24" displayInChart="true" displayInActivitySummary="true" sortOrder = "13" precision="0"
+        <fitField id="24" displayInChart="true" displayInActivitySummary="true" sortOrder = "14" precision="0"
         dataLabel="@Strings.VehTotalCnt_label" chartTitle="@Strings.VehTotalCnt_label" fillColor="#e74c3c"
-        unitLabel="@Strings.no_units"/>
+        unitLabel="@Strings.no_unit"/>
     </fitContributions>
 
 </resources>
