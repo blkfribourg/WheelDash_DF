@@ -110,34 +110,34 @@
 
     <string id="speed_graph_label">Speed</string>
     <string id="speed_label">Speed</string>
-    <string id="speed_units_kmh">km/h</string>
-    <string id="speed_units_mph">mph</string>
+    <string id="speed_unit_kmh">km/h</string>
+    <string id="speed_unit_mph">mph</string>
     <string id="pwm_graph_label">PWM</string>
     <string id="pwm_label">PWM</string>
-    <string id="pwm_units"></string>
+    <string id="pwm_unit"></string>
     <string id="voltage_graph_label">Voltage</string>
     <string id="voltage_label">Voltage</string>
-    <string id="voltage_units">V</string>
+    <string id="voltage_unit">V</string>
     <string id="current_graph_label">Current</string>
     <string id="current_label">Current</string>
-    <string id="current_units">A</string>
+    <string id="current_unit">A</string>
     <string id="power_graph_label">Motor power</string>
     <string id="power_label">Motor power</string>
-    <string id="power_units">W</string>
+    <string id="power_unit">W</string>
     <string id="temperature_graph_label">MB Temperature</string>
     <string id="temperature_label">MB Temperature</string>
-    <string id="temperature_units">°C</string>
+    <string id="temperature_unit">°C</string>
     <string id="tripDistance_label">Trip distance</string>
-    <string id="distanceUnits_km">km</string>
-    <string id="distanceUnits_miles">miles</string>
-    <string id="no_units"> </string>
-    <string id="percentagePerDist_units">%/km</string>
+    <string id="distanceunit_km">km</string>
+    <string id="distanceunit_miles">miles</string>
+    <string id="no_unit"> </string>
+    <string id="percentagePerDist_unit">%/km</string>
     
     <string id="maxSpeed_label">Session max speed</string>
     
     <string id="maxPWM_label">Session max PWM</string>
     
-    <string id="percentage_units">%</string>
+    <string id="percentage_unit">%</string>
     <string id="maxCurrent_label">Session max current</string>
   
     <string id="maxPower_label">Session max power</string>
@@ -150,11 +150,11 @@
     
     
     <string id="avgCurrent_label">Session average current</string>
-    <string id="avgCurrent_units">A</string>
+    <string id="avgCurrent_unit">A</string>
     <string id="avgPower_label">Session average power</string>
-    <string id="avgPower_units">W</string>
+    <string id="avgPower_unit">W</string>
   
-    <string id="runnintTime_units">s</string>
+    <string id="runnintTime_unit">s</string>
 
     <string id="minVoltage_label">Session min voltage</string>
     <string id="maxVoltage_label">Session max voltage</string>

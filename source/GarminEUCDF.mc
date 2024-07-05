@@ -77,7 +77,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var mVehTotalCntField = null;
   var _alertDisplayed = false;
   var nb_Font;
-
+  var RadarConnState = -1;
   private var cDrawables = {};
 
   function initialize() {
@@ -191,6 +191,12 @@ class GarminEUCDF extends WatchUi.DataField {
       FitContributor.DATA_TYPE_FLOAT,
       { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "°C" }
     );
+    mMaxTempField = createField(
+      "Max_Temp",
+      MAXTEMP_FIELD_ID,
+      FitContributor.DATA_TYPE_FLOAT,
+      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "°C" }
+    );
     mTripDistField = createField(
       "TripDistance",
       TRIPDISTANCE_FIELD_ID,
@@ -223,7 +229,12 @@ class GarminEUCDF extends WatchUi.DataField {
       FitContributor.DATA_TYPE_FLOAT,
       { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "km/h" }
     );
-
+    mMinBatteryField = createField(
+      "Min_Battery",
+      MINBATTERY_FIELD_ID,
+      FitContributor.DATA_TYPE_UINT8,
+      { :mesgType => FitContributor.MESG_TYPE_SESSION, :units => "%" }
+    );
     mEORBatteryField = createField(
       "EORBattery",
       EORBATTERY_FIELD_ID,
@@ -238,11 +249,10 @@ class GarminEUCDF extends WatchUi.DataField {
     );
 
     if (eucData.useRadar == true) {
-      var RadarConnState = -1;
       if (eucData.radar != null) {
         try {
           RadarConnState = eucData.radar.getDeviceState().state;
-          if (RadarConnState > 0) {
+          if (RadarConnState > 2) {
             mVehRelativeSpdField = createField(
               "VehRelativeSpd",
               VEH_RELATIVE_SPD_ID,
@@ -272,13 +282,13 @@ class GarminEUCDF extends WatchUi.DataField {
     mTripDistField.setData(0.0);
     mMaxSpeedField.setData(0.0);
     mMaxPWMField.setData(0.0);
-    //mMaxTempField.setData(0.0);
+    mMaxTempField.setData(0.0);
     mAvgSpeedField.setData(0.0);
     // mMinVoltageField.setData(0.0);
     // mMaxVoltageField.setData(0.0);
     //  mMaxBatteryField.setData(0.0);
-    //   mMinBatteryField.setData(0.0);
-    //mMinTempField.setData(0.0);
+    mMinBatteryField.setData(0.0);
+    //    mMinTempField.setData(0.0);
   }
 
   var maxSpeed = 0.0;
@@ -306,10 +316,10 @@ class GarminEUCDF extends WatchUi.DataField {
   var avgPower = 0.0;
   var movingmsec = 0.0;
   var averageMovingSpeed = 0.0;
-  var avgUsedBattery = 0.0;
-  var batteryUsageCount = 0;
   var EUCBatteryPercStart = null;
-  var batteryUsg = null;
+  var batteryUsg = 0;
+  var currentbatteryUsg = 0;
+  var batteryUsgValues = new [0];
   function updateFitData(garminInfo) {
     callNb++;
     currentVoltage = eucData.getVoltage();
@@ -348,7 +358,7 @@ class GarminEUCDF extends WatchUi.DataField {
 
     if (eucData.temperature > maxTemp) {
       maxTemp = eucData.temperature;
-      //      mMaxTempField.setData(maxTemp); // id 11
+      mMaxTempField.setData(maxTemp); // id 11
     }
     if (eucData.temperature < minTemp && eucData.temperature != 0.0) {
       minTemp = eucData.temperature;
@@ -370,7 +380,7 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     if (currentBatteryPerc < minBatteryPerc && currentBatteryPerc != 0.0) {
       minBatteryPerc = currentBatteryPerc;
-      // mMinBatteryField.setData(minBatteryPerc);
+      mMinBatteryField.setData(minBatteryPerc);
     }
 
     // var currentMoment = new Time.Moment(Time.now().value());
@@ -411,24 +421,36 @@ class GarminEUCDF extends WatchUi.DataField {
     if (currentBatteryPerc > 0) {
       if (EUCBatteryPercStart == null) {
         EUCBatteryPercStart = currentBatteryPerc;
-        batteryUsageCount = 1;
       } else {
-        if (EUCBatteryPercStart > currentBatteryPerc) {
-          batteryUsageCount++;
-          avgUsedBattery =
-            (avgUsedBattery + (EUCBatteryPercStart - currentBatteryPerc)) /
-            batteryUsageCount.toFloat();
-        } else {
+        if (EUCBatteryPercStart < currentBatteryPerc) {
           EUCBatteryPercStart = currentBatteryPerc;
         }
       }
       if (sessionDistance > 0) {
-        batteryUsg = avgUsedBattery / sessionDistance;
-        mAvgUsedBatteryField.setData(batteryUsg);
+        currentbatteryUsg =
+          (EUCBatteryPercStart - currentBatteryPerc) / sessionDistance;
+        batteryUsgValues.add(currentbatteryUsg);
+        if (batteryUsgValues.size > 10) {
+          batteryUsgValues = batteryUsgValues.slice(1, batteryUsgValues.size());
+          var tempBatteryUsg = 0;
+          var valueCnt = 0;
+          for (var i = 0; i < batteryUsgValues.size(); i++) {
+            var currentBatteryUsg = batteryUsgValues[i];
+            if (currentBatteryUsg != null) {
+              tempBatteryUsg = tempBatteryUsg + currentBatteryUsg;
+              valueCnt++;
+            }
+          }
+          if (valueCnt != 0) {
+            batteryUsg = tempBatteryUsg / valueCnt;
+          }
+
+          mAvgUsedBatteryField.setData(batteryUsg);
+        }
       }
     }
 
-    if (eucData.useRadar == true) {
+    if (eucData.useRadar == true && RadarConnState > 2) {
       mVehRelativeSpdField.setData(eucData.variaTargetSpeed);
       mVehTotalCntField.setData(eucData.totalVehCount);
     }
@@ -1293,7 +1315,7 @@ class GarminEUCDF extends WatchUi.DataField {
       startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
       maxPWM = Storage.getValue("maxPWM");
       movingmsec = Storage.getValue("movingmsec");
-      avgUsedBattery = Storage.getValue("avgUsedBattery");
+      EUCBatteryPercStart = Storage.getValue("EUCBatteryPercStart");
       if (eucData.useRadar == true) {
         if (Storage.getValue("totalVehCount") == null) {
           eucData.totalVehCount = 0;
@@ -1336,7 +1358,7 @@ class GarminEUCDF extends WatchUi.DataField {
     Storage.setValue("callNb", callNb);
     Storage.setValue("movingmsec", movingmsec);
     Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
-    Storage.setValue("avgUsedBattery", avgUsedBattery);
+    Storage.setValue("EUCBatteryPercStart", EUCBatteryPercStart);
     if (eucData.useRadar == true) {
       Storage.setValue("totalVehCount", eucData.totalVehCount);
     }
