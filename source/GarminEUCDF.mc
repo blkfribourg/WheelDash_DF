@@ -430,7 +430,7 @@ class GarminEUCDF extends WatchUi.DataField {
         currentbatteryUsg =
           (EUCBatteryPercStart - currentBatteryPerc) / sessionDistance;
         batteryUsgValues.add(currentbatteryUsg);
-        if (batteryUsgValues.size > 10) {
+        if (batteryUsgValues.size() > 10) {
           batteryUsgValues = batteryUsgValues.slice(1, batteryUsgValues.size());
           var tempBatteryUsg = 0;
           var valueCnt = 0;
