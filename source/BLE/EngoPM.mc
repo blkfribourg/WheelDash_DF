@@ -1,0 +1,72 @@
+using Toybox.BluetoothLowEnergy as Ble;
+using Toybox.System;
+
+module engoPM {
+  var BLE_ENGO_MAIN as Toybox.BluetoothLowEnergy.Uuid =
+    Toybox.BluetoothLowEnergy.longToUuid(
+      0x0000fef500001000l,
+      0x800000805f9b34fbl
+    );
+
+  var BLE_SERV_ACTIVELOOK as Toybox.BluetoothLowEnergy.Uuid =
+    Toybox.BluetoothLowEnergy.longToUuid(
+      0x0783b03e8535b5a0l,
+      0x7140a304d2495cb7l
+    );
+  //! Custom Service (ActiveLook® Commands Interface) Characteristics
+  var BLE_CHAR_TX as Toybox.BluetoothLowEnergy.Uuid =
+    Toybox.BluetoothLowEnergy.longToUuid(
+      0x0783b03e8535b5a0l,
+      0x7140a304d2495cb8l
+    );
+  var BLE_CHAR_RX as Toybox.BluetoothLowEnergy.Uuid =
+    Toybox.BluetoothLowEnergy.longToUuid(
+      0x0783b03e8535b5a0l,
+      0x7140a304d2495cbal
+    );
+  var BLE_CHAR_FLOW_CONTROL as Toybox.BluetoothLowEnergy.Uuid =
+    Toybox.BluetoothLowEnergy.longToUuid(
+      0x0783b03e8535b5a0l,
+      0x7140a304d2495cb9l
+    );
+  var BLE_CHAR_GESTURE_EVENT as Toybox.BluetoothLowEnergy.Uuid =
+    Toybox.BluetoothLowEnergy.longToUuid(
+      0x0783b03e8535b5a0l,
+      0x7140a304d2495cbbl
+    );
+
+  var engoProfileDef;
+
+  function init() {
+    engoProfileDef = {
+      :uuid => BLE_SERV_ACTIVELOOK,
+      :characteristics => [
+        {
+          :uuid => BLE_CHAR_TX,
+          :descriptors => [Ble.cccdUuid()],
+        },
+        {
+          :uuid => BLE_CHAR_RX,
+          :descriptors => [Ble.cccdUuid()],
+        },
+        {
+          :uuid => BLE_CHAR_FLOW_CONTROL,
+          :descriptors => [Ble.cccdUuid()],
+        },
+        {
+          :uuid => BLE_CHAR_GESTURE_EVENT,
+          :descriptors => [Ble.cccdUuid()],
+        },
+      ],
+    };
+  }
+
+  function registerProfiles() {
+    try {
+      Ble.registerProfile(engoProfileDef);
+      System.println("Engo profile OK");
+    } catch (e) {
+      System.println("e=" + e.getErrorMessage());
+    }
+  }
+}

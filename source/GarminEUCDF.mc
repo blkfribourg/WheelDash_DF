@@ -77,7 +77,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var mVehTotalCntField = null;
   var _alertDisplayed = false;
   var nb_Font;
-  var RadarConnState = -1;
+  //var RadarConnState = -1;
   private var cDrawables = {};
 
   function initialize() {
@@ -251,8 +251,8 @@ class GarminEUCDF extends WatchUi.DataField {
     if (eucData.useRadar == true) {
       if (eucData.radar != null) {
         try {
-          RadarConnState = eucData.radar.getDeviceState().state;
-          if (RadarConnState > 2) {
+          //RadarConnState = eucData.radar.getDeviceState().state;
+       //   if (RadarConnState > 2) {
             mVehRelativeSpdField = createField(
               "VehRelativeSpd",
               VEH_RELATIVE_SPD_ID,
@@ -265,7 +265,7 @@ class GarminEUCDF extends WatchUi.DataField {
               FitContributor.DATA_TYPE_UINT16,
               { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
             );
-          }
+      //    }
         } catch (e instanceof Lang.Exception) {
           // System.println(e.getErrorMessage());
         }
@@ -450,7 +450,7 @@ class GarminEUCDF extends WatchUi.DataField {
       }
     }
 
-    if (eucData.useRadar == true && RadarConnState > 2) {
+    if (eucData.useRadar == true) {
       mVehRelativeSpdField.setData(eucData.variaTargetSpeed);
       mVehTotalCntField.setData(eucData.totalVehCount);
     }
@@ -637,7 +637,7 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     eucData.timerState = activityTimerState;
 
-    //eucData.paired = true;
+    eucData.paired = true;
     if (eucData.paired == true) {
       if (delay < 0) {
         updateFitData(info);

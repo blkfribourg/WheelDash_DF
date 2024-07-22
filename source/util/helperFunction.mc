@@ -213,3 +213,5 @@ function variaMove(targetArray) {
 function random(min, max) {
   return (Math.rand() % max) + 1;
 }
+
+// engo related fct

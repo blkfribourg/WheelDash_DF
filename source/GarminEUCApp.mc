@@ -1,7 +1,7 @@
 import Toybox.Application;
 import Toybox.Lang;
 import Toybox.WatchUi;
-
+using Toybox.StringUtil;
 class GarminEUCApp extends Application.AppBase {
   private var view;
   //  private var delegate;
@@ -22,6 +22,12 @@ class GarminEUCApp extends Application.AppBase {
     setSettings(currentProfile);
     //init alarms
     EUCAlarms.alarmsInit();
+
+    var test = StringUtil.convertEncodedString("FF00", {
+      :fromRepresentation => StringUtil.REPRESENTATION_STRING_HEX,
+      :toRepresentation => StringUtil.REPRESENTATION_BYTE_ARRAY,
+    });
+    System.println(test);
   }
 
   // Return the initial view of your application here
@@ -35,6 +41,10 @@ class GarminEUCApp extends Application.AppBase {
       eucBleDelegate = new eucBLEDelegate(frameDecoder.init());
       BluetoothLowEnergy.setDelegate(eucBleDelegate);
       eucPM.registerProfiles();
+      if (eucData.useEngo == true) {
+        engoPM.init();
+        engoPM.registerProfiles();
+      }
     }
 
     view = new GarminEUCDF();
