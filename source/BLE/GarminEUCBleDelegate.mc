@@ -17,6 +17,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var _cbCharacteristicWrite = null;
   var rawcmd = null;
   var rawcmdError = null;
+  var engoDisplayInit = false;
 
   var isUpdatingBleParams as Toybox.Lang.Boolean = false;
   var isBleParamsUpdated as Toybox.Lang.Boolean = false;
@@ -334,9 +335,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
           System.println(firm);
         }
         //req cfg list
-        engo_rx.requestWrite([0xff, 0xd3, 0x00, 0x05, 0xaa]b, {
-          :writeType => Ble.WRITE_TYPE_DEFAULT,
-        });
+        sendRawCmd(engo_rx, [0xff, 0xd3, 0x00, 0x05, 0xaa]b);
       }
       if (value[1] == 0xd3 && value[value.size() - 1] != 0xaa) {
         cfgReadFlag = true;
@@ -364,7 +363,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
         System.println("upload done");
         engoCfgOK = true;
       }
-      if (engoCfgOK == true) {
+      if (engoCfgOK == true && engoDisplayInit == false) {
         System.println("select cfg");
         sendRawCmd(
           engo_rx,
@@ -382,6 +381,17 @@ class eucBLEDelegate extends Ble.BleDelegate {
             0x01, 0x00, 0xaa,
           ]b
         );
+        /*
+        System.println("writing text layout11");
+        sendRawCmd(
+          engo_rx,
+          [
+            0xff, 0x37, 0x00, 0x14, 0x00, 0x98, 0x00, 0x80, 0x03, 0x02, 0x0f,
+            0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x34, 0x00, 0xaa,
+          ]b
+        );
+*/
+        engoDisplayInit = true;
       }
     }
   }
@@ -408,6 +418,15 @@ class eucBLEDelegate extends Ble.BleDelegate {
       // Sys.println("sending command " + enc_cmd.toString());
       char.requestWrite(enc_cmd, { :writeType => Ble.WRITE_TYPE_DEFAULT });
       //  Sys.println("command sent !");
+    }
+  }
+
+  function sendCommands(cmds) {
+    for (var i = 0; i < cmds.size(); i++) {
+      if (cmds[i] != null) {
+        sendRawCmd(engo_rx, cmds[i]);
+        System.println(cmds[i]);
+      }
     }
   }
 

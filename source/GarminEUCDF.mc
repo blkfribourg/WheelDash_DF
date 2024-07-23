@@ -6,6 +6,7 @@ using Toybox.Math;
 import Toybox.System;
 using Toybox.Application.Storage;
 class GarminEUCDF extends WatchUi.DataField {
+  var bleDelegate;
   var fill_logo;
   var empty_logo;
   var delay = 3;
@@ -80,7 +81,8 @@ class GarminEUCDF extends WatchUi.DataField {
   //var RadarConnState = -1;
   private var cDrawables = {};
 
-  function initialize() {
+  function initialize(_bleDelegate) {
+    bleDelegate = _bleDelegate;
     DataField.initialize();
     fieldsInitialize();
     //load custom number font
@@ -252,20 +254,20 @@ class GarminEUCDF extends WatchUi.DataField {
       if (eucData.radar != null) {
         try {
           //RadarConnState = eucData.radar.getDeviceState().state;
-       //   if (RadarConnState > 2) {
-            mVehRelativeSpdField = createField(
-              "VehRelativeSpd",
-              VEH_RELATIVE_SPD_ID,
-              FitContributor.DATA_TYPE_UINT8,
-              { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
-            );
-            mVehTotalCntField = createField(
-              "VehTotalCnt",
-              VEH_TOTAL_CNT_ID,
-              FitContributor.DATA_TYPE_UINT16,
-              { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
-            );
-      //    }
+          //   if (RadarConnState > 2) {
+          mVehRelativeSpdField = createField(
+            "VehRelativeSpd",
+            VEH_RELATIVE_SPD_ID,
+            FitContributor.DATA_TYPE_UINT8,
+            { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
+          );
+          mVehTotalCntField = createField(
+            "VehTotalCnt",
+            VEH_TOTAL_CNT_ID,
+            FitContributor.DATA_TYPE_UINT16,
+            { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
+          );
+          //    }
         } catch (e instanceof Lang.Exception) {
           // System.println(e.getErrorMessage());
         }
@@ -600,6 +602,21 @@ class GarminEUCDF extends WatchUi.DataField {
         fieldValues[field_id] =
           CurrentTime.hour.format("%d") + ":" + CurrentTime.min.format("%02d");
       }
+    }
+    //engo related code
+    if (eucData.useEngo == true && eucData.engoPaired == true) {
+      var cmds = new [4];
+      //PWM layout11
+      cmds[0] = getWriteCmd("30.2", 165, 182, 4, 2, 0x0f);
+      //Speed layout 1
+
+      cmds[1] = getWriteCmd("25.2", 165, 142, 4, 2, 0x0f);
+      //Temperature layout 13
+      cmds[2] = getWriteCmd("45.1", 165, 102, 4, 2, 0x0f);
+      //Battery % layout 14
+      cmds[3] = getWriteCmd("100.0", 165, 62, 4, 2, 0x0f);
+
+      bleDelegate.sendCommands(cmds);
     }
   }
   // Calculate the data to display in the field here

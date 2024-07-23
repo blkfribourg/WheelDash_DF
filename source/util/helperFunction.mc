@@ -110,6 +110,10 @@ function decodeint16(byte1, byte2) {
 function decodeint32(byte1, byte2, byte3, byte4) {
   return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
 }
+
+function encodeint16(val) {
+  return [(val >> 8) & 0xff, val & 0xff]b;
+}
 function stringToArrays(str) {
   var array = splitstr(str, ";");
   var nestedArray = new [0];
@@ -215,3 +219,20 @@ function random(min, max) {
 }
 
 // engo related fct
+
+function getWriteCmd(text, x, y, r, f, c) {
+  var hexText = Toybox.StringUtil.convertEncodedString(text, {
+    :fromRepresentation => Toybox.StringUtil.REPRESENTATION_STRING_PLAIN_TEXT,
+    :toRepresentation => Toybox.StringUtil.REPRESENTATION_BYTE_ARRAY,
+  });
+  var cmd = [0xff, 0x37, 0x00, 0x0d + hexText.size()]b;
+  cmd.addAll(encodeint16(x));
+  cmd.addAll(encodeint16(y)); // to finish, add X int16, Y int8
+  cmd.add(r);
+  cmd.add(f);
+  cmd.add(c);
+  cmd.addAll(hexText);
+  cmd.add(0x00);
+  cmd.add(0xaa);
+  return cmd;
+}

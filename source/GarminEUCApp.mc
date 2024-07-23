@@ -18,16 +18,11 @@ class GarminEUCApp extends Application.AppBase {
   function onStart(state as Dictionary?) as Void {
     // Sandbox zone
     //profileMenu= createMenu(["Profile1","Profile2","Profile3"],"Profile Selection");
+    //System.println(encodeint16(263));
     // end of sandbox
     setSettings(currentProfile);
     //init alarms
     EUCAlarms.alarmsInit();
-
-    var test = StringUtil.convertEncodedString("FF00", {
-      :fromRepresentation => StringUtil.REPRESENTATION_STRING_HEX,
-      :toRepresentation => StringUtil.REPRESENTATION_BYTE_ARRAY,
-    });
-    System.println(test);
   }
 
   // Return the initial view of your application here
@@ -47,7 +42,7 @@ class GarminEUCApp extends Application.AppBase {
       }
     }
 
-    view = new GarminEUCDF();
+    view = new GarminEUCDF(eucBleDelegate);
     return [view]; //Connect IQ7
     // return [view] as Array<Views or InputDelegates>?;
   }
