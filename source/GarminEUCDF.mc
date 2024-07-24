@@ -609,7 +609,6 @@ class GarminEUCDF extends WatchUi.DataField {
       //PWM layout11
       cmds[0] = getWriteCmd("30.2", 165, 182, 4, 2, 0x0f);
       //Speed layout 1
-
       cmds[1] = getWriteCmd("25.2", 165, 142, 4, 2, 0x0f);
       //Temperature layout 13
       cmds[2] = getWriteCmd("45.1", 165, 102, 4, 2, 0x0f);

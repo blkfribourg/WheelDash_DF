@@ -18,7 +18,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var rawcmd = null;
   var rawcmdError = null;
   var engoDisplayInit = false;
-
+  var cfgList = new [0]b;
   var isUpdatingBleParams as Toybox.Lang.Boolean = false;
   var isBleParamsUpdated as Toybox.Lang.Boolean = false;
   function initialize(_decoder) {
@@ -26,7 +26,6 @@ class eucBLEDelegate extends Ble.BleDelegate {
     char = eucPM.EUC_CHAR;
 
     decoder = _decoder;
-
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
     eucData.isFirst = false;
@@ -110,7 +109,8 @@ class eucBLEDelegate extends Ble.BleDelegate {
     } else {
       if (engoDevice != null && engoDevice.equals(device)) {
         eucData.engoPaired = false;
-
+        System.println("Engo Disconnected");
+        resetEngo();
         try {
           Ble.unpairDevice(device);
         } catch (e instanceof Lang.Exception) {
@@ -341,9 +341,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
         cfgReadFlag = true;
         //cfg list
         checkCfgName(value);
+        return;
       }
       if (cfgReadFlag == true && value[value.size() - 1] != 0xaa) {
         checkCfgName(value);
+        return;
       }
       if (cfgReadFlag == true && value[value.size() - 1] == 0xaa) {
         checkCfgName(value);
@@ -358,7 +360,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
         for (var i = 0; i < cfgArray.size(); i++) {
           var cmd = arrayToRawCmd(cfgArray, i);
           sendRawCmd(engo_rx, cmd);
-          System.println(cmd);
+          //System.println(cmd);
         }
         System.println("upload done");
         engoCfgOK = true;
@@ -373,6 +375,8 @@ class eucBLEDelegate extends Ble.BleDelegate {
           ]b
         );
         //sendRawCmd(engo_rx, [0xff, 0x01, 0x00, 0x05, 0x0a]b);
+        System.println("clearing screen");
+        sendRawCmd(engo_rx, [0xff, 0x01, 0x00, 0x05, 0xaa]b);
         System.println("displaying page 1");
         sendRawCmd(
           engo_rx,
@@ -395,18 +399,49 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
     }
   }
-
+  function resetEngo() {
+    cfgReadFlag = false;
+    cfgList = new [0]b;
+    engoDisplayInit = false;
+    engoCfgOK = null;
+  }
   function checkCfgName(value) {
-    System.println("config packets: " + value);
-    if (value.size() > 9) {
-      var cfg_name = value.slice(0, 9);
-      System.println("config name: " + cfg_name);
-      if (
-        cfg_name ==
-        [0x77, 0x68, 0x65, 0x65, 0x6c, 0x64, 0x61, 0x73, 0x68, 0x00]b
-      ) {
-        engoCfgOK = true;
+    cfgList.addAll(value);
+    //System.println(cfgList);
+    if (cfgList[1] == 0xd3 && cfgList[cfgList.size() - 1] == 0xaa) {
+      var names = new [0]b;
+      var tempName = new [0]b;
+      for (var i = 4; i < cfgList.size(); i++) {
+        if (cfgList[i] == 0x00) {
+          // dirty fix
+          //System.println("config name: " + tempName);
+          /*System.println(
+            Toybox.StringUtil.convertEncodedString(tempName, {
+              :fromRepresentation => Toybox.StringUtil
+                .REPRESENTATION_BYTE_ARRAY,
+              :toRepresentation => Toybox.StringUtil
+                .REPRESENTATION_STRING_PLAIN_TEXT,
+            })
+          );*/
+          if (
+            Toybox.StringUtil.convertEncodedString(tempName, {
+              :fromRepresentation => Toybox.StringUtil
+                .REPRESENTATION_BYTE_ARRAY,
+              :toRepresentation => Toybox.StringUtil
+                .REPRESENTATION_STRING_PLAIN_TEXT,
+            }).equals("wheeldash")
+          ) {
+            System.println("WheelDash config detected"); // to do check config version and upload conf if not latest vers.
+            engoCfgOK = true;
+          }
+          names.addAll(tempName);
+          tempName = new [0]b;
+          i = i + 11;
+        } else {
+          tempName.add(cfgList[i]);
+        }
       }
+      //System.println("config packet: " + cfgList);
     }
   }
 
@@ -422,10 +457,12 @@ class eucBLEDelegate extends Ble.BleDelegate {
   }
 
   function sendCommands(cmds) {
-    for (var i = 0; i < cmds.size(); i++) {
-      if (cmds[i] != null) {
-        sendRawCmd(engo_rx, cmds[i]);
-        System.println(cmds[i]);
+    if (engoCfgOK == true && engoDisplayInit == true) {
+      for (var i = 0; i < cmds.size(); i++) {
+        if (cmds[i] != null) {
+          sendRawCmd(engo_rx, cmds[i]);
+          // System.println(cmds[i]);
+        }
       }
     }
   }
