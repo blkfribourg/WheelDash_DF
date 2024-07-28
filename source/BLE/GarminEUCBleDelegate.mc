@@ -292,7 +292,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
     }
     if (currentChar.equals(engo_tx)) {
-      System.println("desc succ written");
+      //System.println("desc succ written");
       engo_rx.requestWrite([0xff, 0x06, 0x00, 0x05, 0xaa]b, {
         :writeType => Ble.WRITE_TYPE_DEFAULT,
       });
@@ -351,22 +351,22 @@ class eucBLEDelegate extends Ble.BleDelegate {
         checkCfgName(value);
         cfgReadFlag = false;
         if (engoCfgOK != true) {
-          System.println("wheeldash conf not found");
+          //   System.println("wheeldash conf not found");
           engoCfgOK = false;
         }
       }
       if (engoCfgOK == false) {
-        System.println("uploading config");
+        //  System.println("uploading config");
         for (var i = 0; i < cfgArray.size(); i++) {
           var cmd = arrayToRawCmd(cfgArray, i);
           sendRawCmd(engo_rx, cmd);
           //System.println(cmd);
         }
-        System.println("upload done");
+        // System.println("upload done");
         engoCfgOK = true;
       }
       if (engoCfgOK == true && engoDisplayInit == false) {
-        System.println("select cfg");
+        //  System.println("select cfg");
         sendRawCmd(
           engo_rx,
           [
@@ -375,9 +375,9 @@ class eucBLEDelegate extends Ble.BleDelegate {
           ]b
         );
         //sendRawCmd(engo_rx, [0xff, 0x01, 0x00, 0x05, 0x0a]b);
-        System.println("clearing screen");
+        //System.println("clearing screen");
         sendRawCmd(engo_rx, [0xff, 0x01, 0x00, 0x05, 0xaa]b);
-        System.println("displaying page 1");
+        //System.println("displaying page 1");
         sendRawCmd(
           engo_rx,
           [
@@ -431,7 +431,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
                 .REPRESENTATION_STRING_PLAIN_TEXT,
             }).equals("wheeldash")
           ) {
-            System.println("WheelDash config detected"); // to do check config version and upload conf if not latest vers.
+            // System.println("WheelDash config detected"); // to do check config version and upload conf if not latest vers.
             engoCfgOK = true;
           }
           names.addAll(tempName);

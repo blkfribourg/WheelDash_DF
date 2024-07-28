@@ -225,6 +225,15 @@ function getWriteCmd(text, x, y, r, f, c) {
     :fromRepresentation => Toybox.StringUtil.REPRESENTATION_STRING_PLAIN_TEXT,
     :toRepresentation => Toybox.StringUtil.REPRESENTATION_BYTE_ARRAY,
   });
+  var textLength = text.length();
+  if (textLength < 5) {
+    var leftPadding = []b;
+    while (leftPadding.size() < 5 - hexText.size()) {
+      leftPadding.add(0x20);
+    }
+    hexText = leftPadding.addAll(hexText);
+  }
+
   var cmd = [0xff, 0x37, 0x00, 0x0d + hexText.size()]b;
   cmd.addAll(encodeint16(x));
   cmd.addAll(encodeint16(y)); // to finish, add X int16, Y int8

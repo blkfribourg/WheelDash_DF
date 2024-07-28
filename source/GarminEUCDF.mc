@@ -605,16 +605,53 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     //engo related code
     if (eucData.useEngo == true && eucData.engoPaired == true) {
-      var cmds = new [4];
+      var cmds = new [5];
+      var xpos = 225;
       //PWM layout11
-      cmds[0] = getWriteCmd("30.2", 165, 182, 4, 2, 0x0f);
+      cmds[0] = getWriteCmd(
+        valueRound(eucData.PWM, "%.1f"),
+        xpos,
+        182,
+        4,
+        2,
+        0x0f
+      );
       //Speed layout 1
-      cmds[1] = getWriteCmd("25.2", 165, 142, 4, 2, 0x0f);
+      cmds[1] = getWriteCmd(
+        valueRound(eucData.correctedSpeed, "%.1f"),
+        xpos,
+        142,
+        4,
+        2,
+        0x0f
+      );
       //Temperature layout 13
-      cmds[2] = getWriteCmd("45.1", 165, 102, 4, 2, 0x0f);
+      cmds[2] = getWriteCmd(
+        valueRound(eucData.temperature, "%.1f"),
+        xpos,
+        102,
+        4,
+        2,
+        0x0f
+      );
       //Battery % layout 14
-      cmds[3] = getWriteCmd("100.0", 165, 62, 4, 2, 0x0f);
-
+      cmds[3] = getWriteCmd(
+        valueRound(currentBatteryPerc, "%.1f"),
+        xpos,
+        62,
+        4,
+        2,
+        0x0f
+      );
+      var currentTime = System.getClockTime();
+      cmds[4] = getWriteCmd(
+        currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d"),
+        100,
+        210,
+        4,
+        1,
+        0x0f
+      );
       bleDelegate.sendCommands(cmds);
     }
   }

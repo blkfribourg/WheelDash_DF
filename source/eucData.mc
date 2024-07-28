@@ -77,8 +77,8 @@ module eucData {
   var useRadar = false;
 
   // Engo
-  var useEngo=true;
-  var engoPaired=false;
+  var useEngo = true;
+  var engoPaired = false;
 
   function getBatteryPercentage() {
     if (voltage != null) {
