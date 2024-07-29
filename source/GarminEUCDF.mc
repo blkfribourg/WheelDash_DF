@@ -556,7 +556,7 @@ class GarminEUCDF extends WatchUi.DataField {
         fieldValues[field_id] = valueRound(maxCurrent, "%.1f");
       }
       if (fieldIDs[field_id] == 17) {
-        fieldNames[field_id] = "MAX CURR";
+        fieldNames[field_id] = "AVG CURR";
         fieldValues[field_id] = valueRound(avgCurrent, "%.1f");
       }
       if (fieldIDs[field_id] == 18) {
@@ -605,46 +605,121 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     //engo related code
     if (eucData.useEngo == true && eucData.engoPaired == true) {
-      var cmds = new [5];
-      var xpos = 225;
-      //PWM layout11
-      cmds[0] = getWriteCmd(
-        valueRound(eucData.PWM, "%.1f"),
-        xpos,
-        182,
-        4,
-        2,
-        0x0f
-      );
-      //Speed layout 1
-      cmds[1] = getWriteCmd(
-        valueRound(eucData.correctedSpeed, "%.1f"),
-        xpos,
-        142,
-        4,
-        2,
-        0x0f
-      );
-      //Temperature layout 13
-      cmds[2] = getWriteCmd(
-        valueRound(eucData.temperature, "%.1f"),
-        xpos,
-        102,
-        4,
-        2,
-        0x0f
-      );
-      //Battery % layout 14
-      cmds[3] = getWriteCmd(
-        valueRound(currentBatteryPerc, "%.1f"),
-        xpos,
-        62,
-        4,
-        2,
-        0x0f
-      );
+      var textArray = new [4];
+      // var xpos = 225;
+      if (eucData.engoPage == 1) {
+        textArray[0] = getHexText(valueRound(eucData.PWM, "%.1f"));
+        textArray[1] = getHexText(valueRound(eucData.correctedSpeed, "%.1f"));
+        textArray[2] = getHexText(valueRound(eucData.temperature, "%.1f"));
+        textArray[3] = getHexText(valueRound(currentBatteryPerc, "%.1f"));
+
+        /*
+        //PWM page 1
+        cmds[0] = getWriteCmd(
+          valueRound(eucData.PWM, "%.1f"),
+          xpos,
+          182,
+          4,
+          2,
+          0x0f
+        );
+        //Speed page 1
+        cmds[1] = getWriteCmd(
+          valueRound(eucData.correctedSpeed, "%.1f"),
+          xpos,
+          142,
+          4,
+          2,
+          0x0f
+        );
+        //Temperature page 1
+        cmds[2] = getWriteCmd(
+          valueRound(eucData.temperature, "%.1f"),
+          xpos,
+          102,
+          4,
+          2,
+          0x0f
+        );
+        //Battery % page 1
+        cmds[3] = getWriteCmd(
+          valueRound(currentBatteryPerc, "%.1f"),
+          xpos,
+          62,
+          4,
+          2,
+          0x0f
+        );*/
+      }
+      if (eucData.engoPage == 2) {
+        //Chrono page 1
+
+        var chrono;
+        if (activityTimerTime != null) {
+          var sec = activityTimerTime / 1000;
+          var mn = sec / 60;
+          chrono = [mn / 60, mn % 60, sec % 60, activityTimerTime % 1000];
+        } else {
+          chrono = null;
+        }
+        textArray[0] = getHexText(
+          chrono[0].format("%02d") +
+            ":" +
+            chrono[1].format("%02d") +
+            ":" +
+            chrono[2].format("%02d")
+        );
+        textArray[1] = getHexText(valueRound(sessionDistance, "%.1f"));
+        textArray[2] = getHexText(valueRound(averageMovingSpeed, "%.1f"));
+        textArray[3] = getHexText(valueRound(maxSpeed, "%.1f"));
+        /*
+        cmds[0] = getWriteCmd(
+          chrono[0].format("%02d") +
+            ":" +
+            chrono[1].format("%02d") +
+            ":" +
+            chrono[2].format("%02d"),
+          xpos,
+          182,
+          4,
+          2,
+          0x0f
+        );
+        //Speed page 1
+        cmds[1] = getWriteCmd(
+          valueRound(sessionDistance, "%.1f"),
+          xpos,
+          142,
+          4,
+          2,
+          0x0f
+        );
+        //Temperature page 1
+        cmds[2] = getWriteCmd(
+          valueRound(averageMovingSpeed, "%.1f"),
+          xpos,
+          102,
+          4,
+          2,
+          0x0f
+        );
+        //Battery % page 1
+        cmds[3] = getWriteCmd(
+          valueRound(maxSpeed, "%.1f"),
+          xpos,
+          62,
+          4,
+          2,
+          0x0f
+        );
+        var 
+        //ff83001b02310032003300340035003600370038003900313000aa
+        */
+      }
+      var data = pagePayload(textArray);
+
       var currentTime = System.getClockTime();
-      cmds[4] = getWriteCmd(
+      var cmdTime = getWriteCmd(
         currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d"),
         100,
         210,
@@ -652,7 +727,9 @@ class GarminEUCDF extends WatchUi.DataField {
         1,
         0x0f
       );
-      bleDelegate.sendCommands(cmds);
+
+      bleDelegate.sendCommands(getPageCmd(data, eucData.engoPage));
+      bleDelegate.sendCommands(cmdTime);
     }
   }
   // Calculate the data to display in the field here

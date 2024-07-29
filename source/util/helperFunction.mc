@@ -221,6 +221,28 @@ function random(min, max) {
 // engo related fct
 
 function getWriteCmd(text, x, y, r, f, c) {
+  var hexText = getHexText(text);
+
+  var cmd = [0xff, 0x37, 0x00, 0x0d + hexText.size()]b;
+  cmd.addAll(encodeint16(x));
+  cmd.addAll(encodeint16(y)); // to finish, add X int16, Y int8
+  cmd.add(r);
+  cmd.add(f);
+  cmd.add(c);
+  cmd.addAll(hexText);
+  cmd.add(0x00);
+  cmd.add(0xaa);
+  return cmd;
+}
+
+function getPageCmd(payload, pageId) {
+  var cmd = [0xff, 0x83, 0x00, payload.size() + 6, pageId]b;
+  cmd.addAll(payload);
+  cmd.add(0xaa);
+  return cmd;
+}
+
+function getHexText(text) {
   var hexText = Toybox.StringUtil.convertEncodedString(text, {
     :fromRepresentation => Toybox.StringUtil.REPRESENTATION_STRING_PLAIN_TEXT,
     :toRepresentation => Toybox.StringUtil.REPRESENTATION_BYTE_ARRAY,
@@ -233,15 +255,15 @@ function getWriteCmd(text, x, y, r, f, c) {
     }
     hexText = leftPadding.addAll(hexText);
   }
+  return hexText;
+}
 
-  var cmd = [0xff, 0x37, 0x00, 0x0d + hexText.size()]b;
-  cmd.addAll(encodeint16(x));
-  cmd.addAll(encodeint16(y)); // to finish, add X int16, Y int8
-  cmd.add(r);
-  cmd.add(f);
-  cmd.add(c);
-  cmd.addAll(hexText);
-  cmd.add(0x00);
-  cmd.add(0xaa);
-  return cmd;
+function pagePayload(textArray) {
+  var payload = []b;
+  for (var i = 0; i < textArray.size(); i++) {
+    payload.addAll(textArray[i]);
+    payload.add(0x00);
+  }
+  //System.println("payload: " + payload);
+  return payload;
 }

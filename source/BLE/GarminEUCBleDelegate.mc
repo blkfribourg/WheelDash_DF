@@ -10,10 +10,13 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var engo_service = null;
   var engo_tx = null;
   var engo_rx = null;
+  var engo_gesture = null;
   var engoDevice = null;
   var EUCDevice = null;
   var engoCfgOK;
   var cfgReadFlag = false;
+  var engoGestureOK = false;
+  var engoGestureNotif = false;
   var _cbCharacteristicWrite = null;
   var rawcmd = null;
   var rawcmdError = null;
@@ -94,7 +97,17 @@ class eucBLEDelegate extends Ble.BleDelegate {
               ? engo_service.getCharacteristic(engoPM.BLE_CHAR_RX)
               : null;
 
-          if (engo_service != null && engo_tx != null && engo_rx != null) {
+          engo_gesture =
+            engo_service != null
+              ? engo_service.getCharacteristic(engoPM.BLE_CHAR_GESTURE_EVENT)
+              : null;
+
+          if (
+            engo_service != null &&
+            engo_tx != null &&
+            engo_rx != null &&
+            engo_gesture != null
+          ) {
             var cccd = engo_tx.getDescriptor(Ble.cccdUuid());
             cccd.requestWrite([0x01, 0x00]b);
 
@@ -278,6 +291,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   }
 
   function onDescriptorWrite(desc, status) {
+    //System.println(desc.getCharacteristic().getUuid());
     var currentChar = desc.getCharacteristic();
     // send getName request for KS using ble queue
     if (currentChar.equals(eucPM.EUC_CHAR)) {
@@ -290,16 +304,21 @@ class eucBLEDelegate extends Ble.BleDelegate {
           { :writeType => Ble.WRITE_TYPE_DEFAULT }
         );
       }
-    }
-    if (currentChar.equals(engo_tx)) {
-      //System.println("desc succ written");
-      engo_rx.requestWrite([0xff, 0x06, 0x00, 0x05, 0xaa]b, {
-        :writeType => Ble.WRITE_TYPE_DEFAULT,
-      });
+    } else {
+      if (currentChar.equals(engo_gesture) && engoGestureNotif == true) {
+        engo_rx.requestWrite([0xff, 0x06, 0x00, 0x05, 0xaa]b, {
+          :writeType => Ble.WRITE_TYPE_DEFAULT,
+        });
+      } else {
+        enableGesture();
+      }
     }
   }
 
   function onCharacteristicChanged(char, value) {
+    //  System.println("SensorNotif: " + engoGestureNotif);
+    // System.println("SensorOK: " + engoGestureOK);
+
     // message7 = "CharacteristicChanged";
     if (char.equals(eucPM.EUC_CHAR)) {
       if (
@@ -334,9 +353,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
           var firm = value.slice(4, 8);
           System.println(firm);
         }
+
         //req cfg list
         sendRawCmd(engo_rx, [0xff, 0xd3, 0x00, 0x05, 0xaa]b);
       }
+
       if (value[1] == 0xd3 && value[value.size() - 1] != 0xaa) {
         cfgReadFlag = true;
         //cfg list
@@ -365,6 +386,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
         // System.println("upload done");
         engoCfgOK = true;
       }
+      if (engoGestureNotif == true && engoGestureOK == false) {
+        sendRawCmd(engo_rx, [0xff, 0x21, 0x00, 0x06, 0x01, 0xaa]b);
+        System.println("gesture enabled");
+        engoGestureOK = true;
+      }
       if (engoCfgOK == true && engoDisplayInit == false) {
         //  System.println("select cfg");
         sendRawCmd(
@@ -374,17 +400,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
             0x73, 0x68, 0x00, 0xaa,
           ]b
         );
-        //sendRawCmd(engo_rx, [0xff, 0x01, 0x00, 0x05, 0x0a]b);
+        //
         //System.println("clearing screen");
-        sendRawCmd(engo_rx, [0xff, 0x01, 0x00, 0x05, 0xaa]b);
+        clearScreen();
         //System.println("displaying page 1");
-        sendRawCmd(
-          engo_rx,
-          [
-            0xff, 0x86, 0x00, 0x0e, 0x01, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00,
-            0x01, 0x00, 0xaa,
-          ]b
-        );
+
         /*
         System.println("writing text layout11");
         sendRawCmd(
@@ -398,12 +418,31 @@ class eucBLEDelegate extends Ble.BleDelegate {
         engoDisplayInit = true;
       }
     }
+    if (engoDisplayInit == true) {
+      //enable gesture
+    }
+    if (char.equals(engo_gesture)) {
+      if (value[0] == 0x01) {
+        System.println("gesture detected");
+        eucData.engoPage = eucData.engoPage + 1;
+        if (eucData.engoPage > 2) {
+          eucData.engoPage = 1;
+        }
+        clearScreen();
+      }
+    }
+  }
+  function clearScreen() {
+    sendRawCmd(engo_rx, [0xff, 0x01, 0x00, 0x05, 0xaa]b);
+    // sendRawCmd(engo_rx, [0xff, 0x86, 0x00, 0x06, eucData.engoPage, 0xaa]b);
   }
   function resetEngo() {
     cfgReadFlag = false;
     cfgList = new [0]b;
     engoDisplayInit = false;
     engoCfgOK = null;
+    engoGestureOK = false;
+    engoGestureNotif = false;
   }
   function checkCfgName(value) {
     cfgList.addAll(value);
@@ -444,7 +483,18 @@ class eucBLEDelegate extends Ble.BleDelegate {
       //System.println("config packet: " + cfgList);
     }
   }
-
+  function enableGesture() {
+    if (engoGestureNotif == false) {
+      try {
+        var gcccd = engo_gesture.getDescriptor(Ble.cccdUuid());
+        gcccd.requestWrite([0x01, 0x00]b);
+        engoGestureNotif = true;
+        //  System.println("gesture notif enabled");
+      } catch (e) {
+        System.println("could not enable notif on gesture");
+      }
+    }
+  }
   function sendCmd(cmd) {
     //Sys.println("enter sending command " + cmd);
 
@@ -458,15 +508,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
   function sendCommands(cmds) {
     if (engoCfgOK == true && engoDisplayInit == true) {
-      for (var i = 0; i < cmds.size(); i++) {
-        if (cmds[i] != null) {
-          sendRawCmd(engo_rx, cmds[i]);
-          // System.println(cmds[i]);
-        }
-      }
+      sendRawCmd(engo_rx, cmds);
+      // System.println(cmds[i]);
     }
   }
-
+  //coder même principe pour descriptor ? ou implementer même methode qu'activelook
   function sendRawCmd(char, buffer) {
     var bufferToSend = []b;
     if (rawcmdError != null) {
