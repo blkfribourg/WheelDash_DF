@@ -78,6 +78,8 @@ class GarminEUCDF extends WatchUi.DataField {
   var mVehTotalCntField = null;
   var _alertDisplayed = false;
   var nb_Font;
+
+  var engoBattReq = 60;
   //var RadarConnState = -1;
   private var cDrawables = {};
 
@@ -605,13 +607,24 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     //engo related code
     if (eucData.useEngo == true && eucData.engoPaired == true) {
-      var textArray = new [4];
+      engoBattReq = engoBattReq + 1;
+      if (engoBattReq > 60) {
+        engoBattReq = 0;
+        bleDelegate.getEngoBattery();
+      }
+      var textArray = new [6];
+
       // var xpos = 225;
+      var currentTime = System.getClockTime();
+      textArray[0] = getHexText(eucData.engoBattery + " %");
+      textArray[1] = getHexText(
+        currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d")
+      );
       if (eucData.engoPage == 1) {
-        textArray[0] = getHexText(valueRound(eucData.PWM, "%.1f"));
-        textArray[1] = getHexText(valueRound(eucData.correctedSpeed, "%.1f"));
-        textArray[2] = getHexText(valueRound(eucData.temperature, "%.1f"));
-        textArray[3] = getHexText(valueRound(currentBatteryPerc, "%.1f"));
+        textArray[2] = getHexText(valueRound(eucData.PWM, "%.1f"));
+        textArray[3] = getHexText(valueRound(eucData.correctedSpeed, "%.1f"));
+        textArray[4] = getHexText(valueRound(eucData.temperature, "%.1f"));
+        textArray[5] = getHexText(valueRound(currentBatteryPerc, "%.1f"));
 
         /*
         //PWM page 1
@@ -662,16 +675,16 @@ class GarminEUCDF extends WatchUi.DataField {
         } else {
           chrono = null;
         }
-        textArray[0] = getHexText(
+        textArray[2] = getHexText(
           chrono[0].format("%02d") +
             ":" +
             chrono[1].format("%02d") +
             ":" +
             chrono[2].format("%02d")
         );
-        textArray[1] = getHexText(valueRound(sessionDistance, "%.1f"));
-        textArray[2] = getHexText(valueRound(averageMovingSpeed, "%.1f"));
-        textArray[3] = getHexText(valueRound(maxSpeed, "%.1f"));
+        textArray[3] = getHexText(valueRound(sessionDistance, "%.1f"));
+        textArray[4] = getHexText(valueRound(averageMovingSpeed, "%.1f"));
+        textArray[5] = getHexText(valueRound(maxSpeed, "%.1f"));
         /*
         cmds[0] = getWriteCmd(
           chrono[0].format("%02d") +
@@ -717,7 +730,7 @@ class GarminEUCDF extends WatchUi.DataField {
         */
       }
       var data = pagePayload(textArray);
-
+      /*
       var currentTime = System.getClockTime();
       var cmdTime = getWriteCmd(
         currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d"),
@@ -727,9 +740,9 @@ class GarminEUCDF extends WatchUi.DataField {
         1,
         0x0f
       );
-
+*/
       bleDelegate.sendCommands(getPageCmd(data, eucData.engoPage));
-      bleDelegate.sendCommands(cmdTime);
+      //    bleDelegate.sendCommands(cmdTime);
     }
   }
   // Calculate the data to display in the field here

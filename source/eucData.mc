@@ -80,6 +80,7 @@ module eucData {
   var useEngo = true;
   var engoPaired = false;
   var engoPage = 1;
+  var engoBattery = 100;
 
   function getBatteryPercentage() {
     if (voltage != null) {

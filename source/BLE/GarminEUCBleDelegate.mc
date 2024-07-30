@@ -357,7 +357,10 @@ class eucBLEDelegate extends Ble.BleDelegate {
         //req cfg list
         sendRawCmd(engo_rx, [0xff, 0xd3, 0x00, 0x05, 0xaa]b);
       }
-
+      if (value[0] == 0xff && value[1] == 0x05) {
+        //battery
+        eucData.engoBattery = value[4];
+      }
       if (value[1] == 0xd3 && value[value.size() - 1] != 0xaa) {
         cfgReadFlag = true;
         //cfg list
@@ -435,6 +438,9 @@ class eucBLEDelegate extends Ble.BleDelegate {
   function clearScreen() {
     sendRawCmd(engo_rx, [0xff, 0x01, 0x00, 0x05, 0xaa]b);
     // sendRawCmd(engo_rx, [0xff, 0x86, 0x00, 0x06, eucData.engoPage, 0xaa]b);
+  }
+  function getEngoBattery() {
+    sendRawCmd(engo_rx, [0xff, 0x05, 0x00, 0x05, 0xaa]b);
   }
   function resetEngo() {
     cfgReadFlag = false;
