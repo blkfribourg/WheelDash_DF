@@ -77,7 +77,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var mVehTotalCntField = null;
   var _alertDisplayed = false;
   var nb_Font;
-  var RadarConnState = -1;
+  //var RadarConnState = -1;
   private var cDrawables = {};
 
   function initialize() {
@@ -249,27 +249,29 @@ class GarminEUCDF extends WatchUi.DataField {
     );
 
     if (eucData.useRadar == true) {
-      if (eucData.radar != null) {
+      /*  if (eucData.radar != null) {
         try {
           RadarConnState = eucData.radar.getDeviceState().state;
           if (RadarConnState > 2) {
-            mVehRelativeSpdField = createField(
-              "VehRelativeSpd",
-              VEH_RELATIVE_SPD_ID,
-              FitContributor.DATA_TYPE_UINT8,
-              { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
-            );
-            mVehTotalCntField = createField(
-              "VehTotalCnt",
-              VEH_TOTAL_CNT_ID,
-              FitContributor.DATA_TYPE_UINT16,
-              { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
-            );
+            */
+      mVehRelativeSpdField = createField(
+        "VehRelativeSpd",
+        VEH_RELATIVE_SPD_ID,
+        FitContributor.DATA_TYPE_UINT8,
+        { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
+      );
+      mVehTotalCntField = createField(
+        "VehTotalCnt",
+        VEH_TOTAL_CNT_ID,
+        FitContributor.DATA_TYPE_UINT16,
+        { :mesgType => FitContributor.MESG_TYPE_RECORD, :units => "" }
+      );
+      /*
           }
         } catch (e instanceof Lang.Exception) {
           // System.println(e.getErrorMessage());
         }
-      }
+      }*/
     }
 
     // set fields to 0
@@ -316,7 +318,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var avgPower = 0.0;
   var movingmsec = 0.0;
   var averageMovingSpeed = 0.0;
-  var EUCBatteryPercStart = null;
+  var EUCBatteryPercStart = 0;
   var batteryUsg = 0;
   var currentbatteryUsg = 0;
   var batteryUsgValues = new [0];
@@ -419,7 +421,7 @@ class GarminEUCDF extends WatchUi.DataField {
     //mAvgPowerField.setData(sumPower / callNb); // id 14
 
     if (currentBatteryPerc > 0) {
-      if (EUCBatteryPercStart == null) {
+      if (EUCBatteryPercStart == 0) {
         EUCBatteryPercStart = currentBatteryPerc;
       } else {
         if (EUCBatteryPercStart < currentBatteryPerc) {
@@ -427,8 +429,7 @@ class GarminEUCDF extends WatchUi.DataField {
         }
       }
       if (sessionDistance > 0) {
-        currentbatteryUsg =
-          (EUCBatteryPercStart - currentBatteryPerc) / sessionDistance;
+        currentbatteryUsg = EUCBatteryPercStart - currentBatteryPerc;
         batteryUsgValues.add(currentbatteryUsg);
         if (batteryUsgValues.size() > 10) {
           batteryUsgValues = batteryUsgValues.slice(1, batteryUsgValues.size());
@@ -442,7 +443,7 @@ class GarminEUCDF extends WatchUi.DataField {
             }
           }
           if (valueCnt != 0) {
-            batteryUsg = tempBatteryUsg / valueCnt;
+            batteryUsg = tempBatteryUsg / valueCnt / sessionDistance;
           }
 
           mAvgUsedBatteryField.setData(batteryUsg);
@@ -450,7 +451,7 @@ class GarminEUCDF extends WatchUi.DataField {
       }
     }
 
-    if (eucData.useRadar == true && RadarConnState > 2) {
+    if (eucData.useRadar == true) {
       mVehRelativeSpdField.setData(eucData.variaTargetSpeed);
       mVehTotalCntField.setData(eucData.totalVehCount);
     }
@@ -642,6 +643,7 @@ class GarminEUCDF extends WatchUi.DataField {
       if (delay < 0) {
         updateFitData(info);
         getFieldValues();
+
         /*
         EUCAlarms.checkAlarms();
         
@@ -1328,8 +1330,8 @@ class GarminEUCDF extends WatchUi.DataField {
       mMaxSpeedField.setData(maxSpeed);
       mMaxPWMField.setData(maxPWM);
       mMaxTempField.setData(maxTemp);
-      mMinVoltageField.setData(minVoltage);
-      mMaxVoltageField.setData(maxVoltage);
+      //mMinVoltageField.setData(minVoltage);
+      //mMaxVoltageField.setData(maxVoltage);
       mMinBatteryField.setData(minBatteryPerc);
     }
   }
