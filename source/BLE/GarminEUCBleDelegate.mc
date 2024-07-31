@@ -3,9 +3,8 @@ using Toybox.Application.Storage;
 import Toybox.Lang;
 
 class eucBLEDelegate extends Ble.BleDelegate {
-  var device = null;
-  var service = null;
-  var char = null;
+  var euc_service = null;
+  var euc_char = null;
   var decoder = null;
   var engo_service = null;
   var engo_tx = null;
@@ -26,12 +25,12 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var isBleParamsUpdated as Toybox.Lang.Boolean = false;
   function initialize(_decoder) {
     BleDelegate.initialize();
-    char = eucPM.EUC_CHAR;
+    //char = eucPM.EUC_CHAR;
 
     decoder = _decoder;
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
-    eucData.isFirst = false;
+    //eucData.isFirst = false;
     if (eucData.useRadar == true) {
       eucData.radar = new AntPlus.BikeRadar(null);
     }
@@ -59,11 +58,13 @@ class eucBLEDelegate extends Ble.BleDelegate {
     if (state == Ble.CONNECTION_STATE_CONNECTED) {
       if (device.getService(eucPM.EUC_SERVICE) != null) {
         var cccd;
-        service = device.getService(eucPM.EUC_SERVICE);
-        char =
-          service != null ? service.getCharacteristic(eucPM.EUC_CHAR) : null;
-        if (service != null && char != null) {
-          cccd = char.getDescriptor(Ble.cccdUuid());
+        euc_service = device.getService(eucPM.EUC_SERVICE);
+        euc_char =
+          euc_service != null
+            ? euc_service.getCharacteristic(eucPM.EUC_CHAR)
+            : null;
+        if (euc_service != null && euc_char != null) {
+          cccd = euc_char.getDescriptor(Ble.cccdUuid());
           cccd.requestWrite([0x01, 0x00]b);
 
           eucData.paired = true;
@@ -83,7 +84,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
       if (eucData.useEngo == true) {
         if (device.getService(engoPM.BLE_SERV_ACTIVELOOK) != null) {
-          System.println("Horn connected");
+          System.println("Engo connected");
 
           engo_service = device.getService(engoPM.BLE_SERV_ACTIVELOOK);
 
@@ -108,6 +109,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
             engo_rx != null &&
             engo_gesture != null
           ) {
+            System.println("EngoNotifOn");
             var cccd = engo_tx.getDescriptor(Ble.cccdUuid());
             cccd.requestWrite([0x01, 0x00]b);
 
@@ -258,7 +260,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
             result = scanResults.next()
           ) {
             if (result instanceof Ble.ScanResult) {
-              System.println(result.getServiceUuids().next());
+              // System.println(result.getServiceUuids().next());
               if (
                 contains(
                   result.getServiceUuids(),
@@ -266,7 +268,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
                   result
                 ) == true
               ) {
-                System.println("HornFOund!");
+                System.println("EngoFound!");
                 Ble.setScanState(Ble.SCAN_STATE_OFF);
                 try {
                   // Do something here
@@ -285,18 +287,23 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
       var result = loadSR();
       if (result != false) {
-        //        EUCDevice = Ble.pairDevice(result as Ble.ScanResult);
+        try {
+          // Do something here
+          EUCDevice = Ble.pairDevice(result as Ble.ScanResult);
+        } catch (e instanceof Lang.Exception) {
+          // System.println("EUCError: " + e.getErrorMessage());
+        }
       }
     }
   }
 
   function onDescriptorWrite(desc, status) {
-    //System.println(desc.getCharacteristic().getUuid());
+    //System.println("UUID:" + desc.getCharacteristic().getUuid());
     var currentChar = desc.getCharacteristic();
     // send getName request for KS using ble queue
     if (currentChar.equals(eucPM.EUC_CHAR)) {
       if (eucData.wheelBrand == 2 || eucData.wheelBrand == 3) {
-        char.requestWrite(
+        euc_char.requestWrite(
           [
             0xaa, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x9b, 0x14, 0x5a, 0x5a,
@@ -305,12 +312,15 @@ class eucBLEDelegate extends Ble.BleDelegate {
         );
       }
     } else {
-      if (currentChar.equals(engo_gesture) && engoGestureNotif == true) {
-        engo_rx.requestWrite([0xff, 0x06, 0x00, 0x05, 0xaa]b, {
-          :writeType => Ble.WRITE_TYPE_DEFAULT,
-        });
-      } else {
-        enableGesture();
+      if (eucData.engoPaired == true) {
+        System.println("EngoPairedIsTrue, descript");
+        if (currentChar.equals(engo_gesture) && engoGestureNotif == true) {
+          engo_rx.requestWrite([0xff, 0x06, 0x00, 0x05, 0xaa]b, {
+            :writeType => Ble.WRITE_TYPE_DEFAULT,
+          });
+        } else {
+          enableGesture();
+        }
       }
     }
   }
@@ -319,8 +329,9 @@ class eucBLEDelegate extends Ble.BleDelegate {
     //  System.println("SensorNotif: " + engoGestureNotif);
     // System.println("SensorOK: " + engoGestureOK);
 
-    // message7 = "CharacteristicChanged";
-    if (char.equals(eucPM.EUC_CHAR)) {
+    System.println("CharacteristicChanged");
+    if (char.equals(euc_char)) {
+      System.println("EUCCharChanged");
       if (
         decoder != null &&
         (eucData.wheelBrand == 0 || eucData.wheelBrand == 1)
@@ -347,11 +358,13 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
     }
     if (char.equals(engo_tx)) {
+      System.println(value);
+      System.println("EngoCharChanged");
       if (value[1] == 0x06) {
         //firmware vers
         if (value.size() > 9) {
           var firm = value.slice(4, 8);
-          System.println(firm);
+          System.println("firm: " + firm);
         }
 
         //req cfg list
@@ -501,16 +514,6 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
     }
   }
-  function sendCmd(cmd) {
-    //Sys.println("enter sending command " + cmd);
-
-    if (service != null && char != null && cmd != "") {
-      var enc_cmd = string_to_byte_array(cmd as String);
-      // Sys.println("sending command " + enc_cmd.toString());
-      char.requestWrite(enc_cmd, { :writeType => Ble.WRITE_TYPE_DEFAULT });
-      //  Sys.println("command sent !");
-    }
-  }
 
   function sendCommands(cmds) {
     if (engoCfgOK == true && engoDisplayInit == true) {
@@ -579,15 +582,6 @@ class eucBLEDelegate extends Ble.BleDelegate {
   }
   var shouldAdd;
 
-  function getChar() {
-    return char;
-  }
-
-  function manualUnpair() {
-    if (device != null) {
-      Ble.unpairDevice(device);
-    }
-  }
   function stringToPadByteArray(str, size, leftPadding) {
     var result = StringUtil.convertEncodedString(str, {
       :fromRepresentation => StringUtil.REPRESENTATION_STRING_PLAIN_TEXT,

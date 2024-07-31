@@ -606,7 +606,11 @@ class GarminEUCDF extends WatchUi.DataField {
       }
     }
     //engo related code
-    if (eucData.useEngo == true && eucData.engoPaired == true) {
+    if (
+      eucData.useEngo == true &&
+      eucData.engoPaired == true &&
+      bleDelegate.engoDisplayInit == true
+    ) {
       engoBattReq = engoBattReq + 1;
       if (engoBattReq > 60) {
         engoBattReq = 0;
@@ -616,7 +620,12 @@ class GarminEUCDF extends WatchUi.DataField {
 
       // var xpos = 225;
       var currentTime = System.getClockTime();
-      textArray[0] = getHexText(eucData.engoBattery + " %");
+      if (eucData.engoBattery != null) {
+        textArray[0] = getHexText(eucData.engoBattery + " %");
+      } else {
+        textArray[0] = getHexText(" ");
+      }
+
       textArray[1] = getHexText(
         currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d")
       );
@@ -741,6 +750,7 @@ class GarminEUCDF extends WatchUi.DataField {
         0x0f
       );
 */
+      System.println("sendCmd");
       bleDelegate.sendCommands(getPageCmd(data, eucData.engoPage));
       //    bleDelegate.sendCommands(cmdTime);
     }
@@ -780,7 +790,7 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     eucData.timerState = activityTimerState;
 
-    eucData.paired = true;
+    //eucData.paired = true;
     if (eucData.paired == true) {
       if (delay < 0) {
         updateFitData(info);

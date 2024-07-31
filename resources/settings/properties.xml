@@ -5,23 +5,23 @@
     <property id="logoEmpty" type="string">empty</property>
     <property id="logoColor" type="string">1f1f1f</property>
     <property id="linesColor" type="string">ffffff</property>
-    <property id="font" type="number">0</property>
+    <property id="font" type="number">1</property>
     <property id="txtColor" type="string">ffffff</property>
     <property id="txtColor_unpr" type="string">ff8000</property>
     <property id="logoOffsetx" type="number">0</property>
     <property id="logoOffsety" type="number">0</property>
     <property id="displayNorth" type="boolean">false</property>
-    <property id="displayWind" type="boolean">false</property>
+    <property id="displayWind" type="boolean">true</property>
     <property id="vibeIntensity" type="number">90</property>
     <property id="motorbikeHeadset" type="boolean">false</property>
     <property id="useRadar" type="boolean">false</property>
     <property id="variaFarAlarmDistThr" type="number">60</property>
     <property id="variaCloseAlarmDistThr" type="number">20</property>
-    <property id ="fieldNB" type="number">6</property>
+    <property id ="fieldNB" type="number">8</property>
     
     <property id="profile" type="number">1</property>
-    <property id="wheelBrand_p1" type="number">0</property>
-    <property id="wheelName_p1" type="string">Profile 1</property>
+    <property id="wheelBrand_p1" type="number">1</property>
+    <property id="wheelName_p1" type="string">Shermax2</property>
     <property id="rotationSpeed_PWM_p1" type="float">65.2</property>
     <property id="rotationVoltage_PWM_p1" type="float">81.5</property>
     <property id="powerFactor_PWM_p1" type="float">0.9</property>
@@ -29,7 +29,7 @@
     <property id="speedCorrectionFactor_p1" type="float">1.0</property>
     <property id="currentCorrection_p1" type="number">0</property>
     <property id="alarmThreshold_PWM_p1" type="number">80</property>
-    <property id="alarmThreshold2_PWM_p1" type="number">0</property>
+    <property id="alarmThreshold2_PWM_p1" type="number">90</property>
     <property id="alarmThreshold_speed_p1" type="number">0</property>
     <property id="alarmThreshold_temp_p1" type="number">0</property>
     <property id="begodeCF_p1" type="boolean">false</property>
@@ -65,14 +65,14 @@
     <property id="begodeCF_p3" type="boolean">false</property>
 
     <property id="debugMode" type="boolean">false</property>
-    <property id="field1" type="number">0</property>
-    <property id="field2" type="number">1</property>
-    <property id="field3" type="number">2</property>
-    <property id="field4" type="number">3</property>
+    <property id="field1" type="number">6</property>
+    <property id="field2" type="number">0</property>
+    <property id="field3" type="number">11</property>
+    <property id="field4" type="number">1</property>
     <property id="field5" type="number">4</property>
-    <property id="field6" type="number">5</property>
-    <property id="field7" type="number">6</property>
-    <property id="field8" type="number">7</property>
+    <property id="field6" type="number">13</property>
+    <property id="field7" type="number">8</property>
+    <property id="field8" type="number">2</property>
     
     
     
