@@ -222,57 +222,59 @@ class VeteranDecoder {
   }
 
   function processFrame(value) {
-    System.println("procFrame: " + value);
-    eucData.voltage =
-      value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 4,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 100.0;
-    eucData.speed =
-      value
-        .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-          :offset => 6,
+    // System.println("procFrame: " + value);
+    if (value.size() > 35) {
+      eucData.voltage =
+        value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+          :offset => 4,
           :endianness => Lang.ENDIAN_BIG,
-        })
-        .abs() / 10.0;
-    eucData.Phcurrent =
-      value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 16,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 10.0;
-    eucData.tripDistance =
-      (((value[8 + 2] & 0xff) << 24) |
-        ((value[8 + 3] & 0xff) << 16) |
-        ((value[8] & 0xff) << 8) |
-        (value[8 + 1] & 0xff)) /
-      1000.0;
-    eucData.totalDistance =
-      (((value[12 + 2] & 0xff) << 24) |
-        ((value[12 + 3] & 0xff) << 16) |
-        ((value[12] & 0xff) << 8) |
-        (value[12 + 1] & 0xff)) /
-      1000.0;
+        }) / 100.0;
+      eucData.speed =
+        value
+          .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+            :offset => 6,
+            :endianness => Lang.ENDIAN_BIG,
+          })
+          .abs() / 10.0;
+      eucData.Phcurrent =
+        value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+          :offset => 16,
+          :endianness => Lang.ENDIAN_BIG,
+        }) / 10.0;
+      eucData.tripDistance =
+        (((value[8 + 2] & 0xff) << 24) |
+          ((value[8 + 3] & 0xff) << 16) |
+          ((value[8] & 0xff) << 8) |
+          (value[8 + 1] & 0xff)) /
+        1000.0;
+      eucData.totalDistance =
+        (((value[12 + 2] & 0xff) << 24) |
+          ((value[12 + 3] & 0xff) << 16) |
+          ((value[12] & 0xff) << 8) |
+          (value[12 + 1] & 0xff)) /
+        1000.0;
 
-    /*
+      /*
     eucData.temperature =
       value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
         :offset => 18,
         :endianness => Lang.ENDIAN_BIG,
       }) / 100.0;
       */
-    //from eucWatch :
-    eucData.temperature = ((value[18] << 8) | value[19]) / 100;
-    // implement chargeMode/speedAlert/speedTiltback later
-    eucData.version =
-      value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 28,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 1000.0;
-    eucData.hPWM =
-      value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 34,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 100.0;
+      //from eucWatch :
+      eucData.temperature = ((value[18] << 8) | value[19]) / 100;
+      // implement chargeMode/speedAlert/speedTiltback later
+      eucData.version =
+        value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+          :offset => 28,
+          :endianness => Lang.ENDIAN_BIG,
+        }) / 1000.0;
+      eucData.hPWM =
+        value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+          :offset => 34,
+          :endianness => Lang.ENDIAN_BIG,
+        }) / 100.0;
+    }
   }
 }
 

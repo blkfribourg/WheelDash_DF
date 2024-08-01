@@ -336,10 +336,14 @@ class eucBLEDelegate extends Ble.BleDelegate {
     if (char.equals(euc_char)) {
       if (firstChar == true) {
         // beep
-        euc_char.requestWrite(string_to_byte_array("b" as String), {
-          :writeType => Ble.WRITE_TYPE_DEFAULT,
-        });
-        firstChar = false;
+        try {
+          euc_char.requestWrite(string_to_byte_array("b" as String), {
+            :writeType => Ble.WRITE_TYPE_DEFAULT,
+          });
+          firstChar = false;
+        } catch (e instanceof Lang.Exception) {
+          // System.println(e.getErrorMessage());
+        }
       }
       //  System.println("EUCCharChanged");
       if (
