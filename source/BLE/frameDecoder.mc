@@ -222,6 +222,7 @@ class VeteranDecoder {
   }
 
   function processFrame(value) {
+    System.println("procFrame: " + value);
     eucData.voltage =
       value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
         :offset => 4,

@@ -3,6 +3,7 @@ using Toybox.Application.Storage;
 import Toybox.Lang;
 
 class eucBLEDelegate extends Ble.BleDelegate {
+  var firstChar = null;
   var euc_service = null;
   var euc_char = null;
   var decoder = null;
@@ -68,6 +69,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
           cccd.requestWrite([0x01, 0x00]b);
 
           eucData.paired = true;
+          firstChar = true;
 
           //        eucData.timeWhenConnected = new Time.Moment(Time.now().value());
 
@@ -80,6 +82,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
         } else {
           Ble.unpairDevice(device);
           eucData.paired = false;
+          firstChar = false;
         }
       }
       if (eucData.useEngo == true) {
@@ -124,7 +127,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     } else {
       if (engoDevice != null && engoDevice.equals(device)) {
         eucData.engoPaired = false;
-        System.println("Engo Disconnected");
+        //System.println("Engo Disconnected");
         resetEngo();
         try {
           Ble.unpairDevice(device);
@@ -135,7 +138,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
       if (EUCDevice != null && EUCDevice.equals(device)) {
         eucData.paired = false;
-
+        firstChar = false;
         try {
           Ble.unpairDevice(device);
         } catch (e instanceof Lang.Exception) {
@@ -313,7 +316,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
     } else {
       if (eucData.engoPaired == true) {
-        System.println("EngoPairedIsTrue, descript");
+        // System.println("EngoPairedIsTrue, descript");
         if (currentChar.equals(engo_gesture) && engoGestureNotif == true) {
           engo_rx.requestWrite([0xff, 0x06, 0x00, 0x05, 0xaa]b, {
             :writeType => Ble.WRITE_TYPE_DEFAULT,
@@ -329,9 +332,16 @@ class eucBLEDelegate extends Ble.BleDelegate {
     //  System.println("SensorNotif: " + engoGestureNotif);
     // System.println("SensorOK: " + engoGestureOK);
 
-    System.println("CharacteristicChanged");
+    //   System.println("CharacteristicChanged");
     if (char.equals(euc_char)) {
-      System.println("EUCCharChanged");
+      if (firstChar == true) {
+        // beep
+        euc_char.requestWrite(string_to_byte_array("b" as String), {
+          :writeType => Ble.WRITE_TYPE_DEFAULT,
+        });
+        firstChar = false;
+      }
+      //  System.println("EUCCharChanged");
       if (
         decoder != null &&
         (eucData.wheelBrand == 0 || eucData.wheelBrand == 1)
@@ -358,13 +368,13 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
     }
     if (char.equals(engo_tx)) {
-      System.println(value);
-      System.println("EngoCharChanged");
+      //System.println(value);
+      //System.println("EngoCharChanged");
       if (value[1] == 0x06) {
         //firmware vers
         if (value.size() > 9) {
           var firm = value.slice(4, 8);
-          System.println("firm: " + firm);
+          //System.println("firm: " + firm);
         }
 
         //req cfg list
@@ -404,7 +414,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
       if (engoGestureNotif == true && engoGestureOK == false) {
         sendRawCmd(engo_rx, [0xff, 0x21, 0x00, 0x06, 0x01, 0xaa]b);
-        System.println("gesture enabled");
+        //System.println("gesture enabled");
         engoGestureOK = true;
       }
       if (engoCfgOK == true && engoDisplayInit == false) {
