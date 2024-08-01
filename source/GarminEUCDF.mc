@@ -122,31 +122,7 @@ class GarminEUCDF extends WatchUi.DataField {
         View.findDrawableById("RecordingIndicator");
     }
   }*/
-  public function restoreValues(
-    _maxTemp,
-    _minTemp,
-    _maxVoltage,
-    _minVoltage,
-    _maxBatteryPerc,
-    _minBatteryPerc,
-    _sessionDistance,
-    _avgSpeed,
-    _maxPWM,
-    _movingmsec
-    // _startingMoment
-  ) {
-    maxTemp = _maxTemp;
-    minTemp = _minTemp;
-    maxVoltage = _maxVoltage;
-    minVoltage = _minVoltage;
-    maxBatteryPerc = _maxBatteryPerc;
-    minBatteryPerc = _minBatteryPerc;
-    sessionDistance = _sessionDistance;
-    avgSpeed = _avgSpeed;
-    maxPWM = _maxPWM;
-    movingmsec = _movingmsec;
-    // startingMoment = _startingMoment;
-  }
+
   function fieldsInitialize() {
     fieldIDs = [
       AppStorage.getSetting("field1"),
