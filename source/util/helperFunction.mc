@@ -255,7 +255,7 @@ function getHexText(text) {
     }
     hexText = leftPadding.addAll(hexText);
   }
-  hexText.add(0x20); //right padding 1 char for proper clearing
+  hexText.addAll([0x20, 0x20]b); //right padding 2 char for proper clearing
   return hexText;
 }
 

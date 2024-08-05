@@ -106,8 +106,14 @@
 
     <string id="variaCloseAlarmDistThr">Varia close distance alarm threshold</string>
     <string id="variaFarAlarmDistThr">Varia far distance alarm threshold</string>
+    
+    <string id="useEngo">ActiveView Engo support</string>
+    <string id="engoTouch">Switch view mode</string>    
+    <string id="engoTouch0">Gesture (proximity sensor)</string>
+    <string id="engoTouch1">Capacitative Button</string>
+    
+    
     <!-- FIT Strings-->
-
     <string id="speed_graph_label">Speed</string>
     <string id="speed_label">Speed</string>
     <string id="speed_unit_kmh">km/h</string>

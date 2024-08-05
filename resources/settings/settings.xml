@@ -334,6 +334,22 @@
                 max="150"
             />
         </setting>
+        <setting
+            propertyKey="@Properties.useEngo"
+            title="@Strings.useEngo">
+                <settingConfig
+                    type="boolean"
+                />
+        </setting>
+        <setting
+                propertyKey="@Properties.engoTouch"
+                title="@Strings.engoTouch">
+                <settingConfig type="list">
+                    <listEntry value="0">@Strings.engoTouch0</listEntry>
+                    <listEntry value="1">@Strings.engoTouch1</listEntry>                    
+                </settingConfig>
+            </setting>
+         
 <!--
             <setting
                 propertyKey="@Properties.resumeDectectionMethod"

@@ -10,7 +10,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var engo_service = null;
   var engo_tx = null;
   var engo_rx = null;
-  var engo_gesture = null;
+  var engo_userInput = null;
   var engoDevice = null;
   var EUCDevice = null;
   var engoCfgOK;
@@ -101,16 +101,16 @@ class eucBLEDelegate extends Ble.BleDelegate {
               ? engo_service.getCharacteristic(engoPM.BLE_CHAR_RX)
               : null;
 
-          engo_gesture =
+          engo_userInput =
             engo_service != null
-              ? engo_service.getCharacteristic(engoPM.BLE_CHAR_GESTURE_EVENT)
+              ? engo_service.getCharacteristic(engoPM.BLE_CHAR_USERINPUT)
               : null;
 
           if (
             engo_service != null &&
             engo_tx != null &&
             engo_rx != null &&
-            engo_gesture != null
+            engo_userInput != null
           ) {
             System.println("EngoNotifOn");
             var cccd = engo_tx.getDescriptor(Ble.cccdUuid());
@@ -317,7 +317,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     } else {
       if (eucData.engoPaired == true) {
         // System.println("EngoPairedIsTrue, descript");
-        if (currentChar.equals(engo_gesture) && engoGestureNotif == true) {
+        if (currentChar.equals(engo_userInput) && engoGestureNotif == true) {
           engo_rx.requestWrite([0xff, 0x06, 0x00, 0x05, 0xaa]b, {
             :writeType => Ble.WRITE_TYPE_DEFAULT,
           });
@@ -417,7 +417,10 @@ class eucBLEDelegate extends Ble.BleDelegate {
         engoCfgOK = true;
       }
       if (engoGestureNotif == true && engoGestureOK == false) {
-        sendRawCmd(engo_rx, [0xff, 0x21, 0x00, 0x06, 0x01, 0xaa]b);
+        if (eucData.engoTouch == 0) {
+          sendRawCmd(engo_rx, [0xff, 0x21, 0x00, 0x06, 0x01, 0xaa]b);
+        }
+
         //System.println("gesture enabled");
         engoGestureOK = true;
       }
@@ -451,7 +454,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     if (engoDisplayInit == true) {
       //enable gesture
     }
-    if (char.equals(engo_gesture)) {
+    if (char.equals(engo_userInput)) {
       if (value[0] == 0x01) {
         System.println("gesture detected");
         eucData.engoPage = eucData.engoPage + 1;
@@ -519,7 +522,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   function enableGesture() {
     if (engoGestureNotif == false) {
       try {
-        var gcccd = engo_gesture.getDescriptor(Ble.cccdUuid());
+        var gcccd = engo_userInput.getDescriptor(Ble.cccdUuid());
         gcccd.requestWrite([0x01, 0x00]b);
         engoGestureNotif = true;
         //  System.println("gesture notif enabled");

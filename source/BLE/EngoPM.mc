@@ -34,10 +34,20 @@ module engoPM {
       0x0783b03e8535b5a0l,
       0x7140a304d2495cbbl
     );
-
+  var BLE_CHAR_TOUCH_EVENT as Toybox.BluetoothLowEnergy.Uuid =
+    Toybox.BluetoothLowEnergy.longToUuid(
+      0x0783b03e8535b5a0l,
+      0x7140a304d2495cbcl
+    );
+  var BLE_CHAR_USERINPUT = BLE_CHAR_GESTURE_EVENT;
   var engoProfileDef;
 
   function init() {
+    if (eucData.engoTouch == 0) {
+      BLE_CHAR_USERINPUT = BLE_CHAR_TOUCH_EVENT;
+    } else {
+      BLE_CHAR_USERINPUT = BLE_CHAR_GESTURE_EVENT;
+    }
     engoProfileDef = {
       :uuid => BLE_SERV_ACTIVELOOK,
       :characteristics => [
@@ -54,7 +64,7 @@ module engoPM {
           :descriptors => [Ble.cccdUuid()],
         },
         {
-          :uuid => BLE_CHAR_GESTURE_EVENT,
+          :uuid => BLE_CHAR_USERINPUT,
           :descriptors => [Ble.cccdUuid()],
         },
       ],

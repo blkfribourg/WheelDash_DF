@@ -18,7 +18,10 @@
     <property id="variaFarAlarmDistThr" type="number">60</property>
     <property id="variaCloseAlarmDistThr" type="number">20</property>
     <property id ="fieldNB" type="number">8</property>
+    <property id ="useEngo" type="boolean">false</property>
+    <property id ="engoTouch" type="number">0</property>
     
+
     <property id="profile" type="number">1</property>
     <property id="wheelBrand_p1" type="number">1</property>
     <property id="wheelName_p1" type="string">Shermax2</property>
