@@ -66,11 +66,14 @@ class eucBLEDelegate extends Ble.BleDelegate {
             : null;
         if (euc_service != null && euc_char != null) {
           cccd = euc_char.getDescriptor(Ble.cccdUuid());
-          cccd.requestWrite([0x01, 0x00]b);
+          try {
+            cccd.requestWrite([0x01, 0x00]b);
 
-          eucData.paired = true;
-          firstChar = true;
-
+            eucData.paired = true;
+            firstChar = true;
+          } catch (e instanceof Lang.Exception) {
+            // System.println(e.getErrorMessage());
+          }
           //        eucData.timeWhenConnected = new Time.Moment(Time.now().value());
 
           /* NOT WORKING
@@ -80,9 +83,13 @@ class eucBLEDelegate extends Ble.BleDelegate {
           eucData.name = "Unknown";
         }*/
         } else {
-          Ble.unpairDevice(device);
-          eucData.paired = false;
-          firstChar = false;
+          try {
+            Ble.unpairDevice(device);
+            eucData.paired = false;
+            firstChar = false;
+          } catch (e instanceof Lang.Exception) {
+            // System.println(e.getErrorMessage());
+          }
         }
       }
       if (eucData.useEngo == true) {
@@ -114,13 +121,20 @@ class eucBLEDelegate extends Ble.BleDelegate {
           ) {
             System.println("EngoNotifOn");
             var cccd = engo_tx.getDescriptor(Ble.cccdUuid());
-            cccd.requestWrite([0x01, 0x00]b);
-
+            try {
+              cccd.requestWrite([0x01, 0x00]b);
+            } catch (e instanceof Lang.Exception) {
+              // System.println(e.getErrorMessage());
+            }
             eucData.engoPaired = true;
           } else {
             System.print("notif fail");
-            Ble.unpairDevice(device);
-            eucData.engoPaired = false;
+            try {
+              Ble.unpairDevice(device);
+              eucData.engoPaired = false;
+            } catch (e instanceof Lang.Exception) {
+              // System.println(e.getErrorMessage());
+            }
           }
         }
       }
@@ -306,21 +320,29 @@ class eucBLEDelegate extends Ble.BleDelegate {
     // send getName request for KS using ble queue
     if (currentChar.equals(eucPM.EUC_CHAR)) {
       if (eucData.wheelBrand == 2 || eucData.wheelBrand == 3) {
-        euc_char.requestWrite(
-          [
-            0xaa, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x9b, 0x14, 0x5a, 0x5a,
-          ]b,
-          { :writeType => Ble.WRITE_TYPE_DEFAULT }
-        );
+        try {
+          euc_char.requestWrite(
+            [
+              0xaa, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+              0x00, 0x00, 0x00, 0x00, 0x00, 0x9b, 0x14, 0x5a, 0x5a,
+            ]b,
+            { :writeType => Ble.WRITE_TYPE_DEFAULT }
+          );
+        } catch (e instanceof Lang.Exception) {
+          // System.println(e.getErrorMessage());
+        }
       }
     } else {
       if (eucData.engoPaired == true) {
         // System.println("EngoPairedIsTrue, descript");
         if (currentChar.equals(engo_userInput) && engoGestureNotif == true) {
-          engo_rx.requestWrite([0xff, 0x06, 0x00, 0x05, 0xaa]b, {
-            :writeType => Ble.WRITE_TYPE_DEFAULT,
-          });
+          try {
+            engo_rx.requestWrite([0xff, 0x06, 0x00, 0x05, 0xaa]b, {
+              :writeType => Ble.WRITE_TYPE_DEFAULT,
+            });
+          } catch (e instanceof Lang.Exception) {
+            // System.println(e.getErrorMessage());
+          }
         } else {
           enableGesture();
         }

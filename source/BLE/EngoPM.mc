@@ -43,7 +43,7 @@ module engoPM {
   var engoProfileDef;
 
   function init() {
-    if (eucData.engoTouch == 0) {
+    if (eucData.engoTouch == 1) {
       BLE_CHAR_USERINPUT = BLE_CHAR_TOUCH_EVENT;
     } else {
       BLE_CHAR_USERINPUT = BLE_CHAR_GESTURE_EVENT;
