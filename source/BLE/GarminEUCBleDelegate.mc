@@ -29,10 +29,13 @@ class eucBLEDelegate extends Ble.BleDelegate {
       char = service != null ? service.getCharacteristic(eucPM.EUC_CHAR) : null;
       if (service != null && char != null) {
         cccd = char.getDescriptor(Ble.cccdUuid());
-        cccd.requestWrite([0x01, 0x00]b);
 
-        eucData.paired = true;
-
+        try {
+          cccd.requestWrite([0x01, 0x00]b);
+          eucData.paired = true;
+        } catch (e instanceof Lang.Exception) {
+          // System.println(e.getErrorMessage());
+        }
         //        eucData.timeWhenConnected = new Time.Moment(Time.now().value());
 
         /* NOT WORKING
@@ -42,8 +45,12 @@ class eucBLEDelegate extends Ble.BleDelegate {
           eucData.name = "Unknown";
         }*/
       } else {
-        Ble.unpairDevice(device);
-        eucData.paired = false;
+        try {
+          Ble.unpairDevice(device);
+          eucData.paired = false;
+        } catch (e instanceof Lang.Exception) {
+          // System.println(e.getErrorMessage());
+        }
       }
     } else {
       try {
@@ -166,13 +173,17 @@ class eucBLEDelegate extends Ble.BleDelegate {
   function onDescriptorWrite(desc, status) {
     // send getName request for KS using ble queue
     if ((eucData.wheelBrand == 2 || eucData.wheelBrand == 3) && char != null) {
-      char.requestWrite(
-        [
-          0xaa, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-          0x00, 0x00, 0x00, 0x00, 0x00, 0x9b, 0x14, 0x5a, 0x5a,
-        ]b,
-        { :writeType => Ble.WRITE_TYPE_DEFAULT }
-      );
+      try {
+        char.requestWrite(
+          [
+            0xaa, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x9b, 0x14, 0x5a, 0x5a,
+          ]b,
+          { :writeType => Ble.WRITE_TYPE_DEFAULT }
+        );
+      } catch (e instanceof Lang.Exception) {
+        // System.println(e.getErrorMessage());
+      }
     }
   }
 
@@ -204,23 +215,6 @@ class eucBLEDelegate extends Ble.BleDelegate {
         // System.println(e.getErrorMessage());
       }
     }
-  }
-
-  function sendCmd(cmd) {
-    //Sys.println("enter sending command " + cmd);
-
-    if (service != null && char != null && cmd != "") {
-      var enc_cmd = string_to_byte_array(cmd as String);
-      // Sys.println("sending command " + enc_cmd.toString());
-      char.requestWrite(enc_cmd, { :writeType => Ble.WRITE_TYPE_DEFAULT });
-      //  Sys.println("command sent !");
-    }
-  }
-
-  function sendRawCmd(cmd) {
-    //Sys.println("enter sending command " + cmd);
-    char.requestWrite(cmd, { :writeType => Ble.WRITE_TYPE_DEFAULT });
-    //  Sys.println("command sent !");
   }
 
   private function contains(iter, obj, sr) {
@@ -255,7 +249,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
   function manualUnpair() {
     if (device != null) {
-      Ble.unpairDevice(device);
+      try {
+        Ble.unpairDevice(device);
+      } catch (e instanceof Lang.Exception) {
+        // System.println(e.getErrorMessage());
+      }
     }
   }
 }
