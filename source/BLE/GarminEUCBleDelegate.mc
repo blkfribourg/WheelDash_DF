@@ -480,7 +480,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
       if (value[0] == 0x01) {
         System.println("gesture detected");
         eucData.engoPage = eucData.engoPage + 1;
-        if (eucData.engoPage > 2) {
+        if (eucData.engoPage > eucData.engoPageNb) {
           eucData.engoPage = 1;
         }
         clearScreen();

@@ -52,6 +52,18 @@ var cfgArray = [
   "FFD2000F776865656C6461736800AA",
 ];
 
+var directionDict = {
+  "z" => 40,
+  "q" => 41,
+  "d" => 42,
+  "w" => 43,
+  "c" => 44,
+  "a" => 45,
+  "e" => 46,
+  "x" => 47,
+  "r" => null,
+  "f" => null,
+};
 function arrayToRawCmd(array, i) {
   return Toybox.StringUtil.convertEncodedString(array[i], {
     :fromRepresentation => Toybox.StringUtil.REPRESENTATION_STRING_HEX,

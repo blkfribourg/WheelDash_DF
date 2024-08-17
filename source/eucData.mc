@@ -82,6 +82,7 @@ module eucData {
   var engoPage = 1;
   var engoBattery = null;
   var engoTouch = 0;
+  var engoPageNb = 3;
 
   function getBatteryPercentage() {
     if (voltage != null) {

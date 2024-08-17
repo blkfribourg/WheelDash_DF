@@ -80,6 +80,10 @@ class GarminEUCDF extends WatchUi.DataField {
   var nb_Font;
 
   var engoBattReq = 60;
+  var turnId = null;
+  var prevTurnId = null;
+  var nextPointName = null;
+  var nextPointDistance = null;
   //var RadarConnState = -1;
   private var cDrawables = {};
 
@@ -634,44 +638,6 @@ class GarminEUCDF extends WatchUi.DataField {
         textArray[3] = getHexText(valueRound(eucData.correctedSpeed, "%.1f"));
         textArray[4] = getHexText(valueRound(eucData.temperature, "%.1f"));
         textArray[5] = getHexText(valueRound(currentBatteryPerc, "%.1f"));
-
-        /*
-        //PWM page 1
-        cmds[0] = getWriteCmd(
-          valueRound(eucData.PWM, "%.1f"),
-          xpos,
-          182,
-          4,
-          2,
-          0x0f
-        );
-        //Speed page 1
-        cmds[1] = getWriteCmd(
-          valueRound(eucData.correctedSpeed, "%.1f"),
-          xpos,
-          142,
-          4,
-          2,
-          0x0f
-        );
-        //Temperature page 1
-        cmds[2] = getWriteCmd(
-          valueRound(eucData.temperature, "%.1f"),
-          xpos,
-          102,
-          4,
-          2,
-          0x0f
-        );
-        //Battery % page 1
-        cmds[3] = getWriteCmd(
-          valueRound(currentBatteryPerc, "%.1f"),
-          xpos,
-          62,
-          4,
-          2,
-          0x0f
-        );*/
       }
       if (eucData.engoPage == 2) {
         //Chrono page 1
@@ -694,50 +660,52 @@ class GarminEUCDF extends WatchUi.DataField {
         textArray[3] = getHexText(valueRound(sessionDistance, "%.1f"));
         textArray[4] = getHexText(valueRound(averageMovingSpeed, "%.1f"));
         textArray[5] = getHexText(valueRound(maxSpeed, "%.1f"));
-        /*
-        cmds[0] = getWriteCmd(
+      }
+      if (eucData.engoPage == 3) {
+        //Chrono page 1
+
+        var chrono;
+        if (activityTimerTime != null) {
+          var sec = activityTimerTime / 1000;
+          var mn = sec / 60;
+          chrono = [mn / 60, mn % 60, sec % 60, activityTimerTime % 1000];
+        } else {
+          chrono = null;
+        }
+        textArray[2] = getHexText(
           chrono[0].format("%02d") +
             ":" +
             chrono[1].format("%02d") +
             ":" +
-            chrono[2].format("%02d"),
-          xpos,
-          182,
-          4,
-          2,
-          0x0f
+            chrono[2].format("%02d")
         );
-        //Speed page 1
-        cmds[1] = getWriteCmd(
-          valueRound(sessionDistance, "%.1f"),
-          xpos,
-          142,
-          4,
-          2,
-          0x0f
-        );
-        //Temperature page 1
-        cmds[2] = getWriteCmd(
-          valueRound(averageMovingSpeed, "%.1f"),
-          xpos,
-          102,
-          4,
-          2,
-          0x0f
-        );
-        //Battery % page 1
-        cmds[3] = getWriteCmd(
-          valueRound(maxSpeed, "%.1f"),
-          xpos,
-          62,
-          4,
-          2,
-          0x0f
-        );
-        var 
-        //ff83001b02310032003300340035003600370038003900313000aa
-        */
+        if (nextPointDistance != null) {
+          textArray[3] = getHexText(
+            valueRound(nextPointDistance, "%.1f") + " m"
+          );
+        } else {
+          textArray[3] = getHexText("      ");
+        }
+        if (nextPointName != null) {
+          textArray[4] = getHexText(nextPointName);
+        } else {
+          textArray[4] = getHexText("      ");
+        }
+
+        textArray = textArray.slice(0, 5);
+        if (turnId != null) {
+          if (prevTurnId != turnId) {
+            prevTurnId = turnId;
+            var imgId = directionDict.get(turnId);
+            if (imgId != null) {
+              System.println("updating nav img");
+              var imgCmd = getImgCmd(imgId, 62, 43);
+              bleDelegate.sendCommands(imgCmd);
+            }
+          }
+        }
       }
+
       var data = pagePayload(textArray);
       /*
       var currentTime = System.getClockTime();
@@ -789,8 +757,25 @@ class GarminEUCDF extends WatchUi.DataField {
       activityTimerTime = info.timerTime;
     }
     eucData.timerState = activityTimerState;
+    if (eucData.useEngo == true) {
+      if (info.distanceToNextPoint != null) {
+        nextPointDistance = info.distanceToNextPoint;
+      } else {
+        nextPointDistance = null;
+      }
+      if (info.nameOfNextPoint != null && info.nameOfNextPoint.length() > 0) {
+        nextPointName = info.nameOfNextPoint.substring(1, null);
+        turnId = info.nameOfNextPoint.substring(0, 1);
+      } else {
+        nextPointName = null;
+        turnId = null;
+      }
+    }
+    System.println("nextPointName: " + nextPointName);
+    System.println("nextPointDistance: " + nextPointDistance);
+    System.println("turnId: " + turnId);
 
-    //eucData.paired = true;
+    eucData.paired = true;
     if (eucData.paired == true) {
       if (delay < 0) {
         updateFitData(info);
@@ -1428,64 +1413,83 @@ class GarminEUCDF extends WatchUi.DataField {
     }
   }
   function loadStoredValues() {
-    if (
-      Storage.getValue("maxTemp") != null &&
-      Storage.getValue("minTemp") != null &&
-      Storage.getValue("maxVoltage") != null &&
-      Storage.getValue("minVoltage") != null &&
-      Storage.getValue("maxBatteryPerc") != null &&
-      Storage.getValue("minBatteryPerc") != null &&
-      Storage.getValue("sessionDistance") != null &&
-      Storage.getValue("avgSpeed") != null &&
-      Storage.getValue("maxPWM") != null &&
-      Storage.getValue("movingmsec") != null &&
-      Storage.getValue("avgCurrent") != null &&
-      Storage.getValue("avgPower") != null &&
-      Storage.getValue("maxSpeed") != null &&
-      Storage.getValue("maxPower") != null &&
-      Storage.getValue("maxCurrent") != null &&
-      Storage.getValue("sumCurrent") != null &&
-      Storage.getValue("sumPower") != null &&
-      Storage.getValue("callNb") != null &&
-      Storage.getValue("startingEUCTripDistance") != null
-    ) {
+    if (Storage.getValue("maxTemp") != null) {
       maxTemp = Storage.getValue("maxTemp");
-      minTemp = Storage.getValue("minTemp");
-      maxVoltage = Storage.getValue("maxVoltage");
-      minVoltage = Storage.getValue("minVoltage");
-      maxBatteryPerc = Storage.getValue("maxBatteryPerc");
-      minBatteryPerc = Storage.getValue("minBatteryPerc");
-      sessionDistance = Storage.getValue("sessionDistance");
-      avgSpeed = Storage.getValue("avgSpeed");
-      avgCurrent = Storage.getValue("avgCurrent");
-      avgPower = Storage.getValue("avgPower");
-      maxSpeed = Storage.getValue("maxSpeed");
-      maxCurrent = Storage.getValue("maxCurrent");
-      maxPower = Storage.getValue("maxPower");
-      sumCurrent = Storage.getValue("sumCurrent");
-      sumPower = Storage.getValue("sumPower");
-      callNb = Storage.getValue("callNb");
-      startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
-      maxPWM = Storage.getValue("maxPWM");
-      movingmsec = Storage.getValue("movingmsec");
-      EUCBatteryPercStart = Storage.getValue("EUCBatteryPercStart");
-      if (eucData.useRadar == true) {
-        if (Storage.getValue("totalVehCount") == null) {
-          eucData.totalVehCount = 0;
-        } else {
-          eucData.totalVehCount = Storage.getValue("totalVehCount");
-        }
-      }
-
-      // should only be required for max values
-      mMaxSpeedField.setData(maxSpeed);
-      mMaxPWMField.setData(maxPWM);
-      mMaxTempField.setData(maxTemp);
-      mMinVoltageField.setData(minVoltage);
-      mMaxVoltageField.setData(maxVoltage);
-      mMinBatteryField.setData(minBatteryPerc);
     }
+    if (Storage.getValue("minTemp") != null) {
+      minTemp = Storage.getValue("minTemp");
+    }
+    if (Storage.getValue("maxVoltage") != null) {
+      maxVoltage = Storage.getValue("maxVoltage");
+    }
+    if (Storage.getValue("minVoltage") != null) {
+      minVoltage = Storage.getValue("minVoltage");
+    }
+    if (Storage.getValue("maxBatteryPerc") != null) {
+      maxBatteryPerc = Storage.getValue("maxBatteryPerc");
+    }
+    if (Storage.getValue("minBatteryPerc") != null) {
+      minBatteryPerc = Storage.getValue("minBatteryPerc");
+    }
+    if (Storage.getValue("sessionDistance") != null) {
+      sessionDistance = Storage.getValue("sessionDistance");
+    }
+    if (Storage.getValue("avgSpeed") != null) {
+      avgSpeed = Storage.getValue("avgSpeed");
+    }
+    if (Storage.getValue("maxPWM") != null) {
+      maxPWM = Storage.getValue("maxPWM");
+    }
+    if (Storage.getValue("movingmsec") != null) {
+      movingmsec = Storage.getValue("movingmsec");
+    }
+    if (Storage.getValue("avgCurrent") != null) {
+    }
+    if (Storage.getValue("avgPower") != null) {
+      avgPower = Storage.getValue("avgPower");
+    }
+    if (Storage.getValue("maxSpeed") != null) {
+      maxSpeed = Storage.getValue("maxSpeed");
+    }
+    if (Storage.getValue("maxPower") != null) {
+      maxPower = Storage.getValue("maxPower");
+    }
+    if (Storage.getValue("maxCurrent") != null) {
+      maxCurrent = Storage.getValue("maxCurrent");
+    }
+    if (Storage.getValue("sumCurrent") != null) {
+      sumCurrent = Storage.getValue("sumCurrent");
+    }
+    if (Storage.getValue("sumPower") != null) {
+      sumPower = Storage.getValue("sumPower");
+    }
+    if (Storage.getValue("callNb") != null) {
+      callNb = Storage.getValue("callNb");
+    }
+    if (Storage.getValue("startingEUCTripDistance") != null) {
+      startingEUCTripDistance = Storage.getValue("startingEUCTripDistance");
+    }
+    if (Storage.getValue("EUCBatteryPercStart") != null) {
+      EUCBatteryPercStart = Storage.getValue("EUCBatteryPercStart");
+    }
+
+    if (eucData.useRadar == true) {
+      if (Storage.getValue("totalVehCount") == null) {
+        eucData.totalVehCount = 0;
+      } else {
+        eucData.totalVehCount = Storage.getValue("totalVehCount");
+      }
+    }
+
+    // should only be required for max values
+    mMaxSpeedField.setData(maxSpeed);
+    mMaxPWMField.setData(maxPWM);
+    mMaxTempField.setData(maxTemp);
+    //mMinVoltageField.setData(minVoltage);
+    //mMaxVoltageField.setData(maxVoltage);
+    mMinBatteryField.setData(minBatteryPerc);
   }
+
   function onTimerReset() {
     //System.println("reset");
     //Storage.clearValues();

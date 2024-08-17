@@ -8,7 +8,8 @@
     <iq:application id="46260b70-af63-47a4-9c79-e4fdccf63a2d" type="datafield" name="@Strings.AppName" entry="GarminEUCApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.1.0">
         <!-- 
              df id  : d7399422-2a19-4d1c-9b30-b9bd962e9ac5
-             dev id : 11687288-d1f1-43e9-aaa4-2f5cce1fb17e-->
+             dev id : 11687288-d1f1-43e9-aaa4-2f5cce1fb17e
+             internalbeta :46260b70-af63-47a4-9c79-e4fdccf63a2d-->
         <!--
             Use the following from the Visual Studio Code comand palette to edit
             the build targets:

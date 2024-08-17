@@ -242,6 +242,13 @@ function getPageCmd(payload, pageId) {
   return cmd;
 }
 
+function getImgCmd(imgId, xPos, yPos) {
+  var cmd = [0xff, 0x42, 0x00, 10, imgId]b;
+  cmd.addAll(encodeint16(xPos));
+  cmd.addAll(encodeint16(yPos));
+  cmd.add(0xaa);
+}
+
 function getHexText(text) {
   var hexText = Toybox.StringUtil.convertEncodedString(text, {
     :fromRepresentation => Toybox.StringUtil.REPRESENTATION_STRING_PLAIN_TEXT,
