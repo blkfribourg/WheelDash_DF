@@ -53,8 +53,8 @@ module eucData {
   var KSName = "";
   var KS18L_scale_toggle = false;
   var model = "none";
-  var temperature2 = 0;
-  var cpuLoad = 0;
+  //var temperature2 = 0;
+  //var cpuLoad = 0;
 
   //alarms
   var motorbikeHeadset = false;

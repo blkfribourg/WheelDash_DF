@@ -1,7 +1,7 @@
 import Toybox.Application;
 import Toybox.Lang;
 import Toybox.WatchUi;
-using Toybox.StringUtil;
+
 class GarminEUCApp extends Application.AppBase {
   private var view;
   //  private var delegate;

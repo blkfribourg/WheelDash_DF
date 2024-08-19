@@ -10,7 +10,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var fill_logo;
   var empty_logo;
   var delay = 3;
-  var firstCall = true;
+  // var firstCall = true;
 
   var fieldNB;
   var fieldIDs;
@@ -19,33 +19,15 @@ class GarminEUCDF extends WatchUi.DataField {
   const SPEED_FIELD_ID = 0;
   const PWM_FIELD_ID = 1;
   const VOLTAGE_FIELD_ID = 2;
-
-  const POWER_FIELD_ID = 4;
   const TEMP_FIELD_ID = 5;
   const TRIPDISTANCE_FIELD_ID = 6;
-
   const AVGMVSPEED_FIELD_ID = 7;
   const AVGSPEED_FIELD_ID = 8;
   const MAXSPEED_FIELD_ID = 9;
-
   const MAXPWM_FIELD_ID = 10;
-  const AVGCURRENT_FIELD_ID = 11;
-
-  const MAXCURRENT_FIELD_ID = 12;
-  const AVGPOWER_FIELD_ID = 13;
-  const MAXPOWER_FIELD_ID = 14;
-
-  const MINTEMP_FIELD_ID = 15;
   const MAXTEMP_FIELD_ID = 16;
-
-  const MINVOLTAGE_FIELD_ID = 17;
-  const MAXVOLTAGE_FIELD_ID = 18;
-
   const MINBATTERY_FIELD_ID = 19;
-  const MAXBATTERY_FIELD_ID = 20;
-
   const AVGUSEDBATTERY_FIELD_ID = 21;
-
   const EORBATTERY_FIELD_ID = 22;
 
   const VEH_RELATIVE_SPD_ID = 23;
@@ -54,24 +36,19 @@ class GarminEUCDF extends WatchUi.DataField {
   var mSpeedField = null;
   var mPWMField = null;
   var mVoltageField = null;
-  var mCurrentField = null;
-  var mPowerField = null;
+
   var mTempField = null;
   var mTripDistField = null;
   var mAvgMvSpeedField = null;
   var mMaxSpeedField = null;
   var mMaxPWMField = null;
-  var mMaxCurrentField = null;
-  var mMaxPowerField = null;
+
   var mMaxTempField = null;
-  var mMinTempField = null;
+
   var mAvgSpeedField = null;
-  var mAvgCurrentField = null;
-  var mAvgPowerField = null;
-  var mMinVoltageField = null;
-  var mMaxVoltageField = null;
+
   var mMinBatteryField = null;
-  var mMaxBatteryField = null;
+
   var mAvgUsedBatteryField = null;
   var mEORBatteryField = null;
   var mVehRelativeSpdField = null;
@@ -81,7 +58,7 @@ class GarminEUCDF extends WatchUi.DataField {
 
   var engoBattReq = 60;
   var turnId = null;
-  var prevTurnId = null;
+  var prevTurnId = "";
   var nextPointName = null;
   var nextPointDistance = null;
   //var RadarConnState = -1;
@@ -634,10 +611,16 @@ class GarminEUCDF extends WatchUi.DataField {
         currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d")
       );
       if (eucData.engoPage == 1) {
-        textArray[2] = getHexText(valueRound(eucData.PWM, "%.1f"));
-        textArray[3] = getHexText(valueRound(eucData.correctedSpeed, "%.1f"));
-        textArray[4] = getHexText(valueRound(eucData.temperature, "%.1f"));
-        textArray[5] = getHexText(valueRound(currentBatteryPerc, "%.1f"));
+        textArray[2] = getHexText(valueRound(eucData.PWM, "%.1f") + " %");
+        textArray[3] = getHexText(
+          valueRound(eucData.correctedSpeed, "%.1f") + " km/h"
+        );
+        textArray[4] = getHexText(
+          valueRound(eucData.temperature, "%.1f") + " *C"
+        );
+        textArray[5] = getHexText(
+          valueRound(currentBatteryPerc, "%.1f") + " %"
+        );
       }
       if (eucData.engoPage == 2) {
         //Chrono page 1
@@ -657,49 +640,45 @@ class GarminEUCDF extends WatchUi.DataField {
             ":" +
             chrono[2].format("%02d")
         );
-        textArray[3] = getHexText(valueRound(sessionDistance, "%.1f"));
-        textArray[4] = getHexText(valueRound(averageMovingSpeed, "%.1f"));
-        textArray[5] = getHexText(valueRound(maxSpeed, "%.1f"));
+        textArray[3] = getHexText(valueRound(sessionDistance, "%.1f") + " km");
+        textArray[4] = getHexText(
+          valueRound(averageMovingSpeed, "%.1f") + " km/h"
+        );
+        textArray[5] = getHexText(valueRound(maxSpeed, "%.1f") + " km/h");
       }
       if (eucData.engoPage == 3) {
         //Chrono page 1
-
-        var chrono;
-        if (activityTimerTime != null) {
-          var sec = activityTimerTime / 1000;
-          var mn = sec / 60;
-          chrono = [mn / 60, mn % 60, sec % 60, activityTimerTime % 1000];
-        } else {
-          chrono = null;
-        }
-        textArray[2] = getHexText(
-          chrono[0].format("%02d") +
-            ":" +
-            chrono[1].format("%02d") +
-            ":" +
-            chrono[2].format("%02d")
-        );
         if (nextPointDistance != null) {
-          textArray[3] = getHexText(
+          textArray[2] = getHexText(
             valueRound(nextPointDistance, "%.1f") + " m"
           );
         } else {
-          textArray[3] = getHexText("      ");
+          textArray[2] = getHexText("No");
         }
         if (nextPointName != null) {
+          textArray[3] = getHexText(nextPointName);
           textArray[4] = getHexText(nextPointName);
         } else {
-          textArray[4] = getHexText("      ");
+          //System.println("NameNull");
+          //implement word wrap
+          textArray[3] = getHexText("No1"); // si plus de 20 char word wrap et ligne suivante!
+          textArray[4] = getHexText("No2");
         }
-
         textArray = textArray.slice(0, 5);
+
         if (turnId != null) {
-          if (prevTurnId != turnId) {
+          if (!prevTurnId.equals(turnId)) {
             prevTurnId = turnId;
+            //    System.println("prevId " + prevTurnId);
+            //    System.println("Id " + turnId);
+
             var imgId = directionDict.get(turnId);
             if (imgId != null) {
-              System.println("updating nav img");
-              var imgCmd = getImgCmd(imgId, 62, 43);
+              // System.println("updating nav img");
+              var imgCmd = getImgCmd(imgId, 130, 150);
+              //  System.println(imgCmd);
+
+              bleDelegate.sendCommands(getClearRectCmd(130, 150, 190, 210, 0));
               bleDelegate.sendCommands(imgCmd);
             }
           }
@@ -718,7 +697,7 @@ class GarminEUCDF extends WatchUi.DataField {
         0x0f
       );
 */
-      System.println("sendCmd");
+      // System.println(getPageCmd(data, eucData.engoPage));
       bleDelegate.sendCommands(getPageCmd(data, eucData.engoPage));
       //    bleDelegate.sendCommands(cmdTime);
     }
@@ -726,9 +705,6 @@ class GarminEUCDF extends WatchUi.DataField {
   // Calculate the data to display in the field here
   var activityElapsedTime = "";
   var activityElapsedDist = "";
-  var activityAvgSpd = "";
-  var activityGPSAcc = "";
-  var activityStartTimeVal = "";
   var activityTimerState = "";
   var activityTimerTime = "";
   var reset = "no";
@@ -741,15 +717,7 @@ class GarminEUCDF extends WatchUi.DataField {
     if (info.elapsedDistance != null) {
       activityElapsedDist = info.elapsedDistance;
     }
-    if (info.averageSpeed != null) {
-      activityAvgSpd = info.averageSpeed;
-    }
-    if (info.currentLocationAccuracy != null) {
-      activityGPSAcc = info.currentLocationAccuracy;
-    }
-    if (info.startTime != null) {
-      activityStartTimeVal = info.startTime.value();
-    }
+
     if (info.timerState != null) {
       activityTimerState = info.timerState;
     }
@@ -771,9 +739,9 @@ class GarminEUCDF extends WatchUi.DataField {
         turnId = null;
       }
     }
-    System.println("nextPointName: " + nextPointName);
-    System.println("nextPointDistance: " + nextPointDistance);
-    System.println("turnId: " + turnId);
+    //System.println("nextPointName: " + nextPointName);
+    //System.println("nextPointDistance: " + nextPointDistance);
+    //System.println("turnId: " + turnId);
 
     eucData.paired = true;
     if (eucData.paired == true) {
@@ -864,6 +832,7 @@ class GarminEUCDF extends WatchUi.DataField {
   function onUpdate(dc) {
     // DEBUG SCREEN
     if (eucData.debug) {
+      /*
       var alignAxe = dc.getWidth() / 5;
       var space = dc.getHeight() / 10;
       var yGap = dc.getHeight() / 8;
@@ -891,20 +860,7 @@ class GarminEUCDF extends WatchUi.DataField {
         "CarNb: " + eucData.variaTargetNb,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
-      dc.drawText(
-        alignAxe - 2 * xGap,
-        3 * space + yGap,
-        Graphics.FONT_TINY,
-        "GPSacc: " + activityGPSAcc,
-        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
-      );
-      dc.drawText(
-        alignAxe - 2 * xGap,
-        4 * space + yGap,
-        Graphics.FONT_TINY,
-        "StrtTime: " + activityStartTimeVal,
-        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
-      );
+
       dc.drawText(
         alignAxe - 2 * xGap,
         5 * space + yGap,
@@ -926,6 +882,7 @@ class GarminEUCDF extends WatchUi.DataField {
         "rstOcc: " + reset,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       ); // END OF DEBUG SCREEN
+      */
     } else {
       // System.println(eucData.isFirst);
       if (eucData.isFirst && !eucData.paired) {
@@ -1520,6 +1477,4 @@ class GarminEUCDF extends WatchUi.DataField {
       Storage.setValue("totalVehCount", eucData.totalVehCount);
     }
   }
-  function onTimerStart() {}
-  function onTimerResume() {}
 }

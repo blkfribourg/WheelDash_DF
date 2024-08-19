@@ -24,11 +24,6 @@ module engoPM {
       0x0783b03e8535b5a0l,
       0x7140a304d2495cbal
     );
-  var BLE_CHAR_FLOW_CONTROL as Toybox.BluetoothLowEnergy.Uuid =
-    Toybox.BluetoothLowEnergy.longToUuid(
-      0x0783b03e8535b5a0l,
-      0x7140a304d2495cb9l
-    );
   var BLE_CHAR_GESTURE_EVENT as Toybox.BluetoothLowEnergy.Uuid =
     Toybox.BluetoothLowEnergy.longToUuid(
       0x0783b03e8535b5a0l,
@@ -60,10 +55,6 @@ module engoPM {
           :descriptors => [Ble.cccdUuid()],
         },
         {
-          :uuid => BLE_CHAR_FLOW_CONTROL,
-          :descriptors => [Ble.cccdUuid()],
-        },
-        {
           :uuid => BLE_CHAR_USERINPUT,
           :descriptors => [Ble.cccdUuid()],
         },
@@ -76,7 +67,7 @@ module engoPM {
       Ble.registerProfile(engoProfileDef);
       //  System.println("Engo profile OK");
     } catch (e) {
-      System.println("e=" + e.getErrorMessage());
+      //  System.println("e=" + e.getErrorMessage());
     }
   }
 }

@@ -31,7 +31,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     decoder = _decoder;
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
-    //eucData.isFirst = false;
+    eucData.isFirst = false;
     if (eucData.useRadar == true) {
       eucData.radar = new AntPlus.BikeRadar(null);
     }
@@ -94,7 +94,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
       if (eucData.useEngo == true) {
         if (device.getService(engoPM.BLE_SERV_ACTIVELOOK) != null) {
-          System.println("Engo connected");
+          // System.println("Engo connected");
 
           engo_service = device.getService(engoPM.BLE_SERV_ACTIVELOOK);
 
@@ -119,7 +119,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
             engo_rx != null &&
             engo_userInput != null
           ) {
-            System.println("EngoNotifOn");
+            // System.println("EngoNotifOn");
             var cccd = engo_tx.getDescriptor(Ble.cccdUuid());
             try {
               cccd.requestWrite([0x01, 0x00]b);
@@ -224,7 +224,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   }
   //! @param scanResults An iterator of new scan results
   function onScanResults(scanResults as Ble.Iterator) {
-    System.println("scanning");
+    // System.println("scanning");
     if (eucData.isFirst) {
       var wheelFound = false;
       for (
@@ -263,7 +263,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
             try {
               EUCDevice = Ble.pairDevice(result as Ble.ScanResult);
             } catch (e instanceof Lang.Exception) {
-              System.println("EUCError: " + e.getErrorMessage());
+              // System.println("EUCError: " + e.getErrorMessage());
             }
           }
         }
@@ -285,13 +285,13 @@ class eucBLEDelegate extends Ble.BleDelegate {
                   result
                 ) == true
               ) {
-                System.println("EngoFound!");
+                //System.println("EngoFound!");
                 Ble.setScanState(Ble.SCAN_STATE_OFF);
                 try {
                   // Do something here
                   engoDevice = Ble.pairDevice(result as Ble.ScanResult);
                 } catch (e instanceof Lang.Exception) {
-                  System.println("hornError: " + e.getErrorMessage());
+                  //   System.println("hornError: " + e.getErrorMessage());
                 }
                 //System.println("ConnectedToHorn?");
               }
@@ -429,14 +429,25 @@ class eucBLEDelegate extends Ble.BleDelegate {
         }
       }
       if (engoCfgOK == false) {
-        //  System.println("uploading config");
-        for (var i = 0; i < cfgArray.size(); i++) {
-          var cmd = arrayToRawCmd(cfgArray, i);
+        clearScreen();
+        sendRawCmd(engo_rx, getWriteCmd("updating config", 195, 110, 4, 5, 16));
+        sendRawCmd(engo_rx, getWriteCmd("please wait...", 195, 70, 4, 5, 16));
+        System.println("uploading config");
+        for (var i = 0; i < getJson(:EngoCfg1).size(); i++) {
+          var cmd = arrayToRawCmd(getJson(:EngoCfg1)[i]);
           sendRawCmd(engo_rx, cmd);
           //System.println(cmd);
         }
-        // System.println("upload done");
-        engoCfgOK = true;
+        for (var i = 0; i < getJson(:EngoCfg2).size(); i++) {
+          var cmd = arrayToRawCmd(getJson(:EngoCfg2)[i]);
+          sendRawCmd(engo_rx, cmd);
+          //System.println(cmd);
+        }
+        //   System.println("upload ongoing");
+
+        // req Cfg list again;
+        cfgList = new [0]b;
+        sendRawCmd(engo_rx, [0xff, 0xd3, 0x00, 0x05, 0xaa]b);
       }
       if (engoGestureNotif == true && engoGestureOK == false) {
         if (eucData.engoTouch == 0) {
@@ -478,7 +489,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     }
     if (char.equals(engo_userInput)) {
       if (value[0] == 0x01) {
-        System.println("gesture detected");
+        //System.println("gesture detected");
         eucData.engoPage = eucData.engoPage + 1;
         if (eucData.engoPage > eucData.engoPageNb) {
           eucData.engoPage = 1;
@@ -528,11 +539,21 @@ class eucBLEDelegate extends Ble.BleDelegate {
                 .REPRESENTATION_STRING_PLAIN_TEXT,
             }).equals("wheeldash")
           ) {
-            // System.println("WheelDash config detected"); // to do check config version and upload conf if not latest vers.
-            engoCfgOK = true;
+            //checking version
+            var cfgEngoVer = cfgList.slice(i + 5, i + 9);
+            var cfgVer = arrayToRawCmd(
+              getJson(:EngoCfg2)[getJson(:EngoCfg2).size() - 2]
+            ).slice(14, 18);
+            //  System.println(cfgVer);
+            //  System.println(cfgEngoVer);
+            if (cfgEngoVer.equals(cfgVer)) {
+              //    System.println("version is up to date");
+              engoCfgOK = true;
+            }
           }
           names.addAll(tempName);
           tempName = new [0]b;
+
           i = i + 11;
         } else {
           tempName.add(cfgList[i]);
@@ -549,7 +570,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
         engoGestureNotif = true;
         //  System.println("gesture notif enabled");
       } catch (e) {
-        System.println("could not enable notif on gesture");
+        //  System.println("could not enable notif on gesture");
       }
     }
   }

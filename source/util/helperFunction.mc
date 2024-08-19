@@ -1,8 +1,7 @@
 import Toybox.Lang;
+import Toybox.WatchUi;
 using Toybox.StringUtil;
 using Toybox.Math;
-using Toybox.System;
-import Toybox.Time;
 
 // convert string to byte, used when sending string command via BLE
 function string_to_byte_array(plain_text) {
@@ -163,6 +162,7 @@ function sArray2nArray(sArray) {
   return nArray;
 }
 
+/*
 // varia sim
 class fakeVariaTarget {
   var range = 0;
@@ -217,7 +217,7 @@ function variaMove(targetArray) {
 function random(min, max) {
   return (Math.rand() % max) + 1;
 }
-
+*/
 // engo related fct
 
 function getWriteCmd(text, x, y, r, f, c) {
@@ -236,8 +236,20 @@ function getWriteCmd(text, x, y, r, f, c) {
 }
 
 function getPageCmd(payload, pageId) {
-  var cmd = [0xff, 0x83, 0x00, payload.size() + 6, pageId]b;
+  var cmd = [0xff, 0x86, 0x00, payload.size() + 6, pageId]b;
   cmd.addAll(payload);
+  cmd.add(0xaa);
+  return cmd;
+}
+
+function getClearRectCmd(x0, y0, x1, y1, int) {
+  var cmd = [0xff, 0x30, 0x00, 6, int]b;
+  cmd.add(0xaa);
+  cmd.addAll([0xff, 0x34, 0x00, 13]b);
+  cmd.addAll(encodeint16(x0));
+  cmd.addAll(encodeint16(y0));
+  cmd.addAll(encodeint16(x1));
+  cmd.addAll(encodeint16(y1));
   cmd.add(0xaa);
   return cmd;
 }
@@ -247,6 +259,7 @@ function getImgCmd(imgId, xPos, yPos) {
   cmd.addAll(encodeint16(xPos));
   cmd.addAll(encodeint16(yPos));
   cmd.add(0xaa);
+  return cmd;
 }
 
 function getHexText(text) {
@@ -274,4 +287,8 @@ function pagePayload(textArray) {
   }
   //System.println("payload: " + payload);
   return payload;
+}
+
+function getJson(symbol) {
+  return WatchUi.loadResource(Rez.JsonData[symbol]);
 }

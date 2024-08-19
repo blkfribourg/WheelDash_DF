@@ -335,7 +335,7 @@ class KingsongDecoder {
         // Distance/Time/Fan Data
         eucData.tripDistance =
           decode4bytes(value[2], value[3], value[4], value[5]) / 1000.0;
-        eucData.temperature2 = decode2bytes(value[14], value[15]) / 100.0;
+        //      eucData.temperature2 = decode2bytes(value[14], value[15]) / 100.0;
       } else if ((value[16] & 255) == 187) {
         // Name and Type data : Don't get why it's so "twisted" but OK ...
         var end;
@@ -362,7 +362,7 @@ class KingsongDecoder {
         eucData.model = model;
       } else if ((value[16] & 255) == 0xf5) {
         //cpu load
-        eucData.cpuLoad = value[14];
+        //       eucData.cpuLoad = value[14];
         eucData.hPWM = value[15];
         return false;
       }
