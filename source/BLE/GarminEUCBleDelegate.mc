@@ -31,7 +31,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     decoder = _decoder;
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
-    eucData.isFirst = false;
+    //eucData.isFirst = false;
     if (eucData.useRadar == true) {
       eucData.radar = new AntPlus.BikeRadar(null);
     }

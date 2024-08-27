@@ -611,6 +611,7 @@ class GarminEUCDF extends WatchUi.DataField {
         currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d")
       );
       if (eucData.engoPage == 1) {
+        prevTurnId = null;
         textArray[2] = getHexText(valueRound(eucData.PWM, "%.1f") + " %");
         textArray[3] = getHexText(
           valueRound(eucData.correctedSpeed, "%.1f") + " km/h"
@@ -624,7 +625,7 @@ class GarminEUCDF extends WatchUi.DataField {
       }
       if (eucData.engoPage == 2) {
         //Chrono page 1
-
+        prevTurnId = null;
         var chrono;
         if (activityTimerTime != null) {
           var sec = activityTimerTime / 1000;
@@ -653,21 +654,23 @@ class GarminEUCDF extends WatchUi.DataField {
             valueRound(nextPointDistance, "%.1f") + " m"
           );
         } else {
-          textArray[2] = getHexText("No");
+          textArray[2] = getHexText("");
         }
         if (nextPointName != null) {
-          textArray[3] = getHexText(nextPointName);
-          textArray[4] = getHexText(nextPointName);
+          var multiLineName = multiline(nextPointName);
+          //  System.println(multiLineName);
+          textArray[3] = getHexText(multiLineName[0]);
+          textArray[4] = getHexText(multiLineName[1]);
         } else {
           //System.println("NameNull");
           //implement word wrap
-          textArray[3] = getHexText("No1"); // si plus de 20 char word wrap et ligne suivante!
-          textArray[4] = getHexText("No2");
+          textArray[3] = getHexText(""); // si plus de 20 char word wrap et ligne suivante!
+          textArray[4] = getHexText("");
         }
         textArray = textArray.slice(0, 5);
 
         if (turnId != null) {
-          if (!prevTurnId.equals(turnId)) {
+          if (!turnId.equals(prevTurnId)) {
             prevTurnId = turnId;
             //    System.println("prevId " + prevTurnId);
             //    System.println("Id " + turnId);
@@ -678,8 +681,9 @@ class GarminEUCDF extends WatchUi.DataField {
               var imgCmd = getImgCmd(imgId, 130, 150);
               //  System.println(imgCmd);
 
-              bleDelegate.sendCommands(getClearRectCmd(130, 150, 190, 210, 0));
-              bleDelegate.sendCommands(imgCmd);
+              bleDelegate.sendCommands(
+                concatCmd([getClearRectCmd(130, 150, 190, 210, 0), imgCmd])
+              );
             }
           }
         }
@@ -743,7 +747,7 @@ class GarminEUCDF extends WatchUi.DataField {
     //System.println("nextPointDistance: " + nextPointDistance);
     //System.println("turnId: " + turnId);
 
-    eucData.paired = true;
+    //eucData.paired = true;
     if (eucData.paired == true) {
       if (delay < 0) {
         updateFitData(info);

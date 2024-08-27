@@ -1,3 +1,4 @@
+import Toybox.System;
 import Toybox.Lang;
 import Toybox.WatchUi;
 using Toybox.StringUtil;
@@ -291,4 +292,77 @@ function pagePayload(textArray) {
 
 function getJson(symbol) {
   return WatchUi.loadResource(Rez.JsonData[symbol]);
+}
+
+function multiline(wholeString) {
+  var firstLine = "";
+  var secLine = "";
+  if (wholeString.length() > 20) {
+    var commaIdx = wholeString.find(",");
+    if (
+      commaIdx != null &&
+      commaIdx > 5 &&
+      wholeString.substring(0, commaIdx).length() <= 20
+    ) {
+      firstLine = wholeString.substring(0, commaIdx);
+      secLine = wholeString.substring(commaIdx + 1, null);
+    } else {
+      if (wholeString.length() > 20) {
+        var str = wholeString;
+        var idx = 0;
+        var local_idx = 0;
+        while (str.find(" ") != null) {
+          local_idx = str.find(" ");
+          if (idx + local_idx >= 20) {
+            break;
+          }
+          str = str.substring(local_idx + 1, null);
+
+          if (local_idx != null) {
+            idx = idx + local_idx + 1;
+          }
+          //  System.println(idx);
+        }
+        var newfirstLine;
+        if (idx == 0) {
+          newfirstLine = wholeString;
+        } else {
+          newfirstLine = wholeString.substring(0, idx);
+        }
+
+        if (newfirstLine.length() <= 20) {
+          firstLine = newfirstLine;
+          secLine = wholeString.substring(idx, null);
+        } else {
+          firstLine = wholeString.substring(0, 20);
+          secLine = wholeString.substring(20, null);
+        }
+      }
+    }
+  } else {
+    firstLine = wholeString;
+  }
+  //trim space:
+  firstLine = trimSpace(firstLine);
+  secLine = trimSpace(secLine);
+  return [firstLine, secLine];
+}
+
+function trimSpace(str) {
+  while (str.find(" ") == 0) {
+    str = str.substring(1, null);
+  }
+  //System.println(str.substring(str.length() - 1, null));
+  while (str.substring(str.length() - 1, null).equals(" ")) {
+    str = str.substring(0, -1);
+  }
+  return str;
+}
+
+function concatCmd(cmds) {
+  var cmd = []b;
+  for (var i = 0; i < cmds.size(); i++) {
+    cmd.addAll(cmds[i]);
+  }
+  return cmd;
 }
