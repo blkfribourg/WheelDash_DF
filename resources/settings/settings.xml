@@ -39,6 +39,7 @@
                     <listEntry value="24">@Strings.eucdata24</listEntry>
                     <listEntry value="25">@Strings.eucdata25</listEntry>
                     <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -73,6 +74,7 @@
                     <listEntry value="24">@Strings.eucdata24</listEntry>
                     <listEntry value="25">@Strings.eucdata25</listEntry>
                     <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -106,7 +108,8 @@
                     <listEntry value="23">@Strings.eucdata23</listEntry>
                     <listEntry value="24">@Strings.eucdata24</listEntry>
                     <listEntry value="25">@Strings.eucdata25</listEntry>
-                    <listEntry value="26">@Strings.eucdata26</listEntry>                    
+                    <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>                    
                 </settingConfig>
             </setting>
             <setting
@@ -140,6 +143,7 @@
                     <listEntry value="24">@Strings.eucdata24</listEntry>
                     <listEntry value="25">@Strings.eucdata25</listEntry>
                     <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                    
                 </settingConfig>
             </setting>
@@ -174,6 +178,7 @@
                     <listEntry value="24">@Strings.eucdata24</listEntry>
                     <listEntry value="25">@Strings.eucdata25</listEntry>
                     <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                    
                 </settingConfig>
             </setting>
@@ -208,6 +213,7 @@
                     <listEntry value="24">@Strings.eucdata24</listEntry>
                     <listEntry value="25">@Strings.eucdata25</listEntry>
                     <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -242,6 +248,7 @@
                     <listEntry value="24">@Strings.eucdata24</listEntry>
                     <listEntry value="25">@Strings.eucdata25</listEntry>
                     <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -276,6 +283,7 @@
                     <listEntry value="24">@Strings.eucdata24</listEntry>
                     <listEntry value="25">@Strings.eucdata25</listEntry>
                     <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                     
                 </settingConfig>
             </setting>

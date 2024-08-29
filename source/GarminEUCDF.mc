@@ -585,6 +585,12 @@ class GarminEUCDF extends WatchUi.DataField {
         fieldValues[field_id] =
           CurrentTime.hour.format("%d") + ":" + CurrentTime.min.format("%02d");
       }
+      if (fieldIDs[field_id] == 27) {
+        fieldNames[field_id] = "GPS SPD";
+        var GPS_speed = Position.getInfo().speed;
+
+        fieldValues[field_id] = valueRound(GPS_speed, "%.1f");
+      }
     }
     //engo related code
     if (
