@@ -11,12 +11,12 @@ module EUCAlarms {
   var tempAlarm = false;
   var nextTrigger as Moment?;
   var triggerAlarm = false;
-  var displayingAlert = false;
+  //  var displayingAlert = false;
   var PWM1_thr = 0;
   var PWM2_thr = 0;
   var vibeKilled = true;
   var toneKilled = true;
-  var textAlert = "";
+  var textAlert = "none";
   var PWMVibe, PWMDangerVibe, speedVibe, tempVibe, killVibe;
   var PWMTone, PWMDangerTone, speedTone, tempTone, killTone;
 
@@ -126,19 +126,20 @@ module EUCAlarms {
   function setAlarmType() {
     if (PWMAlarm == true) {
       textAlert = "!! PWM Alarm !!";
-      displayingAlert = true;
+      //  displayingAlert = true;
     } else {
       if (tempAlarm == true) {
         textAlert = "!! Temperature Alarm !!";
-        displayingAlert = true;
+        //  displayingAlert = true;
       } else if (speedAlarm == true) {
         textAlert = "!! Speed Alarm !!";
-        displayingAlert = true;
+        //   displayingAlert = true;
       }
     }
 
     if (PWMAlarm == false && tempAlarm == false && speedAlarm == false) {
-      displayingAlert = false;
+      // displayingAlert = false;
+      textAlert = "none";
       if (
         killVibe != null &&
         eucData.vibeIntensity != 0 &&

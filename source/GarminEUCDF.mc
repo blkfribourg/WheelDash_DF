@@ -592,125 +592,6 @@ class GarminEUCDF extends WatchUi.DataField {
         fieldValues[field_id] = valueRound(GPS_speed, "%.1f");
       }
     }
-    //engo related code
-    if (
-      eucData.useEngo == true &&
-      eucData.engoPaired == true &&
-      bleDelegate.engoDisplayInit == true
-    ) {
-      engoBattReq = engoBattReq + 1;
-      if (engoBattReq > 60) {
-        engoBattReq = 0;
-        bleDelegate.getEngoBattery();
-      }
-      var textArray = new [6];
-
-      // var xpos = 225;
-      var currentTime = System.getClockTime();
-      if (eucData.engoBattery != null) {
-        textArray[0] = getHexText(eucData.engoBattery + " %");
-      } else {
-        textArray[0] = getHexText(" ");
-      }
-
-      textArray[1] = getHexText(
-        currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d")
-      );
-      if (eucData.engoPage == 1) {
-        prevTurnId = null;
-        textArray[2] = getHexText(valueRound(eucData.PWM, "%.1f") + " %");
-        textArray[3] = getHexText(
-          valueRound(eucData.correctedSpeed, "%.1f") + " km/h"
-        );
-        textArray[4] = getHexText(
-          valueRound(eucData.temperature, "%.1f") + " *C"
-        );
-        textArray[5] = getHexText(
-          valueRound(currentBatteryPerc, "%.1f") + " %"
-        );
-      }
-      if (eucData.engoPage == 2) {
-        //Chrono page 1
-        prevTurnId = null;
-        var chrono;
-        if (activityTimerTime != null) {
-          var sec = activityTimerTime / 1000;
-          var mn = sec / 60;
-          chrono = [mn / 60, mn % 60, sec % 60, activityTimerTime % 1000];
-        } else {
-          chrono = null;
-        }
-        textArray[2] = getHexText(
-          chrono[0].format("%02d") +
-            ":" +
-            chrono[1].format("%02d") +
-            ":" +
-            chrono[2].format("%02d")
-        );
-        textArray[3] = getHexText(valueRound(sessionDistance, "%.1f") + " km");
-        textArray[4] = getHexText(
-          valueRound(averageMovingSpeed, "%.1f") + " km/h"
-        );
-        textArray[5] = getHexText(valueRound(maxSpeed, "%.1f") + " km/h");
-      }
-      if (eucData.engoPage == 3) {
-        //Chrono page 1
-        if (nextPointDistance != null) {
-          textArray[2] = getHexText(
-            valueRound(nextPointDistance, "%.1f") + " m"
-          );
-        } else {
-          textArray[2] = getHexText("");
-        }
-        if (nextPointName != null) {
-          var multiLineName = multiline(nextPointName);
-          //  System.println(multiLineName);
-          textArray[3] = getHexText(multiLineName[0]);
-          textArray[4] = getHexText(multiLineName[1]);
-        } else {
-          //System.println("NameNull");
-          //implement word wrap
-          textArray[3] = getHexText(""); // si plus de 20 char word wrap et ligne suivante!
-          textArray[4] = getHexText("");
-        }
-        textArray = textArray.slice(0, 5);
-
-        if (turnId != null) {
-          if (!turnId.equals(prevTurnId)) {
-            prevTurnId = turnId;
-            //    System.println("prevId " + prevTurnId);
-            //    System.println("Id " + turnId);
-
-            var imgId = directionDict.get(turnId);
-            if (imgId != null) {
-              // System.println("updating nav img");
-              var imgCmd = getImgCmd(imgId, 130, 150);
-              //  System.println(imgCmd);
-
-              bleDelegate.sendCommands(
-                concatCmd([getClearRectCmd(130, 150, 190, 210, 0), imgCmd])
-              );
-            }
-          }
-        }
-      }
-
-      var data = pagePayload(textArray);
-      /*
-      var currentTime = System.getClockTime();
-      var cmdTime = getWriteCmd(
-        currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d"),
-        100,
-        210,
-        4,
-        1,
-        0x0f
-      );
-*/
-      // System.println(getPageCmd(data, eucData.engoPage));
-      bleDelegate.sendCommands(getPageCmd(data, eucData.engoPage));
-      //    bleDelegate.sendCommands(cmdTime);
-    }
   }
   // Calculate the data to display in the field here
   var activityElapsedTime = "";
@@ -736,6 +617,12 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     eucData.timerState = activityTimerState;
     if (eucData.useEngo == true) {
+      engoUpdate();
+      // check if cfg config is beeing updated to display a message :
+      if (eucData.engoCfgUpdate != null) {
+        EUCAlarms.textAlert = "Engo Cfg updt " + eucData.engoCfgUpdate;
+      }
+
       if (info.distanceToNextPoint != null) {
         nextPointDistance = info.distanceToNextPoint;
       } else {
@@ -754,6 +641,7 @@ class GarminEUCDF extends WatchUi.DataField {
     //System.println("turnId: " + turnId);
 
     //eucData.paired = true;
+
     if (eucData.paired == true) {
       if (delay < 0) {
         updateFitData(info);
@@ -836,6 +724,146 @@ class GarminEUCDF extends WatchUi.DataField {
       }
     }
     return variaVoltage;
+  }
+
+  function engoUpdate() {
+    //engo related code
+    if (
+      eucData.useEngo == true &&
+      eucData.engoPaired == true &&
+      bleDelegate.engoDisplayInit == true
+    ) {
+      engoBattReq = engoBattReq + 1;
+      if (engoBattReq > 60) {
+        engoBattReq = 0;
+        bleDelegate.getEngoBattery();
+      }
+      var textArray = new [6];
+
+      // var xpos = 225;
+      var currentTime = System.getClockTime();
+      if (eucData.engoBattery != null) {
+        textArray[0] = getHexText(eucData.engoBattery + " %", 0, 0);
+      } else {
+        textArray[0] = getHexText(" ", 0, 0);
+      }
+
+      textArray[1] = getHexText(
+        currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d"),
+        0,
+        0
+      );
+      if (eucData.engoPage == 1) {
+        prevTurnId = null;
+        textArray[2] = getHexText(valueRound(eucData.PWM, "%.1f") + " %", 0, 1);
+        textArray[3] = getHexText(
+          valueRound(eucData.correctedSpeed, "%.1f") + " km/h",
+          0,
+          1
+        );
+        textArray[4] = getHexText(
+          valueRound(eucData.temperature, "%.1f") + " *C",
+          0,
+          1
+        );
+        textArray[5] = getHexText(
+          valueRound(currentBatteryPerc, "%.1f") + " %",
+          0,
+          1
+        );
+      }
+      if (eucData.engoPage == 2) {
+        //Chrono page 1
+        prevTurnId = null;
+        var chrono;
+        if (activityTimerTime != null) {
+          var sec = activityTimerTime / 1000;
+          var mn = sec / 60;
+          chrono = [mn / 60, mn % 60, sec % 60, activityTimerTime % 1000];
+        } else {
+          chrono = null;
+        }
+        textArray[2] = getHexText(
+          chrono[0].format("%02d") +
+            ":" +
+            chrono[1].format("%02d") +
+            ":" +
+            chrono[2].format("%02d"),
+          0,
+          1
+        );
+        textArray[3] = getHexText(
+          valueRound(sessionDistance, "%.1f") + " km",
+          0,
+          1
+        );
+        textArray[4] = getHexText(
+          valueRound(averageMovingSpeed, "%.1f") + " km/h",
+          0,
+          1
+        );
+        textArray[5] = getHexText(valueRound(maxSpeed, "%.1f") + " km/h", 0, 1);
+      }
+      if (eucData.engoPage == 3) {
+        //Chrono page 1
+        if (nextPointDistance != null) {
+          textArray[2] = getHexText(
+            valueRound(nextPointDistance, "%.1f") + " m",
+            0,
+            0
+          );
+        } else {
+          textArray[2] = getHexText("", 0, 0);
+        }
+        if (nextPointName != null) {
+          var multiLineName = multiline(nextPointName);
+          //  System.println(multiLineName);
+          textArray[3] = getHexText(multiLineName[0], 0, 0);
+          textArray[4] = getHexText(multiLineName[1], 0, 0);
+        } else {
+          //System.println("NameNull");
+          //implement word wrap
+          textArray[3] = getHexText("", 0, 0); // si plus de 20 char word wrap et ligne suivante!
+          textArray[4] = getHexText("", 0, 0);
+        }
+        textArray = textArray.slice(0, 5);
+
+        if (turnId != null) {
+          if (!turnId.equals(prevTurnId)) {
+            prevTurnId = turnId;
+            //    System.println("prevId " + prevTurnId);
+            //    System.println("Id " + turnId);
+
+            var imgId = directionDict.get(turnId);
+            if (imgId != null) {
+              // System.println("updating nav img");
+              var imgCmd = getImgCmd(imgId, 130, 150);
+              //  System.println(imgCmd);
+
+              bleDelegate.sendCommands(
+                concatCmd([getClearRectCmd(130, 150, 190, 210, 0), imgCmd])
+              );
+            }
+          }
+        }
+      }
+
+      var data = pagePayload(textArray);
+      /*
+      var currentTime = System.getClockTime();
+      var cmdTime = getWriteCmd(
+        currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d"),
+        100,
+        210,
+        4,
+        1,
+        0x0f
+      );
+*/
+      // System.println(getPageCmd(data, eucData.engoPage));
+      bleDelegate.sendCommands(getPageCmd(data, eucData.engoPage));
+      //    bleDelegate.sendCommands(cmdTime);
+    }
   }
 
   // Update the field layout and display the field data
@@ -1222,7 +1250,7 @@ class GarminEUCDF extends WatchUi.DataField {
             Graphics.TEXT_JUSTIFY_CENTER
           );
         }
-        if (EUCAlarms.displayingAlert == true) {
+        if (!EUCAlarms.textAlert.equals("none")) {
           dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
           dc.fillRectangle(
             0,

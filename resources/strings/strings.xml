@@ -110,7 +110,7 @@
     <string id="useEngo">ActiveView Engo support</string>
     <string id="engoTouch">Switch view mode</string>    
     <string id="engoTouch0">Gesture (proximity sensor)</string>
-    <string id="engoTouch1">Capacitative Button</string>
+    <string id="engoTouch1">Capacitive Button</string>
     
     
     <!-- FIT Strings-->

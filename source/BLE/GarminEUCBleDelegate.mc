@@ -24,6 +24,8 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var cfgList = new [0]b;
   var isUpdatingBleParams as Toybox.Lang.Boolean = false;
   var isBleParamsUpdated as Toybox.Lang.Boolean = false;
+  var cfgPacketsTotal = null;
+  var cfgPacketsCount = 0;
   function initialize(_decoder) {
     BleDelegate.initialize();
     //char = eucPM.EUC_CHAR;
@@ -31,7 +33,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     decoder = _decoder;
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
-    //eucData.isFirst = false;
+    // eucData.isFirst = false;
     if (eucData.useRadar == true) {
       eucData.radar = new AntPlus.BikeRadar(null);
     }
@@ -41,6 +43,9 @@ class eucBLEDelegate extends Ble.BleDelegate {
     status as Toybox.BluetoothLowEnergy.Status
   ) as Void {
     // _log("onCharacteristicWrite", [characteristic, status]);
+    if (characteristic.equals(engo_rx) && cfgPacketsTotal != null) {
+      cfgUpdateStatus();
+    }
     if (isUpdatingBleParams && !isBleParamsUpdated) {
       isUpdatingBleParams = false;
       if (status == Toybox.BluetoothLowEnergy.STATUS_SUCCESS) {
@@ -432,16 +437,19 @@ class eucBLEDelegate extends Ble.BleDelegate {
         clearScreen();
         sendRawCmd(engo_rx, getWriteCmd("updating config", 195, 110, 4, 5, 16));
         sendRawCmd(engo_rx, getWriteCmd("please wait...", 195, 70, 4, 5, 16));
+        cfgPacketsTotal = 0;
         System.println("uploading config");
         for (var i = 0; i < getJson(:EngoCfg1).size(); i++) {
+          var charNb = getJson(:EngoCfg1)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
           var cmd = arrayToRawCmd(getJson(:EngoCfg1)[i]);
           sendRawCmd(engo_rx, cmd);
-          //System.println(cmd);
         }
         for (var i = 0; i < getJson(:EngoCfg2).size(); i++) {
+          var charNb = getJson(:EngoCfg2)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
           var cmd = arrayToRawCmd(getJson(:EngoCfg2)[i]);
           sendRawCmd(engo_rx, cmd);
-          //System.println(cmd);
         }
         //   System.println("upload ongoing");
 
@@ -459,6 +467,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
       if (engoCfgOK == true && engoDisplayInit == false) {
         //  System.println("select cfg");
+        eucData.engoCfgUpdate = null;
         sendRawCmd(
           engo_rx,
           [
@@ -512,6 +521,9 @@ class eucBLEDelegate extends Ble.BleDelegate {
     engoCfgOK = null;
     engoGestureOK = false;
     engoGestureNotif = false;
+    cfgPacketsTotal = null;
+    cfgPacketsCount = 0;
+    eucData.engoCfgUpdate = null;
   }
   function checkCfgName(value) {
     cfgList.addAll(value);
@@ -608,7 +620,18 @@ class eucBLEDelegate extends Ble.BleDelegate {
       // onBleError(e);
     }
   }
+  function cfgUpdateStatus() {
+    // means update started
 
+    cfgPacketsCount++;
+
+    eucData.engoCfgUpdate =
+      ((cfgPacketsCount * 100) / cfgPacketsTotal).toString() + "%";
+    if (cfgPacketsCount >= cfgPacketsTotal) {
+      cfgPacketsTotal = null;
+      eucData.engoCfgUpdate = "Loading";
+    }
+  }
   private function contains(iter, obj, sr) {
     for (var uuid = iter.next(); uuid != null; uuid = iter.next()) {
       if (uuid.equals(obj)) {

@@ -222,7 +222,7 @@ function random(min, max) {
 // engo related fct
 
 function getWriteCmd(text, x, y, r, f, c) {
-  var hexText = getHexText(text);
+  var hexText = getHexText(text, 0, 0);
 
   var cmd = [0xff, 0x37, 0x00, 0x0d + hexText.size()]b;
   cmd.addAll(encodeint16(x));
@@ -263,20 +263,27 @@ function getImgCmd(imgId, xPos, yPos) {
   return cmd;
 }
 
-function getHexText(text) {
+function getHexText(text, lpadding, rpadding) {
   var hexText = Toybox.StringUtil.convertEncodedString(text, {
     :fromRepresentation => Toybox.StringUtil.REPRESENTATION_STRING_PLAIN_TEXT,
     :toRepresentation => Toybox.StringUtil.REPRESENTATION_BYTE_ARRAY,
   });
   var textLength = text.length();
-  if (textLength < 5) {
+  System.println(textLength);
+  if (lpadding > 0) {
     var leftPadding = []b;
-    while (leftPadding.size() < 5 - hexText.size()) {
-      leftPadding.add(0x20);
+    for (var i = 0; i < lpadding - textLength; i++) {
+      leftPadding.add(0x24);
+      //  System.print("left");
     }
     hexText = leftPadding.addAll(hexText);
+    // System.println(hexText);
   }
-  hexText.add(0x20); //right padding 2 char for proper clearing
+  if (rpadding > 0) {
+    for (var i = 0; i < rpadding; i++) {
+      hexText.add(0x24);
+    }
+  }
   return hexText;
 }
 
