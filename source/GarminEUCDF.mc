@@ -61,6 +61,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var prevTurnId = "";
   var nextPointName = null;
   var nextPointDistance = null;
+  // var navigationData = null;
   //var RadarConnState = -1;
   private var cDrawables = {};
 
@@ -619,14 +620,12 @@ class GarminEUCDF extends WatchUi.DataField {
     if (eucData.useEngo == true) {
       engoUpdate();
       // check if cfg config is beeing updated to display a message :
-      if (eucData.engoCfgUpdate != null) {
-        EUCAlarms.textAlert = "Engo Cfg updt " + eucData.engoCfgUpdate;
-      }
 
       if (info.distanceToNextPoint != null) {
         nextPointDistance = info.distanceToNextPoint;
       } else {
         nextPointDistance = null;
+        eucData.engoPageNb = 2; // remove navig view
       }
       if (info.nameOfNextPoint != null && info.nameOfNextPoint.length() > 0) {
         nextPointName = info.nameOfNextPoint.substring(1, null);

@@ -33,7 +33,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     decoder = _decoder;
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
-    // eucData.isFirst = false;
+    //eucData.isFirst = false;
     if (eucData.useRadar == true) {
       eucData.radar = new AntPlus.BikeRadar(null);
     }
@@ -466,8 +466,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
         engoGestureOK = true;
       }
       if (engoCfgOK == true && engoDisplayInit == false) {
-        //  System.println("select cfg");
+        //System.println("select cfg");
+
         eucData.engoCfgUpdate = null;
+        EUCAlarms.textAlert = "none";
+        //System.println(eucData.engoCfgUpdate);
         sendRawCmd(
           engo_rx,
           [
@@ -626,11 +629,12 @@ class eucBLEDelegate extends Ble.BleDelegate {
     cfgPacketsCount++;
 
     eucData.engoCfgUpdate =
-      ((cfgPacketsCount * 100) / cfgPacketsTotal).toString() + "%";
+      " updt " + ((cfgPacketsCount * 100) / cfgPacketsTotal).toString() + "%";
     if (cfgPacketsCount >= cfgPacketsTotal) {
       cfgPacketsTotal = null;
       eucData.engoCfgUpdate = "Loading";
     }
+    EUCAlarms.textAlert = "Engo Cfg " + eucData.engoCfgUpdate;
   }
   private function contains(iter, obj, sr) {
     for (var uuid = iter.next(); uuid != null; uuid = iter.next()) {
