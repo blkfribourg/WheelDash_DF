@@ -1,6 +1,13 @@
 <settings>
  
-
+<setting
+            propertyKey="@Properties.fieldNB"
+            title="@Strings.fieldNB">  
+                <settingConfig type="list">
+                    <listEntry value="6">@Strings.fieldNB6</listEntry>
+                    <listEntry value="8">@Strings.fieldNB8</listEntry>
+                </settingConfig>
+        </setting>
  <setting
                 propertyKey="@Properties.field1"
                 title="@Strings.field1">
@@ -25,6 +32,14 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
+                    <listEntry value="23">@Strings.eucdata23</listEntry>
+                    <listEntry value="24">@Strings.eucdata24</listEntry>
+                    <listEntry value="25">@Strings.eucdata25</listEntry>
+                    <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -52,6 +67,14 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
+                    <listEntry value="23">@Strings.eucdata23</listEntry>
+                    <listEntry value="24">@Strings.eucdata24</listEntry>
+                    <listEntry value="25">@Strings.eucdata25</listEntry>
+                    <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -79,7 +102,14 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
-                    
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
+                    <listEntry value="23">@Strings.eucdata23</listEntry>
+                    <listEntry value="24">@Strings.eucdata24</listEntry>
+                    <listEntry value="25">@Strings.eucdata25</listEntry>
+                    <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>                    
                 </settingConfig>
             </setting>
             <setting
@@ -106,6 +136,14 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
+                    <listEntry value="23">@Strings.eucdata23</listEntry>
+                    <listEntry value="24">@Strings.eucdata24</listEntry>
+                    <listEntry value="25">@Strings.eucdata25</listEntry>
+                    <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                    
                 </settingConfig>
             </setting>
@@ -133,6 +171,14 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
+                    <listEntry value="23">@Strings.eucdata23</listEntry>
+                    <listEntry value="24">@Strings.eucdata24</listEntry>
+                    <listEntry value="25">@Strings.eucdata25</listEntry>
+                    <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                    
                 </settingConfig>
             </setting>
@@ -160,6 +206,84 @@
                     <listEntry value="17">@Strings.eucdata17</listEntry>
                     <listEntry value="18">@Strings.eucdata18</listEntry>
                     <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
+                    <listEntry value="23">@Strings.eucdata23</listEntry>
+                    <listEntry value="24">@Strings.eucdata24</listEntry>
+                    <listEntry value="25">@Strings.eucdata25</listEntry>
+                    <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
+                    
+                </settingConfig>
+            </setting>
+            <setting
+                propertyKey="@Properties.field7"
+                title="@Strings.field7">
+                <settingConfig type="list">
+                    <listEntry value="0">@Strings.eucdata0</listEntry>
+                    <listEntry value="1">@Strings.eucdata1</listEntry>
+                    <listEntry value="2">@Strings.eucdata2</listEntry>
+                    <listEntry value="3">@Strings.eucdata3</listEntry>
+                    <listEntry value="4">@Strings.eucdata4</listEntry>
+                    <listEntry value="5">@Strings.eucdata5</listEntry>
+                    <listEntry value="6">@Strings.eucdata6</listEntry>
+                    <listEntry value="7">@Strings.eucdata7</listEntry>
+					<listEntry value="8">@Strings.eucdata8</listEntry>
+                    <listEntry value="9">@Strings.eucdata9</listEntry>
+                    <listEntry value="10">@Strings.eucdata10</listEntry>
+                    <listEntry value="11">@Strings.eucdata11</listEntry>
+                    <listEntry value="12">@Strings.eucdata12</listEntry>
+                    <listEntry value="13">@Strings.eucdata13</listEntry>
+                    <listEntry value="14">@Strings.eucdata14</listEntry>
+                    <listEntry value="15">@Strings.eucdata15</listEntry>
+					<listEntry value="16">@Strings.eucdata16</listEntry>
+                    <listEntry value="17">@Strings.eucdata17</listEntry>
+                    <listEntry value="18">@Strings.eucdata18</listEntry>
+                    <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
+                    <listEntry value="23">@Strings.eucdata23</listEntry>
+                    <listEntry value="24">@Strings.eucdata24</listEntry>
+                    <listEntry value="25">@Strings.eucdata25</listEntry>
+                    <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
+                    
+                </settingConfig>
+            </setting>
+            <setting
+                propertyKey="@Properties.field8"
+                title="@Strings.field8">
+                <settingConfig type="list">
+                    <listEntry value="0">@Strings.eucdata0</listEntry>
+                    <listEntry value="1">@Strings.eucdata1</listEntry>
+                    <listEntry value="2">@Strings.eucdata2</listEntry>
+                    <listEntry value="3">@Strings.eucdata3</listEntry>
+                    <listEntry value="4">@Strings.eucdata4</listEntry>
+                    <listEntry value="5">@Strings.eucdata5</listEntry>
+                    <listEntry value="6">@Strings.eucdata6</listEntry>
+                    <listEntry value="7">@Strings.eucdata7</listEntry>
+					<listEntry value="8">@Strings.eucdata8</listEntry>
+                    <listEntry value="9">@Strings.eucdata9</listEntry>
+                    <listEntry value="10">@Strings.eucdata10</listEntry>
+                    <listEntry value="11">@Strings.eucdata11</listEntry>
+                    <listEntry value="12">@Strings.eucdata12</listEntry>
+                    <listEntry value="13">@Strings.eucdata13</listEntry>
+                    <listEntry value="14">@Strings.eucdata14</listEntry>
+                    <listEntry value="15">@Strings.eucdata15</listEntry>
+					<listEntry value="16">@Strings.eucdata16</listEntry>
+                    <listEntry value="17">@Strings.eucdata17</listEntry>
+                    <listEntry value="18">@Strings.eucdata18</listEntry>
+                    <listEntry value="19">@Strings.eucdata19</listEntry>
+                    <listEntry value="20">@Strings.eucdata20</listEntry>
+                    <listEntry value="21">@Strings.eucdata21</listEntry>
+                    <listEntry value="22">@Strings.eucdata22</listEntry>
+                    <listEntry value="23">@Strings.eucdata23</listEntry>
+                    <listEntry value="24">@Strings.eucdata24</listEntry>
+                    <listEntry value="25">@Strings.eucdata25</listEntry>
+                    <listEntry value="26">@Strings.eucdata26</listEntry>
+                    <listEntry value="27">@Strings.eucdata27</listEntry>
                     
                 </settingConfig>
             </setting>
@@ -177,22 +301,64 @@
                     type="boolean"
                 />
             </setting>
-            <!--
             <setting
-            propertyKey="@Properties.useMiles"
-            title="@Strings.useMiles">
+            propertyKey="@Properties.vibeIntensity"
+            title="@Strings.vibeIntensity">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="100"
+            />
+        </setting>
+          <setting
+            propertyKey="@Properties.motorbikeHeadset"
+            title="@Strings.motorbikeHeadset">
             <settingConfig
                 type="boolean"
             />
         </setting>
          <setting
-            propertyKey="@Properties.useFahrenheit"
-            title="@Strings.useFahrenheit">
+            propertyKey="@Properties.useRadar"
+            title="@Strings.useRadar">
+                <settingConfig
+                    type="boolean"
+                />
+            </setting>
+         <setting
+            propertyKey="@Properties.variaFarAlarmDistThr"
+            title="@Strings.variaFarAlarmDistThr">
             <settingConfig
-                type="boolean"
+                type="numeric"
+                min="0"
+                max="150"
             />
         </setting>
-
+         <setting
+            propertyKey="@Properties.variaCloseAlarmDistThr"
+            title="@Strings.variaCloseAlarmDistThr">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="150"
+            />
+        </setting>
+        <setting
+            propertyKey="@Properties.useEngo"
+            title="@Strings.useEngo">
+                <settingConfig
+                    type="boolean"
+                />
+        </setting>
+        <setting
+                propertyKey="@Properties.engoTouch"
+                title="@Strings.engoTouch">
+                <settingConfig type="list">
+                    <listEntry value="0">@Strings.engoTouch0</listEntry>
+                    <listEntry value="1">@Strings.engoTouch1</listEntry>                    
+                </settingConfig>
+            </setting>
+         
+<!--
             <setting
                 propertyKey="@Properties.resumeDectectionMethod"
                 title="@Strings.resumeDectectionMethod">
@@ -300,6 +466,15 @@
         <setting
             propertyKey="@Properties.alarmThreshold_PWM_p1"
             title="@Strings.alarmThreshold_PWM_p1">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="100"
+                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+        </setting>
+        <setting
+            propertyKey="@Properties.alarmThreshold2_PWM_p1"
+            title="@Strings.alarmThreshold2_PWM_p1">
             <settingConfig
                 type="numeric"
                 min="0"
@@ -420,6 +595,15 @@
                 errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
         </setting>
         <setting
+            propertyKey="@Properties.alarmThreshold2_PWM_p2"
+            title="@Strings.alarmThreshold2_PWM_p2">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="100"
+                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+        </setting>
+        <setting
             propertyKey="@Properties.alarmThreshold_speed_p2"
             title="@Strings.alarmThreshold_speed_p2">
             <settingConfig
@@ -526,6 +710,15 @@
         <setting
             propertyKey="@Properties.alarmThreshold_PWM_p3"
             title="@Strings.alarmThreshold_PWM_p3">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="100"
+                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+        </setting>
+        <setting
+            propertyKey="@Properties.alarmThreshold2_PWM_p3"
+            title="@Strings.alarmThreshold2_PWM_p3">
             <settingConfig
                 type="numeric"
                 min="0"

@@ -1,0 +1,120 @@
+{
+    "config":[
+        {"deprecated": false, "cfg": "wheeldash", "cfgVersion": 0, "cfgKey": 0}
+    ],
+
+    "fonts":[
+        {"id": 4, "path": "./font/Rajdhani/Rajdhani-Medium.ttf", "height": 38, "first": " ","last": ";"},
+		{"id": 5, "path": "./font/Rajdhani/Rajdhani-Medium.ttf", "height": 20, "first": " ","last": ":"}
+    ],
+
+    "layoutDelete":[
+        {"id": 0},
+        {"id": 3}
+    ],
+
+    "layouts": [
+		{"id": 7, "name":"battery", "x0": 122, "y0": 184, "width": 122, "height": 30, "foreColor": 10, "backColor": 0, "font": 5, "txtX0": 80, "txtY0": 28, "txtRot": 4, "txtOpacity": true, "usetxt": true,
+            "cmds" : [
+                {"type": "img", "id": 22, "x": 100, "y": 8},
+                {"type": "font", "id": 1}
+            ]
+        },
+		{"id": 10, "name":"time", "x0": 122, "y0": 184, "width": 122, "height": 30, "foreColor": 10, "backColor": 0, "font": 5, "txtX0": 80, "txtY0": 28, "txtRot": 4, "txtOpacity": true, "usetxt": true,
+            "cmds" : [
+				{"type": "font", "id": 1}
+            ]
+        },
+        {"id": 11, "name":"pwm", "x0": 30, "y0": 85, "width": 244, "height": 42, "foreColor": 10, "backColor": 0, "font": 4, "txtX0": 165, "txtY0": 38, "txtRot": 4, "txtOpacity": true, "usetxt": true,
+            "cmds" : [
+                {"type": "img", "id": 26, "x": 188, "y": 8},
+                {"type": "font", "id": 1},
+                {"type": "text", "x": 80, "y": 28, "txt": "%"}
+            ]
+        },
+		 {"id": 12, "name":"speed", "x0": 30, "y0": 85, "width": 244, "height": 42, "foreColor": 10, "backColor": 0, "font": 4, "txtX0": 165, "txtY0": 38, "txtRot": 4, "txtOpacity": true, "usetxt": true,
+            "cmds" : [
+                {"type": "img", "id": 23, "x": 188, "y": 8},
+                {"type": "font", "id": 1},
+                {"type": "text", "x": 80, "y": 28, "txt": "km/h"}
+            ]
+        },
+		{"id": 13, "name":"temperature", "x0": 30, "y0": 85, "width": 244, "height": 42, "foreColor": 10, "backColor": 0, "font": 4, "txtX0": 165, "txtY0": 38, "txtRot": 4, "txtOpacity": true, "usetxt": true,
+            "cmds" : [
+                {"type": "img", "id": 25, "x": 188, "y": 8},
+                {"type": "font", "id": 1},
+                {"type": "text", "x": 80, "y": 28, "txt": "degC"}
+            ]
+        },
+		{"id": 14, "name":"battery", "x0": 30, "y0": 85, "width": 244, "height": 42, "foreColor": 10, "backColor": 0, "font": 4, "txtX0": 165, "txtY0": 38, "txtRot": 4, "txtOpacity": true, "usetxt": true,
+            "cmds" : [
+                {"type": "img", "id": 24, "x": 188, "y": 8},
+                {"type": "font", "id": 1},
+                {"type": "text", "x": 80, "y": 28, "txt": "%"}
+            ]
+        },
+		{"id": 15, "name":"chrono", "x0": 30, "y0": 85, "width": 244, "height": 42, "foreColor": 10, "backColor": 0, "font": 4, "txtX0": 165, "txtY0": 38, "txtRot": 4, "txtOpacity": true, "usetxt": true,
+            "cmds" : [
+                {"type": "img", "id": 32, "x": 188, "y": 8},
+				{"type": "font", "id": 1}
+            ]
+        },
+		{"id": 16, "name":"distance", "x0": 30, "y0": 85, "width": 244, "height": 42, "foreColor": 10, "backColor": 0, "font": 4, "txtX0": 165, "txtY0": 38, "txtRot": 4, "txtOpacity": true, "usetxt": true,
+            "cmds" : [
+                {"type": "img", "id": 27, "x": 188, "y": 8},
+                {"type": "font", "id": 1},
+                {"type": "text", "x": 80, "y": 28, "txt": "km"}
+            ]
+        },
+		{"id": 17, "name":"avgspeed", "x0": 30, "y0": 85, "width": 244, "height": 42, "foreColor": 10, "backColor": 0, "font": 4, "txtX0": 165, "txtY0": 38, "txtRot": 4, "txtOpacity": true, "usetxt": true,
+            "cmds" : [
+                {"type": "img", "id": 30, "x": 188, "y": 8},
+                {"type": "font", "id": 1},
+                {"type": "text", "x": 80, "y": 28, "txt": "km/h"}
+            ]
+        },
+		{"id": 18, "name":"topspeed", "x0": 30, "y0": 85, "width": 244, "height": 42, "foreColor": 10, "backColor": 0, "font": 4, "txtX0": 165, "txtY0": 38, "txtRot": 4, "txtOpacity": true, "usetxt": true,
+            "cmds" : [
+                {"type": "img", "id": 31, "x": 188, "y": 8},
+                {"type": "font", "id": 1},
+                {"type": "text", "x": 80, "y": 28, "txt": "km/h"}
+            ]
+        }
+    ],
+
+    "imgDelete":[
+        {"deprecated": false, "id": 255}
+    ],
+
+    "imgs": [
+		{"id": 22, "path": "./cfgDescriptor/wheeldash/img/22-engoBattery.png", "fmt": "mono_alpha_8bpp"},
+        {"id": 23, "path": "./cfgDescriptor/wheeldash/img/23-speed.png", "fmt": "mono_alpha_8bpp"},
+        {"id": 24, "path": "./cfgDescriptor/wheeldash/img/24-battery.png", "fmt": "mono_alpha_8bpp"},
+        {"id": 25, "path": "./cfgDescriptor/wheeldash/img/25-temperature.png", "fmt": "mono_alpha_8bpp"},
+		{"id": 26, "path": "./cfgDescriptor/wheeldash/img/26-PWM.png", "fmt": "mono_alpha_8bpp"},
+		{"id": 27, "path": "./cfgDescriptor/wheeldash/img/27-distance.png", "fmt": "mono_alpha_8bpp"},
+		{"id": 30, "path": "./cfgDescriptor/wheeldash/img/30-avgspeed.png", "fmt": "mono_alpha_8bpp"},
+		{"id": 31, "path": "./cfgDescriptor/wheeldash/img/31-topspeed.png", "fmt": "mono_alpha_8bpp"},
+		{"id": 32, "path": "./cfgDescriptor/wheeldash/img/32-chrono.png", "fmt": "mono_alpha_8bpp"}
+    ],
+
+
+    "pages": [
+	{"id":1 ,"layouts" : [
+		{"id":7,"x":152,"y":205},
+		{"id":10,"x":30,"y":205},
+		{"id":11,"x":60,"y":150},
+		{"id":12,"x":60,"y":110},
+		{"id":13,"x":60,"y":70},
+		{"id":14,"x":60,"y":30}
+	]},
+	{"id":2 ,"layouts" : [
+		{"id":7,"x":152,"y":205},
+		{"id":10,"x":30,"y":205},
+		{"id":15,"x":60,"y":150},
+		{"id":16,"x":60,"y":110},
+		{"id":17,"x":60,"y":70},
+		{"id":18,"x":60,"y":30}
+	]}
+    ]
+}

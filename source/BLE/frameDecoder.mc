@@ -228,56 +228,59 @@ class VeteranDecoder {
   }
 
   function processFrame(value) {
-    eucData.voltage =
-      value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 4,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 100.0;
-    eucData.speed =
-      value
-        .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-          :offset => 6,
+    // System.println("procFrame: " + value);
+    if (value.size() > 35) {
+      eucData.voltage =
+        value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+          :offset => 4,
           :endianness => Lang.ENDIAN_BIG,
-        })
-        .abs() / 10.0;
-    eucData.Phcurrent =
-      value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 16,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 10.0;
-    eucData.tripDistance =
-      (((value[8 + 2] & 0xff) << 24) |
-        ((value[8 + 3] & 0xff) << 16) |
-        ((value[8] & 0xff) << 8) |
-        (value[8 + 1] & 0xff)) /
-      1000.0;
-    eucData.totalDistance =
-      (((value[12 + 2] & 0xff) << 24) |
-        ((value[12 + 3] & 0xff) << 16) |
-        ((value[12] & 0xff) << 8) |
-        (value[12 + 1] & 0xff)) /
-      1000.0;
+        }) / 100.0;
+      eucData.speed =
+        value
+          .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+            :offset => 6,
+            :endianness => Lang.ENDIAN_BIG,
+          })
+          .abs() / 10.0;
+      eucData.Phcurrent =
+        value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+          :offset => 16,
+          :endianness => Lang.ENDIAN_BIG,
+        }) / 10.0;
+      eucData.tripDistance =
+        (((value[8 + 2] & 0xff) << 24) |
+          ((value[8 + 3] & 0xff) << 16) |
+          ((value[8] & 0xff) << 8) |
+          (value[8 + 1] & 0xff)) /
+        1000.0;
+      eucData.totalDistance =
+        (((value[12 + 2] & 0xff) << 24) |
+          ((value[12 + 3] & 0xff) << 16) |
+          ((value[12] & 0xff) << 8) |
+          (value[12 + 1] & 0xff)) /
+        1000.0;
 
-    /*
+      /*
     eucData.temperature =
       value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
         :offset => 18,
         :endianness => Lang.ENDIAN_BIG,
       }) / 100.0;
       */
-    //from eucWatch :
-    eucData.temperature = ((value[18] << 8) | value[19]) / 100;
-    // implement chargeMode/speedAlert/speedTiltback later
-    eucData.version =
-      value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 28,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 1000.0;
-    eucData.hPWM =
-      value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 34,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 100.0;
+      //from eucWatch :
+      eucData.temperature = ((value[18] << 8) | value[19]) / 100;
+      // implement chargeMode/speedAlert/speedTiltback later
+      eucData.version =
+        value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+          :offset => 28,
+          :endianness => Lang.ENDIAN_BIG,
+        }) / 1000.0;
+      eucData.hPWM =
+        value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+          :offset => 34,
+          :endianness => Lang.ENDIAN_BIG,
+        }) / 100.0;
+    }
   }
 }
 
@@ -338,7 +341,7 @@ class KingsongDecoder {
         // Distance/Time/Fan Data
         eucData.tripDistance =
           decode4bytes(value[2], value[3], value[4], value[5]) / 1000.0;
-        eucData.temperature2 = decode2bytes(value[14], value[15]) / 100.0;
+        //      eucData.temperature2 = decode2bytes(value[14], value[15]) / 100.0;
       } else if ((value[16] & 255) == 187) {
         // Name and Type data : Don't get why it's so "twisted" but OK ...
         var end;
@@ -365,212 +368,11 @@ class KingsongDecoder {
         eucData.model = model;
       } else if ((value[16] & 255) == 0xf5) {
         //cpu load
-        eucData.cpuLoad = value[14];
+        //       eucData.cpuLoad = value[14];
         eucData.hPWM = value[15];
         return false;
       }
     }
     return false;
-  }
-}
-
-class IMV2Decoder {
-  var frameNb = 0;
-  var start_dist;
-
-  function frameBuffer(bleDelegate, transmittedFrame) {
-    if (
-      bleDelegate.queue.lastPacketType.equals("live") &&
-      transmittedFrame.size() == 20
-    ) {
-      // V11 & V12
-      if (eucData.wheelBrand == 4) {
-        eucData.voltage =
-          transmittedFrame
-            .decodeNumber(Lang.NUMBER_FORMAT_UINT16, {
-              :offset => 5,
-              :endianness => Lang.ENDIAN_LITTLE,
-            })
-            .abs() / 100.0;
-        var speed =
-          transmittedFrame
-            .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-              :offset => 9,
-              :endianness => Lang.ENDIAN_LITTLE,
-            })
-            .abs() / 100.0;
-        if (speed <= 100) {
-          //Should investigate if wrong packet or decoding error
-          eucData.speed = speed;
-        }
-        var pwm =
-          transmittedFrame
-            .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-              :offset => 13,
-              :endianness => Lang.ENDIAN_LITTLE,
-            })
-            .abs() / 100.0;
-        if (pwm < 100.0) {
-          //Should investigate if wrong packet or decoding error
-          eucData.hPWM = pwm;
-        }
-
-        eucData.current =
-          transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-            :offset => 7,
-            :endianness => Lang.ENDIAN_LITTLE,
-          }) / 100.0;
-      }
-      // V11Y V13 V14
-      if (eucData.wheelBrand == 5) {
-        eucData.voltage =
-          transmittedFrame
-            .decodeNumber(Lang.NUMBER_FORMAT_UINT16, {
-              :offset => 5,
-              :endianness => Lang.ENDIAN_LITTLE,
-            })
-            .abs() / 100.0;
-        var speed =
-          transmittedFrame
-            .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-              :offset => 13,
-              :endianness => Lang.ENDIAN_LITTLE,
-            })
-            .abs() / 100.0;
-        if (speed <= 100) {
-          //Should investigate if wrong packet or decoding error
-          eucData.speed = speed;
-        }
-        var pwm =
-          transmittedFrame
-            .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-              :offset => 19,
-              :endianness => Lang.ENDIAN_LITTLE,
-            })
-            .abs() / 100.0;
-        if (pwm < 100.0) {
-          //Should investigate if wrong packet or decoding error
-          eucData.hPWM = pwm;
-        }
-
-        eucData.current =
-          transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-            :offset => 7,
-            :endianness => Lang.ENDIAN_LITTLE,
-          }) / 100.0;
-      }
-    }
-    if (
-      bleDelegate.queue.lastPacketType.equals("stats") &&
-      transmittedFrame.size() == 20
-    ) {
-      eucData.totalDistance =
-        transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_UINT32, {
-          :offset => 5,
-          :endianness => Lang.ENDIAN_LITTLE,
-        }) / 100.0;
-
-      if (start_dist == null) {
-        start_dist = eucData.totalDistance;
-      }
-      eucData.tripDistance = eucData.totalDistance - start_dist;
-    }
-  }
-}
-
-class VESCDecoder {
-  var packetID = 0x2f;
-  var packetEnd = 0x03;
-  var frame = [0]b;
-  var status = "unknown";
-  var startDistance = null;
-
-  function frameBuilder(bleDelegate, value) {
-    if (value[0] == packetID) {
-      status = "append";
-      frame = value;
-    } else {
-      if (status.equals("append")) {
-        frame.addAll(value);
-      }
-    }
-
-    if (value[value.size() - 1] == 0x03) {
-      status = "complete";
-      var transmittedFrame = frame;
-      System.println(transmittedFrame);
-      if (transmittedFrame.size() >= 66) {
-        // ensure that packet is complete
-        frameBuffer(bleDelegate, transmittedFrame);
-      }
-      frame = [0]b;
-      status = "unknown";
-    }
-  }
-
-  function frameBuffer(bleDelegate, transmittedFrame) {
-    var size = transmittedFrame.size();
-
-    eucData.temperature =
-      transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 1,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 10.0;
-
-    eucData.current =
-      transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_SINT32, {
-        :offset => 9,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 100.0;
-
-    eucData.hPWM =
-      transmittedFrame
-        .decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-          :offset => 13,
-          :endianness => Lang.ENDIAN_BIG,
-        })
-        .abs() / 10.0;
-
-    eucData.speed =
-      transmittedFrame
-        .decodeNumber(Lang.NUMBER_FORMAT_SINT32, {
-          :offset => 19,
-          :endianness => Lang.ENDIAN_BIG,
-        })
-        .abs() / 1000.0;
-
-    eucData.voltage =
-      transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 23,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 10.0;
-
-    eucData.battery =
-      transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 25,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 10.0;
-
-    eucData.totalDistance =
-      transmittedFrame.decodeNumber(Lang.NUMBER_FORMAT_UINT32, {
-        :offset => 62,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 1000.0; // in km
-    if (startDistance == null) {
-      startDistance = eucData.totalDistance;
-    }
-    eucData.tripDistance = eucData.totalDistance - startDistance;
-
-    /*
-    tempMos = decodeint16(packet[1], packet[2]) / 10.0;
-    tempMot = decodeint16(packet[3], packet[4]) / 10.0;
-    currMot = decodeint32(packet[5], packet[6], packet[7], packet[8]) / 100.0;
-    currIn = decodeint32(packet[9], packet[10], packet[11], packet[12]) / 100.0;
-    dutyNow = decodeint16(packet[21], packet[22]) / 1000.0;
-    rpm = decodeint32(packet[23], packet[24], packet[25], packet[26]);
-    voltage = decodeint16(packet[27], packet[28]) / 10.0;
-    speed = decodeint32(packet[45], packet[46], packet[47], packet[48]);
-    speed_abs = decodeint32(packet[49], packet[50], packet[51], packet[52]);
-    */
   }
 }
