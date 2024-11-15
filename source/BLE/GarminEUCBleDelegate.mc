@@ -323,7 +323,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     //System.println("UUID:" + desc.getCharacteristic().getUuid());
     var currentChar = desc.getCharacteristic();
     // send getName request for KS using ble queue
-    if (currentChar.equals(eucPM.EUC_CHAR)) {
+    if (currentChar.equals(euc_char)) {
       if (eucData.wheelBrand == 2 || eucData.wheelBrand == 3) {
         try {
           euc_char.requestWrite(

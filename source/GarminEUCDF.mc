@@ -589,7 +589,9 @@ class GarminEUCDF extends WatchUi.DataField {
       if (fieldIDs[field_id] == 27) {
         fieldNames[field_id] = "GPS SPD";
         var GPS_speed = Position.getInfo().speed;
-
+        if (GPS_speed != null) {
+          GPS_speed = GPS_speed * 3.6; //Km/h only here, should implement mph when adding imperial unit support
+        }
         fieldValues[field_id] = valueRound(GPS_speed, "%.1f");
       }
     }
