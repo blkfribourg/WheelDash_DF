@@ -218,7 +218,7 @@ module EUCAlarms {
     //Temperature alarm
     if (eucData.alarmThreshold_temp != 0) {
       if (
-        eucData.temperature > eucData.alarmThreshold_temp &&
+        eucData.correctedTemperature > eucData.alarmThreshold_temp &&
         triggerAlarm == true &&
         PWMAlarm == false
       ) {
@@ -235,7 +235,7 @@ module EUCAlarms {
         }
         tempAlarm = true;
       }
-      if (eucData.temperature < eucData.alarmThreshold_temp) {
+      if (eucData.correctedTemperature < eucData.alarmThreshold_temp) {
         tempAlarm = false;
       }
     }

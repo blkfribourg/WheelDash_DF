@@ -37,17 +37,6 @@ function getXY(screenDiam, startingAngle, radius, angle, pos) {
   return [x, y];
 }
 
-// Get a point coord on a circle
-function getXY(screenDiam, startingAngle, radius, angle, pos) {
-  var x =
-    screenDiam / 2 -
-    radius * Math.sin(Math.toRadians(startingAngle - angle * pos));
-  var y =
-    screenDiam / 2 -
-    radius * Math.cos(Math.toRadians(startingAngle - angle * pos));
-  return [x, y];
-}
-
 function splitstr(str as Lang.String, char) {
   var stringArray;
 
@@ -174,6 +163,21 @@ function sArray2nArray(sArray) {
   return nArray;
 }
 
+function convertKmToMiles(value) {
+  if (value != null) {
+    return value * 0.621371192;
+  } else {
+    return value;
+  }
+}
+
+function convertToF(value) {
+  if (value != null) {
+    return value * 1.8 + 32.0;
+  } else {
+    return value;
+  }
+}
 /*
 // varia sim
 class fakeVariaTarget {

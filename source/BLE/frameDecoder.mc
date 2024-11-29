@@ -11,12 +11,6 @@ module frameDecoder {
     }
     if (eucData.wheelBrand == 2 || eucData.wheelBrand == 3) {
       return new KingsongDecoder();
-    }
-    if (eucData.wheelBrand == 4 || eucData.wheelBrand == 5) {
-      return new IMV2Decoder();
-    }
-    if (eucData.wheelBrand == 6) {
-      return new VESCDecoder();
     } else {
       return null;
     }
@@ -162,7 +156,7 @@ class VeteranDecoder {
   var old1 = 0;
   var old2 = 0;
   var len = 0;
-
+  var usingCrc = false;
   var frame as ByteArray?;
   var state = "unknown";
   function checkChar(c) {
@@ -181,11 +175,12 @@ class VeteranDecoder {
       if (size == len + 3) {
         state = "done";
         reset();
-        if (len > 38) {
+        if (len > 38 || usingCrc) {
           // new format with crc32
           var calc_crc = calculateCRC32(frame, 0, len);
           var provided_crc = UInt32FromBytesBE(frame, len);
           if (calc_crc == provided_crc) {
+            usingCrc = true;
             return true;
           } else {
             return false;

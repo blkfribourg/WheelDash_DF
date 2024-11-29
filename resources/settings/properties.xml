@@ -14,6 +14,7 @@
     <property id="displayWind" type="boolean">true</property>
     <property id="vibeIntensity" type="number">90</property>
     <property id="motorbikeHeadset" type="boolean">false</property>
+    <property id="convertToFahrenheit" type="boolean">false</property>
     <property id="useRadar" type="boolean">false</property>
     <property id="variaFarAlarmDistThr" type="number">60</property>
     <property id="variaCloseAlarmDistThr" type="number">20</property>
@@ -23,8 +24,9 @@
     
 
     <property id="profile" type="number">1</property>
-    <property id="wheelBrand_p1" type="number">1</property>
-    <property id="wheelName_p1" type="string">Shermax2</property>
+    <property id="wheelBrand_p1" type="number">0</property>
+    <property id="wheelName_p1" type="string">Profile 1</property>
+     <property id="convertToMiles_p1" type="boolean">false</property>
     <property id="rotationSpeed_PWM_p1" type="float">65.2</property>
     <property id="rotationVoltage_PWM_p1" type="float">81.5</property>
     <property id="powerFactor_PWM_p1" type="float">0.9</property>
@@ -41,6 +43,7 @@
 
     <property id="wheelBrand_p2" type="number">0</property>
     <property id="wheelName_p2" type="string">Profile 2</property>
+     <property id="convertToMiles_p2" type="boolean">false</property>
     <property id="rotationSpeed_PWM_p2" type="float">65.2</property>
     <property id="rotationVoltage_PWM_p2" type="float">81.5</property>
     <property id="powerFactor_PWM_p2" type="float">0.9</property>
@@ -55,6 +58,7 @@
 
     <property id="wheelBrand_p3" type="number">0</property>
     <property id="wheelName_p3" type="string">Profile 3</property>
+    <property id="convertToMiles_p3" type="boolean">false</property>
     <property id="rotationSpeed_PWM_p3" type="float">65.2</property>
     <property id="rotationVoltage_PWM_p3" type="float">81.5</property>
     <property id="powerFactor_PWM_p3" type="float">0.9</property>

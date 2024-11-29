@@ -1,8 +1,8 @@
 using Toybox.BluetoothLowEnergy as Ble;
 using Toybox.Application.Storage;
-import Toybox.WatchUi;
 import Toybox.Lang;
 using Toybox.AntPlus;
+
 class eucBLEDelegate extends Ble.BleDelegate {
   var firstChar = null;
   var euc_service = null;
@@ -27,6 +27,14 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var isBleParamsUpdated as Toybox.Lang.Boolean = false;
   var cfgPacketsTotal = null;
   var cfgPacketsCount = 0;
+
+  var euc_BLE_TX_startTime;
+  var BLE_RX_startTime;
+
+  // engo display strings
+  var distUnit = "";
+  var spdUnit = "";
+  var tempUnit = "";
   function initialize(_decoder) {
     BleDelegate.initialize();
     //char = eucPM.EUC_CHAR;
@@ -43,6 +51,12 @@ class eucBLEDelegate extends Ble.BleDelegate {
     characteristic as Toybox.BluetoothLowEnergy.Characteristic,
     status as Toybox.BluetoothLowEnergy.Status
   ) as Void {
+    if (eucData.debug) {
+      if (BLE_RX_startTime != null) {
+        eucData.BLEWriteInterval = System.getTimer() - BLE_RX_startTime;
+      }
+      BLE_RX_startTime = System.getTimer();
+    }
     // _log("onCharacteristicWrite", [characteristic, status]);
     if (characteristic.equals(engo_rx) && cfgPacketsTotal != null) {
       cfgUpdateStatus();
@@ -362,6 +376,25 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
     //   System.println("CharacteristicChanged");
     if (char.equals(euc_char)) {
+      if (eucData.useEngo) {
+        if (euc_BLE_TX_startTime != null) {
+          eucData.BLEReadInterval = System.getTimer() - euc_BLE_TX_startTime;
+        } else {
+          euc_BLE_TX_startTime = System.getTimer();
+        }
+        if (eucData.BLEReadInterval > 500 || eucData.BLEReadInterval < 0) {
+          // I don't expect a negative value but if the Sys timer get reset it could happen
+          // if more than 500msec after an EUC packet reception, send data to engo
+          euc_BLE_TX_startTime = System.getTimer();
+          //  engoUpdate();
+        }
+      }
+      if (eucData.debug) {
+        if (euc_BLE_TX_startTime != null) {
+          eucData.BLEReadInterval = System.getTimer() - euc_BLE_TX_startTime;
+        }
+        euc_BLE_TX_startTime = System.getTimer();
+      }
       if (firstChar == true) {
         // beep
         try {
@@ -373,6 +406,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
           // System.println(e.getErrorMessage());
         }
       }
+
       //  System.println("EUCCharChanged");
       if (
         decoder != null &&
@@ -397,6 +431,9 @@ class eucBLEDelegate extends Ble.BleDelegate {
         } catch (e instanceof Lang.Exception) {
           // System.println(e.getErrorMessage());
         }
+      }
+      if (eucData.debug) {
+        eucData.BLEReadProcTime = System.getTimer() - euc_BLE_TX_startTime;
       }
     }
     if (char.equals(engo_tx)) {
@@ -498,7 +535,20 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
     }
     if (engoDisplayInit == true) {
-      //enable gesture
+      // set string vars
+
+      if (eucData.convertToMiles) {
+        distUnit = " mi";
+        spdUnit = " mph";
+      } else {
+        distUnit = " km";
+        spdUnit = " km/h";
+      }
+      if (eucData.convertToFahrenheit) {
+        tempUnit = "F";
+      } else {
+        tempUnit = "C";
+      }
     }
     if (char.equals(engo_userInput)) {
       if (value[0] == 0x01) {
@@ -587,28 +637,6 @@ class eucBLEDelegate extends Ble.BleDelegate {
         //  System.println("gesture notif enabled");
       } catch (e) {
         //  System.println("could not enable notif on gesture");
-      }
-    }
-    if (decoder != null && eucData.wheelBrand == 4) {
-      decoder.frameBuffer(self, value);
-    }
-    if (decoder != null && eucData.wheelBrand == 5) {
-      decoder.frameBuilder(self, value);
-    }
-    /*
-    if (eucData.useRadar == true) {
-      var toneProfile = [new Attention.ToneProfile(500, 200)];
-
-      if (Attention has :ToneProfile) {
-        Attention.playTone({ :toneProfile => toneProfile });
-      }
-    }*/
-
-    if (eucData.useRadar == true && radar != null) {
-      eucData.variaConnected = true;
-      var target = radar.getRadarInfo();
-      if (target.size() != 0) {
-        Varia.processTarget(target);
       }
     }
   }

@@ -1,6 +1,9 @@
 module eucData {
   //var GUI = false;
-
+  var BLEReadInterval = 0;
+  var BLEReadProcTime = 0;
+  var BLEWriteInterval = 0;
+  var DFComputeInterval = 0;
   var orangeColoringThreshold = 80;
   var redColoringThreshold = 90;
   var mainNumber = 0;
@@ -24,7 +27,7 @@ module eucData {
 
   var displayNorth = false;
   var displayWind = false;
-
+  var activityTimerTime = 0;
   // Calculated PWM variables :
   // PLEASE UPDATE WITH YOU OWN VALUES BEFORE USE !
   var rotationSpeed; // cutoff speed when freespin test performed
@@ -34,6 +37,9 @@ module eucData {
   var voltage_scaling = 1;
   var speed = 0.0;
   var correctedSpeed = 0.0;
+  var CorrectedTotalDistance = 0.0;
+  var CorrectedTripDistance = 0.0;
+  var correctedTemperature = 0.0;
   var voltage = 0.0;
   var lowestBatteryPercentage = 101;
   var tripDistance = 0.0;
@@ -45,7 +51,7 @@ module eucData {
   var PWM = 0;
   var hPWM = 0.0;
   var currentCorrection;
-  var gothPWM = false;
+  var gothPWN = false;
   var battery = 0;
   // Veteran specific
   var version = 0;
@@ -86,11 +92,21 @@ module eucData {
   var engoPageNb = 3;
   var engoCfgUpdate = null;
 
-  // varia radar
-  var useRadar = false;
-  var variaTargetDist = 0;
-  var variaTargetNb = 0;
-  var variaConnected = false;
+  var turnId = null;
+  var prevTurnId = "";
+  var nextPointName = null;
+  var nextPointDistance = null;
+
+  // Units
+
+  var convertToMiles = false;
+  var convertToFahrenheit = false;
+
+  //stats
+  var engoMaxSpeed = 0.0;
+  var engoAverageMovingSpeed = 0.0;
+  var engoSessionDistance = 0.0;
+  var engoCurrentBatteryPerc = 0.0;
 
   function getBatteryPercentage() {
     if (voltage != null) {
@@ -136,7 +152,7 @@ module eucData {
           }
         }
         if (version > 5) {
-          // Lynx
+          // Lynx & Sherman L
           if (voltage > 150.3) {
             battery = 100.0;
           } else if (voltage > 122.4) {
@@ -224,12 +240,6 @@ module eucData {
           return 0.0;
         }
       }
-
-      // 0 is begode/gotway, all other brands returns hPWM (Leaperkim / KS / OLD KS / IM / VESC)
-      else {
-        //   System.println("hwPwm");
-        return hPWM;
-      }
     } else {
       return 0.0;
     }
@@ -252,6 +262,34 @@ module eucData {
 
     return currentCurrent;
   }
+  function getCorrectedSpeed() {
+    if (convertToMiles == true) {
+      return convertKmToMiles(speed * speedCorrectionFactor.toFloat());
+    } else {
+      return speed * speedCorrectionFactor.toFloat();
+    }
+  }
+  function getCorrectedTripDistance() {
+    if (convertToMiles == true) {
+      return convertKmToMiles(tripDistance * speedCorrectionFactor.toFloat());
+    } else {
+      return tripDistance * speedCorrectionFactor.toFloat();
+    }
+  }
+  function getCorrectedTotalDistance() {
+    if (convertToMiles == true) {
+      return convertKmToMiles(totalDistance * speedCorrectionFactor.toFloat());
+    } else {
+      return totalDistance * speedCorrectionFactor.toFloat();
+    }
+  }
+  function getTemperature() {
+    if (convertToFahrenheit == true) {
+      return convertToF(temperature);
+    } else {
+      return temperature;
+    }
+  }
 
   function getVoltage() {
     if (voltage != null) {
@@ -263,35 +301,6 @@ module eucData {
       }
     } else {
       return voltage;
-    }
-  }
-
-  function getCorrectedSpeed() {
-    if (useMiles == true) {
-      return speed * speedCorrectionFactor.toFloat() * 0.621371192;
-    } else {
-      return speed * speedCorrectionFactor.toFloat();
-    }
-  }
-  function getCorrectedTripDistance() {
-    if (useMiles == true) {
-      return tripDistance * speedCorrectionFactor.toFloat() * 0.621371192;
-    } else {
-      return tripDistance * speedCorrectionFactor.toFloat();
-    }
-  }
-  function getCorrectedTotalDistance() {
-    if (useMiles == true) {
-      return totalDistance * speedCorrectionFactor.toFloat() * 0.621371192;
-    } else {
-      return totalDistance * speedCorrectionFactor.toFloat();
-    }
-  }
-  function getTemperature() {
-    if (useFahrenheit == true) {
-      return temperature * 1.8 + 32.0;
-    } else {
-      return temperature;
     }
   }
 }

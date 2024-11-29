@@ -1,5 +1,5 @@
 <strings>
-    <string id="AppName">WheelDash DF (dev)</string>
+    <string id="AppName">WheelDash DF (beta)</string>
     <!-- Strings, that are used in Connect IQ Settings menu, like 
         one you see in Garmin Express or Garmin Connect Mobile -->
     <string id="debugView">Debug View</string>
@@ -24,8 +24,7 @@
     <string id="wheelBrand2">Kingsong</string>
     <string id="wheelBrand3">Kingsong (old)</string>
     <string id="wheelBrand4">Inmotion V11 fw1.4/V12</string>
-    <string id="wheelBrand5">Inmotion V11Y/V13/V14</string>
-    <string id="wheelBrand6">VESC</string>
+    <string id="wheelBrand5">VESC</string>
 
     <string id="profile">Profile to use</string>
     <string id="profile0">Last used profile</string>
@@ -60,9 +59,6 @@
     <string id="currentCorrection0">None</string>
     <string id="currentCorrection1">Negative</string>
     <string id="currentCorrection2">Absolute</string>
-
-    <string id="useMiles">Use Miles</string>
-    <string id="useFahrenheit">Use Fahrenheit</string>
 
     <string id="voltageCorrectionFactor_p1">Voltage Correction Factor (Gotway/Begode only) (profile1)</string>
     <string id="voltageCorrectionFactor_p2">Voltage Correction Factor (Gotway/Begode only) (profile2)</string>
@@ -108,6 +104,11 @@
     <string id="displayNorth">Display North orientation (red triangle)</string>
     <string id="displayWind">Display Wind bearing (blue triangle)</string>
 
+    <string id="convertToMiles_p1">Convert to Miles (Profile 1)</string>
+    <string id="convertToMiles_p2">Convert to Miles (Profile 2)</string>
+    <string id="convertToMiles_p3">Convert to Miles (Profile 3)</string>
+    <string id="convertToFahrenheit">Convert to Fahrenheit</string>
+
     <string id="variaCloseAlarmDistThr">Varia close distance alarm threshold</string>
     <string id="variaFarAlarmDistThr">Varia far distance alarm threshold</string>
     
@@ -120,11 +121,9 @@
     <!-- FIT Strings-->
     <string id="speed_graph_label">Speed</string>
     <string id="speed_label">Speed</string>
-    <string id="speed_unit_kmh">km/h</string>
-    <string id="speed_unit_mph">mph</string>
+    <string id="speed_unit">kmh/mph</string>
     <string id="pwm_graph_label">PWM</string>
     <string id="pwm_label">PWM</string>
-    <string id="pwm_unit"></string>
     <string id="voltage_graph_label">Voltage</string>
     <string id="voltage_label">Voltage</string>
     <string id="voltage_unit">V</string>
@@ -136,36 +135,23 @@
     <string id="power_unit">W</string>
     <string id="temperature_graph_label">MB Temperature</string>
     <string id="temperature_label">MB Temperature</string>
-    <string id="temperature_unit">°C</string>
+    <string id="temperature_unit">°C/F</string>
     <string id="tripDistance_label">Trip distance</string>
-    <string id="distanceunit_km">km</string>
-    <string id="distanceunit_miles">miles</string>
+    <string id="distanceunit">km/m</string>
     <string id="no_unit"> </string>
     <string id="percentagePerDist_unit">%/km</string>
-    
     <string id="maxSpeed_label">Session max speed</string>
-    
     <string id="maxPWM_label">Session max PWM</string>
-    
     <string id="percentage_unit">%</string>
     <string id="maxCurrent_label">Session max current</string>
-  
     <string id="maxPower_label">Session max power</string>
-   
     <string id="maxTemperature_label">Session max temp.</string>
     <string id="minTemperature_label">Session min temp.</string>
-
     <string id="avgSpeed_label">Session average speed</string>
     <string id="avgMvSpeed_label">Session average moving speed</string>
-    
-    
     <string id="avgCurrent_label">Session average current</string>
-    <string id="avgCurrent_unit">A</string>
     <string id="avgPower_label">Session average power</string>
-    <string id="avgPower_unit">W</string>
-  
     <string id="runnintTime_unit">s</string>
-
     <string id="minVoltage_label">Session min voltage</string>
     <string id="maxVoltage_label">Session max voltage</string>
     <string id="minBattery_label">Session min battery %</string>

@@ -317,6 +317,13 @@
                 type="boolean"
             />
         </setting>
+        <setting
+            propertyKey="@Properties.convertToFahrenheit"
+            title="@Strings.convertToFahrenheit">
+            <settingConfig
+                type="boolean"
+            />
+        </setting>
          <setting
             propertyKey="@Properties.useRadar"
             title="@Strings.useRadar">
@@ -393,18 +400,23 @@
                     <listEntry value="3">@Strings.wheelBrand3</listEntry>
                     <listEntry value="4">@Strings.wheelBrand4</listEntry>
                     <listEntry value="5">@Strings.wheelBrand5</listEntry> 
-                    <listEntry value="6">@Strings.wheelBrand6</listEntry> 
                     
                 </settingConfig>
             </setting>
-            
+            <setting
+            propertyKey="@Properties.convertToMiles_p1"
+            title="@Strings.convertToMiles_p1">
+            <settingConfig
+                type="boolean"
+            />
+            </setting>
                 <setting
                     propertyKey="@Properties.voltageCorrectionFactor_p1"
                     title="@Strings.voltageCorrectionFactor_p1">
                     <settingConfig
                         type="numeric"
                         min="0"
-                        max="3"
+                        max="2"
                         errorMessage="@Strings.ErrorMessage" />
                 </setting>
                 <setting
@@ -514,19 +526,24 @@
                     <listEntry value="2">@Strings.wheelBrand2</listEntry>
                     <listEntry value="3">@Strings.wheelBrand3</listEntry>
                     <listEntry value="4">@Strings.wheelBrand4</listEntry>
-                    <listEntry value="5">@Strings.wheelBrand5</listEntry>
-                    <listEntry value="6">@Strings.wheelBrand6</listEntry> 
+                    <listEntry value="5">@Strings.wheelBrand5</listEntry> 
                     
                 </settingConfig>
             </setting>
-            
+            <setting
+            propertyKey="@Properties.convertToMiles_p2"
+            title="@Strings.convertToMiles_p2">
+            <settingConfig
+                type="boolean"
+            />
+             </setting>
                 <setting
                     propertyKey="@Properties.voltageCorrectionFactor_p2"
                     title="@Strings.voltageCorrectionFactor_p2">
                     <settingConfig
                         type="numeric"
                         min="0"
-                        max="3"
+                        max="2"
                         errorMessage="@Strings.ErrorMessage" />
                 </setting>
                 <setting
@@ -637,11 +654,16 @@
                     <listEntry value="2">@Strings.wheelBrand2</listEntry>
                     <listEntry value="3">@Strings.wheelBrand3</listEntry>
                     <listEntry value="4">@Strings.wheelBrand4</listEntry>
-                    <listEntry value="5">@Strings.wheelBrand5</listEntry>
-                    <listEntry value="6">@Strings.wheelBrand6</listEntry> 
+                    <listEntry value="5">@Strings.wheelBrand5</listEntry> 
                 </settingConfig>
             </setting>
-            
+            <setting
+            propertyKey="@Properties.convertToMiles_p3"
+            title="@Strings.convertToMiles_p3">
+            <settingConfig
+                type="boolean"
+            />
+            </setting>
                 <setting
                     propertyKey="@Properties.voltageCorrectionFactor_p3"
                     title="@Strings.voltageCorrectionFactor_p3">
@@ -674,7 +696,7 @@
                     <settingConfig
                         type="numeric"
                         min="0"
-                        max="3"
+                        max="2"
                         errorMessage="@Strings.ErrorMessage" />
            
             </setting>
@@ -800,12 +822,6 @@
                 title="@Strings.logoColor">
                 <settingConfig type="alphaNumeric"/>
 </setting>
-<setting
- 
-                    propertyKey="@Properties.useRadar"
-                    title="@Strings.useRadar">
-                    <settingConfig type="boolean"/>
-  </setting>
  <setting
  
                     propertyKey="@Properties.debugView"

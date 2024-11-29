@@ -52,6 +52,7 @@ class GarminEUCApp extends Application.AppBase {
     eucData.engoTouch = AppStorage.getSetting("engoTouch");
 
     eucData.useRadar = AppStorage.getSetting("useRadar");
+    eucData.convertToFahrenheit = AppStorage.getSetting("convertToFahrenheit");
     eucData.motorbikeHeadset = AppStorage.getSetting("motorbikeHeadset");
     eucData.variaCloseAlarmDistThr = AppStorage.getSetting(
       "variaCloseAlarmDistThr"
@@ -76,12 +77,10 @@ class GarminEUCApp extends Application.AppBase {
     eucData.logoOffsetx = AppStorage.getSetting("logoOffsetx");
     eucData.logoOffsety = AppStorage.getSetting("logoOffsety");
     eucData.drawLines = AppStorage.getSetting("drawLines");
-    eucData.useMiles = AppStorage.getSetting("useMiles");
-    eucData.useFahrenheit = AppStorage.getSetting("useFahrenheit");
 
     if (eucData.profile == 1) {
       eucData.wheelBrand = AppStorage.getSetting("wheelBrand_p1");
-      eucData.gothPWM = AppStorage.getSetting("begodeCF_p1");
+      eucData.gothPWN = AppStorage.getSetting("begodeCF_p1");
       eucData.currentCorrection = AppStorage.getSetting("currentCorrection_p1");
       eucData.rotationSpeed = AppStorage.getSetting("rotationSpeed_PWM_p1");
       eucData.rotationVoltage = AppStorage.getSetting("rotationVoltage_PWM_p1");
@@ -104,10 +103,11 @@ class GarminEUCApp extends Application.AppBase {
       eucData.alarmThreshold_temp = AppStorage.getSetting(
         "alarmThreshold_temp_p1"
       );
+      eucData.convertToMiles = AppStorage.getSetting("convertToMiles_p1");
       Storage.setValue("lastProfileIdx", profile);
     } else if (eucData.profile == 2) {
       eucData.wheelBrand = AppStorage.getSetting("wheelBrand_p2");
-      eucData.gothPWM = AppStorage.getSetting("begodeCF_p2");
+      eucData.gothPWN = AppStorage.getSetting("begodeCF_p2");
       eucData.currentCorrection = AppStorage.getSetting("currentCorrection_p2");
       eucData.rotationSpeed = AppStorage.getSetting("rotationSpeed_PWM_p2");
       eucData.rotationVoltage = AppStorage.getSetting("rotationVoltage_PWM_p2");
@@ -130,9 +130,11 @@ class GarminEUCApp extends Application.AppBase {
       eucData.alarmThreshold_temp = AppStorage.getSetting(
         "alarmThreshold_temp_p2"
       );
+      eucData.convertToMiles = AppStorage.getSetting("convertToMiles_p2");
+      Storage.setValue("lastProfileIdx", profile);
     } else if (eucData.profile == 3) {
       eucData.wheelBrand = AppStorage.getSetting("wheelBrand_p3");
-      eucData.gothPWM = AppStorage.getSetting("begodeCF_p3");
+      eucData.gothPWN = AppStorage.getSetting("begodeCF_p3");
       eucData.currentCorrection = AppStorage.getSetting("currentCorrection_p3");
       eucData.rotationSpeed = AppStorage.getSetting("rotationSpeed_PWM_p3");
       eucData.rotationVoltage = AppStorage.getSetting("rotationVoltage_PWM_p3");
@@ -155,6 +157,8 @@ class GarminEUCApp extends Application.AppBase {
       eucData.alarmThreshold_temp = AppStorage.getSetting(
         "alarmThreshold_temp_p3"
       );
+      eucData.convertToMiles = AppStorage.getSetting("convertToMiles_p3");
+      Storage.setValue("lastProfileIdx", profile);
     } else {
       //if profile variable locally stored => get last setting + call fct again
       if (Storage.getValue("lastProfileIdx") != null) {

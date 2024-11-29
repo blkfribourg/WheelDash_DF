@@ -4,7 +4,6 @@ import Toybox.WatchUi;
 import Toybox.Graphics;
 using Toybox.Math;
 import Toybox.System;
-import Toybox.Position;
 using Toybox.Application.Storage;
 class GarminEUCDF extends WatchUi.DataField {
   var bleDelegate;
@@ -62,6 +61,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var prevTurnId = "";
   var nextPointName = null;
   var nextPointDistance = null;
+
   // var navigationData = null;
   //var RadarConnState = -1;
   private var cDrawables = {};
@@ -69,9 +69,7 @@ class GarminEUCDF extends WatchUi.DataField {
   function initialize(_bleDelegate) {
     bleDelegate = _bleDelegate;
     DataField.initialize();
-
     fieldsInitialize();
-
     //load custom number font
     if (eucData.fontID == 0) {
       nb_Font = WatchUi.loadResource(Rez.Fonts.Roboto);
@@ -315,16 +313,17 @@ class GarminEUCDF extends WatchUi.DataField {
     currentBatteryPerc = eucData.getBatteryPercentage();
     eucData.PWM = eucData.getPWM();
     eucData.correctedSpeed = eucData.getCorrectedSpeed();
-
     currentCurrent = eucData.getCurrent();
     currentPower = currentCurrent * currentVoltage;
-
+    eucData.CorrectedTotalDistance = eucData.getCorrectedTotalDistance();
+    eucData.CorrectedTripDistance = eucData.getCorrectedTripDistance();
+    eucData.correctedTemperature = eucData.getTemperature();
     mSpeedField.setData(eucData.correctedSpeed); // id 0
     mPWMField.setData(eucData.PWM); //id 1
     mVoltageField.setData(currentVoltage); // id 2
     //    mCurrentField.setData(currentCurrent); // id 3
     //    mPowerField.setData(currentPower); // id 4
-    mTempField.setData(displayedTemperature); // id 5
+    mTempField.setData(eucData.correctedTemperature); // id 5
     if (currentBatteryPerc > 0 && eucData.paired == true) {
       mEORBatteryField.setData(currentBatteryPerc);
     }
@@ -345,12 +344,15 @@ class GarminEUCDF extends WatchUi.DataField {
       //   mMaxPowerField.setData(maxPower); // id 10
     }
 
-    if (displayedTemperature > maxTemp) {
-      maxTemp = displayedTemperature;
+    if (eucData.correctedTemperature > maxTemp) {
+      maxTemp = eucData.correctedTemperature;
       mMaxTempField.setData(maxTemp); // id 11
     }
-    if (displayedTemperature < minTemp && eucData.temperature != 0.0) {
-      minTemp = displayedTemperature;
+    if (
+      eucData.correctedTemperature < minTemp &&
+      eucData.correctedTemperature != 0.0
+    ) {
+      minTemp = eucData.correctedTemperature;
       // mMinTempField.setData(minTemp); // id 11
     }
 
@@ -376,23 +378,16 @@ class GarminEUCDF extends WatchUi.DataField {
     // var elapsedTime = startingMoment.subtract(currentMoment);
     var elapsedTime = garminInfo.timerTime / 1000.0; // convert to seconds
     //System.println("elaspsed :" + elapsedTime.value());
-    if (elapsedTime != 0 && eucData.totalDistance > 0) {
-      //if (elapsedTime.value() != 0 && eucData.totalDistance > 0) {
+    if (elapsedTime != 0 && eucData.CorrectedTotalDistance > 0) {
+      //if (elapsedTime.value() != 0 && eucData.CorrectedTotalDistance > 0) {
       if (startingEUCTripDistance == 0) {
-        startingEUCTripDistance = correctedTotalDistance;
+        startingEUCTripDistance = eucData.CorrectedTotalDistance;
       }
-      sessionDistance = correctedTotalDistance - startingEUCTripDistance;
+      sessionDistance =
+        eucData.CorrectedTotalDistance - startingEUCTripDistance;
       //avgSpeed = sessionDistance / (elapsedTime.value() / 3600.0);
       avgSpeed = sessionDistance / (elapsedTime / 3600.0);
-
-      var minimalMovingSpeed = 2.5;
-
-      if (eucData.correctedSpeed > minimalMovingSpeed && movingmsec != 0) {
-        movingmsec = movingmsec + 1000.0; //Assuming refresh exactly every 1000ms, which is not true as far as I know
-        avgMovingSpeed = sessionDistance / (movingmsec / 3600000.0);
-      }
     } else {
-      movingmsec = 0.0;
       sessionDistance = 0.0;
       avgSpeed = 0.0;
     }
@@ -475,7 +470,6 @@ class GarminEUCDF extends WatchUi.DataField {
     minBatteryPerc = 101.0;
     maxBatteryPerc = 0.0;
     avgSpeed = 0.0;
-    avgMovingSpeed = 0.0;
     avgCurrent = 0.0;
     avgPower = 0.0;
   }
@@ -499,11 +493,17 @@ class GarminEUCDF extends WatchUi.DataField {
       }
       if (fieldIDs[field_id] == 4) {
         fieldNames[field_id] = "TEMP";
-        fieldValues[field_id] = valueRound(eucData.temperature, "%.1f");
+        fieldValues[field_id] = valueRound(
+          eucData.correctedTemperature,
+          "%.1f"
+        );
       }
       if (fieldIDs[field_id] == 5) {
         fieldNames[field_id] = "TT DIST";
-        fieldValues[field_id] = valueRound(eucData.totalDistance, "%.1f");
+        fieldValues[field_id] = valueRound(
+          eucData.CorrectedTotalDistance,
+          "%.1f"
+        );
       }
       if (fieldIDs[field_id] == 6) {
         fieldNames[field_id] = "PWM";
@@ -573,7 +573,11 @@ class GarminEUCDF extends WatchUi.DataField {
         fieldNames[field_id] = "VEH SPD";
         var targetSpeed = eucData.variaTargetSpeed;
         if (targetSpeed != null) {
-          targetSpeed = targetSpeed * 3.6; //Km/h only here, should implement mph when adding imperial unit support
+          if (eucData.convertToMiles) {
+            targetSpeed = convertKmToMiles(targetSpeed * 3.6);
+          } else {
+            targetSpeed = targetSpeed * 3.6;
+          }
         }
         fieldValues[field_id] = valueRound(targetSpeed, "%.1f");
       }
@@ -598,9 +602,14 @@ class GarminEUCDF extends WatchUi.DataField {
       }
       if (fieldIDs[field_id] == 27) {
         fieldNames[field_id] = "GPS SPD";
-        var GPS_speed = Position.getInfo().speed;
-        if (GPS_speed != null) {
-          GPS_speed = GPS_speed * 3.6; //Km/h only here, should implement mph when adding imperial unit support
+        var PosInfo = Position.getInfo();
+        var GPS_speed = null;
+        if (PosInfo.accuracy > 1 && PosInfo.speed != null) {
+          if (eucData.convertToMiles) {
+            GPS_speed = convertKmToMiles(PosInfo.speed * 3.6);
+          } else {
+            GPS_speed = PosInfo.speed * 3.6;
+          }
         }
         fieldValues[field_id] = valueRound(GPS_speed, "%.1f");
       }
@@ -610,11 +619,11 @@ class GarminEUCDF extends WatchUi.DataField {
   var activityElapsedTime = "";
   var activityElapsedDist = "";
   var activityTimerState = "";
-  var activityTimerTime = "";
   var reset = "no";
   // Calculate the data to display in the field here
   //var fakeVariaObj;
   function compute(info) {
+    var computeStartTime = System.getTimer();
     if (info.elapsedTime != null) {
       activityElapsedTime = info.elapsedTime;
     }
@@ -626,7 +635,7 @@ class GarminEUCDF extends WatchUi.DataField {
       activityTimerState = info.timerState;
     }
     if (info.timerTime != null) {
-      activityTimerTime = info.timerTime;
+      eucData.activityTimerTime = info.timerTime;
     }
     eucData.timerState = activityTimerState;
     if (eucData.useEngo == true) {
@@ -716,6 +725,7 @@ class GarminEUCDF extends WatchUi.DataField {
         onTimerReset();
       }*/
     }
+    eucData.DFComputeInterval = System.getTimer() - computeStartTime;
   }
   function getVariaVoltage() {
     var variaVoltage = null;
@@ -773,7 +783,7 @@ class GarminEUCDF extends WatchUi.DataField {
           1
         );
         textArray[4] = getHexText(
-          valueRound(eucData.temperature, "%.1f") + " *C",
+          valueRound(eucData.correctedTemperature, "%.1f") + " *C",
           0,
           1
         );
@@ -787,10 +797,15 @@ class GarminEUCDF extends WatchUi.DataField {
         //Chrono page 1
         prevTurnId = null;
         var chrono;
-        if (activityTimerTime != null) {
-          var sec = activityTimerTime / 1000;
+        if (eucData.activityTimerTime != null) {
+          var sec = eucData.activityTimerTime / 1000;
           var mn = sec / 60;
-          chrono = [mn / 60, mn % 60, sec % 60, activityTimerTime % 1000];
+          chrono = [
+            mn / 60,
+            mn % 60,
+            sec % 60,
+            eucData.activityTimerTime % 1000,
+          ];
         } else {
           chrono = null;
         }
@@ -860,17 +875,7 @@ class GarminEUCDF extends WatchUi.DataField {
       }
 
       var data = pagePayload(textArray);
-      /*
-      var currentTime = System.getClockTime();
-      var cmdTime = getWriteCmd(
-        currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d"),
-        100,
-        210,
-        4,
-        1,
-        0x0f
-      );
-*/
+
       // System.println(getPageCmd(data, eucData.engoPage));
       bleDelegate.sendCommands(getPageCmd(data, eucData.engoPage));
       //    bleDelegate.sendCommands(cmdTime);
@@ -881,7 +886,11 @@ class GarminEUCDF extends WatchUi.DataField {
   function onUpdate(dc) {
     // DEBUG SCREEN
     if (eucData.debug) {
-      /*
+      /* var BLEReadInterval = 0;
+  var EngoBLEReadInterval = 0;
+  var BLEWriteInterval = 0;
+  var DFComputeInterval = 0;
+  */
       var alignAxe = dc.getWidth() / 5;
       var space = dc.getHeight() / 10;
       var yGap = dc.getHeight() / 8;
@@ -892,21 +901,21 @@ class GarminEUCDF extends WatchUi.DataField {
         alignAxe,
         yGap,
         Graphics.FONT_TINY,
-        "TrgNb: " + eucData.variaTargetNb,
+        "BLERI: " + eucData.BLEReadInterval,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
       dc.drawText(
         alignAxe - xGap,
         space + yGap,
         Graphics.FONT_TINY,
-        "TrgDst: " + eucData.variaTargetDist,
+        "BLERPT: " + eucData.BLEReadProcTime,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
       dc.drawText(
         alignAxe - 2 * xGap,
         2 * space + yGap,
         Graphics.FONT_TINY,
-        "CarNb: " + eucData.variaTargetNb,
+        "BLEWI: " + eucData.BLEWriteInterval,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
 
@@ -914,14 +923,14 @@ class GarminEUCDF extends WatchUi.DataField {
         alignAxe - 2 * xGap,
         5 * space + yGap,
         Graphics.FONT_TINY,
-        "TmrSte: " + activityTimerState,
+        "DFCI: " + eucData.DFComputeInterval,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
-      );
+      ); /*
       dc.drawText(
         alignAxe - xGap,
         6 * space + yGap,
         Graphics.FONT_TINY,
-        "TmrTme: " + activityTimerTime,
+        "TmrTme: " + eucData.activityTimerTime,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
       dc.drawText(
@@ -1419,6 +1428,7 @@ class GarminEUCDF extends WatchUi.DataField {
     }
   }
   function loadStoredValues() {
+    // should add a check on wheel name to avoid restoring data saved with another euc
     if (Storage.getValue("maxTemp") != null) {
       maxTemp = Storage.getValue("maxTemp");
     }
