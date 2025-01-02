@@ -641,19 +641,20 @@ class GarminEUCDF extends WatchUi.DataField {
     if (eucData.useEngo == true) {
       engoUpdate();
       // check if cfg config is beeing updated to display a message :
-
-      if (info.distanceToNextPoint != null) {
-        nextPointDistance = info.distanceToNextPoint;
-      } else {
-        nextPointDistance = null;
-        eucData.engoPageNb = 2; // remove navig view
-      }
-      if (info.nameOfNextPoint != null && info.nameOfNextPoint.length() > 0) {
-        nextPointName = info.nameOfNextPoint.substring(1, null);
-        turnId = info.nameOfNextPoint.substring(0, 1);
-      } else {
-        nextPointName = null;
-        turnId = null;
+      if (info has :distanceToNextPoint && info has :nameOfNextPoint) {
+        if (info.distanceToNextPoint != null) {
+          nextPointDistance = info.distanceToNextPoint;
+        } else {
+          nextPointDistance = null;
+          eucData.engoPageNb = 2; // remove navig view
+        }
+        if (info.nameOfNextPoint != null && info.nameOfNextPoint.length() > 0) {
+          nextPointName = info.nameOfNextPoint.substring(1, null);
+          turnId = info.nameOfNextPoint.substring(0, 1);
+        } else {
+          nextPointName = null;
+          turnId = null;
+        }
       }
     }
     //System.println("nextPointName: " + nextPointName);
