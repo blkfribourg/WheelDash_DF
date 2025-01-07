@@ -1,5 +1,9 @@
 <settings>
- 
+  <setting
+                propertyKey="@Properties.settingsUrl"
+                title="@Strings.settingsUrl">
+                <settingConfig type="alphaNumeric"/>
+    </setting>
 <setting
             propertyKey="@Properties.fieldNB"
             title="@Strings.fieldNB">  
@@ -376,8 +380,8 @@
             </setting>
             -->
             <setting
-            propertyKey="@Properties.profile"
-            title="@Strings.profile">  
+            propertyKey="@Properties.defaultProfile"
+            title="@Strings.defaultProfile">  
                 <settingConfig type="list">
                     <listEntry value="1">@Strings.profile1</listEntry>
                     <listEntry value="2">@Strings.profile2</listEntry>

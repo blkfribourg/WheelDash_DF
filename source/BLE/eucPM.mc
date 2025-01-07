@@ -9,19 +9,15 @@ module eucPM {
     0x800000805f9b34fbl
   );
 
-  var eucProfileDef;
-
-  function init() {
-    eucProfileDef = {
-      :uuid => EUC_SERVICE,
-      :characteristics => [
-        {
-          :uuid => EUC_CHAR,
-          :descriptors => [Ble.cccdUuid()],
-        },
-      ],
-    };
-  }
+  const eucProfileDef = {
+    :uuid => EUC_SERVICE,
+    :characteristics => [
+      {
+        :uuid => EUC_CHAR,
+        :descriptors => [Ble.cccdUuid()],
+      },
+    ],
+  };
 
   function registerProfiles() {
     try {
@@ -30,7 +26,7 @@ module eucPM {
       Sys.println("e=" + e.getErrorMessage());
     }
   }
-
+  /*
   function setGotwayOrVeteranOrKingsong() {
     self.init();
   }
@@ -45,5 +41,5 @@ module eucPM {
       // System.println("GW PM");
       setGotwayOrVeteranOrKingsong();
     }
-  }
+  }*/
 }

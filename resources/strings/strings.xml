@@ -2,6 +2,7 @@
     <string id="AppName">WheelDash DF (beta)</string>
     <!-- Strings, that are used in Connect IQ Settings menu, like 
         one you see in Garmin Express or Garmin Connect Mobile -->
+    <string id="settingsUrl">Settings JSON Url (experimental)</string>
     <string id="debugView">Debug View</string>
     <string id="drawLines">Draw separation lines</string>
     <string id="logoFill">Logo fill coords list</string>
@@ -26,7 +27,7 @@
     <string id="wheelBrand4">Inmotion V11 fw1.4/V12</string>
     <string id="wheelBrand5">VESC</string>
 
-    <string id="profile">Profile to use</string>
+    <string id="defaultProfile">Profile to use</string>
     <string id="profile0">Last used profile</string>
     <string id="profile1">Profile 1</string>      
     <string id="profile2">Profile 2</string>

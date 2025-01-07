@@ -1,5 +1,11 @@
 module eucData {
   //var GUI = false;
+  var fieldNB;
+  var fieldIDs;
+  var JSONFetch = "";
+  var settingsUrl;
+  var ready = false;
+  var settingsChanged = false;
   var BLEReadInterval = 0;
   var BLEReadProcTime = 0;
   var BLEWriteInterval = 0;
@@ -22,7 +28,7 @@ module eucData {
   var linesColor = 0xffffff;
   var drawLines = true;
   var wheelBrand;
-  var paired = false;
+  var paired = true;
   var debug = false;
 
   var displayNorth = false;

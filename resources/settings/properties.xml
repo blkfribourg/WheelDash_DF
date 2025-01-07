@@ -1,4 +1,5 @@
 <properties>
+    <property id="settingsUrl" type="string"></property>
     <property id="debugView" type="boolean">false</property>
     <property id="drawLines" type="boolean">true</property>
     <property id="logoFill" type="string">fill</property>
@@ -23,7 +24,7 @@
     <property id ="engoTouch" type="number">0</property>
     
 
-    <property id="profile" type="number">1</property>
+    <property id="defaultProfile" type="number">1</property>
     <property id="wheelBrand_p1" type="number">0</property>
     <property id="wheelName_p1" type="string">Profile 1</property>
      <property id="convertToMiles_p1" type="boolean">false</property>

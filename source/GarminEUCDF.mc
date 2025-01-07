@@ -6,14 +6,12 @@ using Toybox.Math;
 import Toybox.System;
 using Toybox.Application.Storage;
 class GarminEUCDF extends WatchUi.DataField {
-  var bleDelegate;
+  var bleDelegate = null;
   var fill_logo;
   var empty_logo;
   var delay = 3;
   // var firstCall = true;
 
-  var fieldNB;
-  var fieldIDs;
   var fieldNames;
   var fieldValues;
   const SPEED_FIELD_ID = 0;
@@ -65,50 +63,39 @@ class GarminEUCDF extends WatchUi.DataField {
   // var navigationData = null;
   //var RadarConnState = -1;
   private var cDrawables = {};
+  var web;
 
-  function initialize(_bleDelegate) {
-    bleDelegate = _bleDelegate;
+  function initialize() {
+    // EasyConfig ---------------------------------------
+    System.println("init");
+    var uidsize = 10;
+    if (eucData.settingsUrl.length() > uidsize) {
+      eucData.JSONFetch = "started";
+      web = new WebSettings();
+      var url = eucData.settingsUrl.substring(
+        0,
+        eucData.settingsUrl.length() - uidsize
+      );
+      var uid = eucData.settingsUrl.substring(-uidsize, null);
+      web.setParams(uid, url);
+    } else {
+      eucData.JSONFetch = "none";
+    }
+    if (eucData.settingsUrl.length() == 0) {
+      // delete local JSON if no URL is set
+      Storage.deleteValue("JSONSettings");
+    }
+
     DataField.initialize();
-    fieldsInitialize();
+
     //load custom number font
     if (eucData.fontID == 0) {
       nb_Font = WatchUi.loadResource(Rez.Fonts.Roboto);
     } else {
       nb_Font = WatchUi.loadResource(Rez.Fonts.Rajdhani);
     }
-
-    // draw logo
-    if (eucData.logoFill.length() > 10) {
-      fill_logo = stringToArrays(eucData.logoFill);
-    }
-    if (eucData.logoEmpty.length() > 10) {
-      empty_logo = stringToArrays(eucData.logoEmpty);
-    }
-
-    // System.println(fill_logo);
-    eucData.logoFill = ""; // cleaning doesn't free memory, probably useless
-    eucData.logoEmpty = "";
   }
-  /*
-  function onLayout(dc) as Void {
-    if (eucData.GUI == true) {
-      setLayout(Rez.Layouts.HomeLayout(dc));
 
-      // Label drawables
-      cDrawables[:TimeDate] = View.findDrawableById("TimeDate");
-      cDrawables[:SpeedNumber] = View.findDrawableById("SpeedNumber");
-      cDrawables[:BatteryNumber] = View.findDrawableById("BatteryNumber");
-      cDrawables[:TemperatureNumber] =
-        View.findDrawableById("TemperatureNumber");
-      cDrawables[:BottomSubtitle] = View.findDrawableById("BottomSubtitle");
-      // And arc drawables
-      cDrawables[:SpeedArc] = View.findDrawableById("SpeedDial"); // used for PMW
-      cDrawables[:BatteryArc] = View.findDrawableById("BatteryArc");
-      cDrawables[:TemperatureArc] = View.findDrawableById("TemperatureArc");
-      cDrawables[:RecordingIndicator] =
-        View.findDrawableById("RecordingIndicator");
-    }
-  }*/
   public function restoreValues(
     _maxTemp,
     _minTemp,
@@ -135,21 +122,9 @@ class GarminEUCDF extends WatchUi.DataField {
     // startingMoment = _startingMoment;
   }
   function fieldsInitialize() {
-    fieldIDs = [
-      AppStorage.getSetting("field1"),
-      AppStorage.getSetting("field2"),
-      AppStorage.getSetting("field3"),
-      AppStorage.getSetting("field4"),
-      AppStorage.getSetting("field5"),
-      AppStorage.getSetting("field6"),
-      AppStorage.getSetting("field7"),
-      AppStorage.getSetting("field8"),
-    ];
-    fieldNB = AppStorage.getSetting("fieldNB");
-
-    fieldNames = new [fieldNB];
-    fieldValues = new [fieldNB];
-    for (var i = 0; i < fieldNB; i++) {
+    fieldNames = new [eucData.fieldNB];
+    fieldValues = new [eucData.fieldNB];
+    for (var i = 0; i < eucData.fieldNB; i++) {
       fieldNames[i] = "NC";
       fieldValues[i] = "--";
     }
@@ -474,102 +449,102 @@ class GarminEUCDF extends WatchUi.DataField {
     avgPower = 0.0;
   }
   function getFieldValues() {
-    for (var field_id = 0; field_id < fieldNB; field_id++) {
-      if (fieldIDs[field_id] == 0) {
+    for (var field_id = 0; field_id < eucData.fieldNB; field_id++) {
+      if (eucData.fieldIDs[field_id] == 0) {
         fieldNames[field_id] = "SPEED";
         fieldValues[field_id] = valueRound(eucData.correctedSpeed, "%.1f");
       }
-      if (fieldIDs[field_id] == 1) {
+      if (eucData.fieldIDs[field_id] == 1) {
         fieldNames[field_id] = "VOLTAGE";
         fieldValues[field_id] = valueRound(currentVoltage, "%.1f");
       }
-      if (fieldIDs[field_id] == 2) {
+      if (eucData.fieldIDs[field_id] == 2) {
         fieldNames[field_id] = "TRP DIST";
         fieldValues[field_id] = valueRound(sessionDistance, "%.1f");
       }
-      if (fieldIDs[field_id] == 3) {
+      if (eucData.fieldIDs[field_id] == 3) {
         fieldNames[field_id] = "CURR";
         fieldValues[field_id] = valueRound(currentCurrent, "%.1f");
       }
-      if (fieldIDs[field_id] == 4) {
+      if (eucData.fieldIDs[field_id] == 4) {
         fieldNames[field_id] = "TEMP";
         fieldValues[field_id] = valueRound(
           eucData.correctedTemperature,
           "%.1f"
         );
       }
-      if (fieldIDs[field_id] == 5) {
+      if (eucData.fieldIDs[field_id] == 5) {
         fieldNames[field_id] = "TT DIST";
         fieldValues[field_id] = valueRound(
           eucData.CorrectedTotalDistance,
           "%.1f"
         );
       }
-      if (fieldIDs[field_id] == 6) {
+      if (eucData.fieldIDs[field_id] == 6) {
         fieldNames[field_id] = "PWM";
         fieldValues[field_id] = valueRound(eucData.PWM, "%.1f");
       }
-      if (fieldIDs[field_id] == 7) {
+      if (eucData.fieldIDs[field_id] == 7) {
         fieldNames[field_id] = "BATT %";
         fieldValues[field_id] = valueRound(currentBatteryPerc, "%.1f");
       }
-      if (fieldIDs[field_id] == 8) {
+      if (eucData.fieldIDs[field_id] == 8) {
         fieldNames[field_id] = "BATT USG";
         fieldValues[field_id] = valueRound(batteryUsg, "%.1f");
       }
-      if (fieldIDs[field_id] == 9) {
+      if (eucData.fieldIDs[field_id] == 9) {
         fieldNames[field_id] = "MIN TEMP";
         fieldValues[field_id] = valueRound(minTemp, "%.1f");
       }
-      if (fieldIDs[field_id] == 10) {
+      if (eucData.fieldIDs[field_id] == 10) {
         fieldNames[field_id] = "MAX TEMP";
         fieldValues[field_id] = valueRound(maxTemp, "%.1f");
       }
-      if (fieldIDs[field_id] == 11) {
+      if (eucData.fieldIDs[field_id] == 11) {
         fieldNames[field_id] = "MAX SPD";
         fieldValues[field_id] = valueRound(maxSpeed, "%.1f");
       }
-      if (fieldIDs[field_id] == 12) {
+      if (eucData.fieldIDs[field_id] == 12) {
         fieldNames[field_id] = "AVG SPD";
         fieldValues[field_id] = valueRound(avgSpeed, "%.1f");
       }
-      if (fieldIDs[field_id] == 13) {
+      if (eucData.fieldIDs[field_id] == 13) {
         fieldNames[field_id] = "AVG MV SPD";
         fieldValues[field_id] = valueRound(averageMovingSpeed, "%.1f");
       }
-      if (fieldIDs[field_id] == 14) {
+      if (eucData.fieldIDs[field_id] == 14) {
         fieldNames[field_id] = "MIN VOLT";
         fieldValues[field_id] = valueRound(minVoltage, "%.1f");
       }
-      if (fieldIDs[field_id] == 15) {
+      if (eucData.fieldIDs[field_id] == 15) {
         fieldNames[field_id] = "MAX VOLT";
         fieldValues[field_id] = valueRound(maxVoltage, "%.1f");
       }
-      if (fieldIDs[field_id] == 16) {
+      if (eucData.fieldIDs[field_id] == 16) {
         fieldNames[field_id] = "MAX CURR";
         fieldValues[field_id] = valueRound(maxCurrent, "%.1f");
       }
-      if (fieldIDs[field_id] == 17) {
+      if (eucData.fieldIDs[field_id] == 17) {
         fieldNames[field_id] = "AVG CURR";
         fieldValues[field_id] = valueRound(avgCurrent, "%.1f");
       }
-      if (fieldIDs[field_id] == 18) {
+      if (eucData.fieldIDs[field_id] == 18) {
         fieldNames[field_id] = "MIN BATT %";
         fieldValues[field_id] = valueRound(minBatteryPerc, "%.1f");
       }
-      if (fieldIDs[field_id] == 19) {
+      if (eucData.fieldIDs[field_id] == 19) {
         fieldNames[field_id] = "MAX BATT %";
         fieldValues[field_id] = valueRound(maxBatteryPerc, "%.1f");
       }
-      if (fieldIDs[field_id] == 20) {
+      if (eucData.fieldIDs[field_id] == 20) {
         fieldNames[field_id] = "AVG PWR";
         fieldValues[field_id] = valueRound(avgPower, "%.1f");
       }
-      if (fieldIDs[field_id] == 21) {
+      if (eucData.fieldIDs[field_id] == 21) {
         fieldNames[field_id] = "MAX PWR";
         fieldValues[field_id] = valueRound(maxPower, "%.1f");
       }
-      if (fieldIDs[field_id] == 22) {
+      if (eucData.fieldIDs[field_id] == 22) {
         fieldNames[field_id] = "VEH SPD";
         var targetSpeed = eucData.variaTargetSpeed;
         if (targetSpeed != null) {
@@ -581,26 +556,26 @@ class GarminEUCDF extends WatchUi.DataField {
         }
         fieldValues[field_id] = valueRound(targetSpeed, "%.1f");
       }
-      if (fieldIDs[field_id] == 23) {
+      if (eucData.fieldIDs[field_id] == 23) {
         fieldNames[field_id] = "VEH DST";
         fieldValues[field_id] = valueRound(eucData.variaTargetDist, "%.1f");
       }
-      if (fieldIDs[field_id] == 24) {
+      if (eucData.fieldIDs[field_id] == 24) {
         fieldNames[field_id] = "VEH NB";
         fieldValues[field_id] = valueRound(eucData.variaTargetNb, "%1d");
       }
-      if (fieldIDs[field_id] == 25) {
+      if (eucData.fieldIDs[field_id] == 25) {
         fieldNames[field_id] = "RD V";
         fieldValues[field_id] = valueRound(getVariaVoltage(), "%.1f");
       }
-      if (fieldIDs[field_id] == 26) {
+      if (eucData.fieldIDs[field_id] == 26) {
         fieldNames[field_id] = "TIME";
         var CurrentTime = System.getClockTime();
 
         fieldValues[field_id] =
           CurrentTime.hour.format("%d") + ":" + CurrentTime.min.format("%02d");
       }
-      if (fieldIDs[field_id] == 27) {
+      if (eucData.fieldIDs[field_id] == 27) {
         fieldNames[field_id] = "GPS SPD";
         var PosInfo = Position.getInfo();
         var GPS_speed = null;
@@ -623,51 +598,114 @@ class GarminEUCDF extends WatchUi.DataField {
   // Calculate the data to display in the field here
   //var fakeVariaObj;
   function compute(info) {
-    var computeStartTime = System.getTimer();
-    if (info.elapsedTime != null) {
-      activityElapsedTime = info.elapsedTime;
-    }
-    if (info.elapsedDistance != null) {
-      activityElapsedDist = info.elapsedDistance;
-    }
-
-    if (info.timerState != null) {
-      activityTimerState = info.timerState;
-    }
-    if (info.timerTime != null) {
-      eucData.activityTimerTime = info.timerTime;
-    }
-    eucData.timerState = activityTimerState;
-    if (eucData.useEngo == true) {
-      engoUpdate();
-      // check if cfg config is beeing updated to display a message :
-      if (info has :distanceToNextPoint && info has :nameOfNextPoint) {
-        if (info.distanceToNextPoint != null) {
-          nextPointDistance = info.distanceToNextPoint;
-        } else {
-          nextPointDistance = null;
-          eucData.engoPageNb = 2; // remove navig view
-        }
-        if (info.nameOfNextPoint != null && info.nameOfNextPoint.length() > 0) {
-          nextPointName = info.nameOfNextPoint.substring(1, null);
-          turnId = info.nameOfNextPoint.substring(0, 1);
-        } else {
-          nextPointName = null;
-          turnId = null;
-        }
+    System.println("Compute");
+    // DF init ---------------------------------------------------------------------
+    // If settings are not loaded, load settings:
+    if (eucData.JSONFetch.equals("none")) {
+      setSettings(eucData.profile);
+    } else {
+      System.println(eucData.JSONFetch);
+      if (web != null && !eucData.JSONFetch.equals("fetched")) {
+        web.fetch();
+        System.println("webReq started");
       }
     }
-    //System.println("nextPointName: " + nextPointName);
-    //System.println("nextPointDistance: " + nextPointDistance);
-    //System.println("turnId: " + turnId);
+    if (eucData.JSONFetch.equals("fetched")) {
+      System.println("settings fetched");
+      var JSONSettings =
+        (Storage.getValue("JSONSettings") as Dictionary).get("settings") as
+        Dictionary;
+      if (JSONSettings != null) {
+        // should check how profile is applied : no need for profile, just parse the setting first
+        eucData.ready = setJSONSettings(JSONSettings);
+        // eucData.JSONFetch = "done";
+      }
+    }
 
-    //eucData.paired = true;
+    if (
+      bleDelegate == null &&
+      (eucData.ready == true || eucData.JSONFetch.equals("none"))
+    ) {
+      // Initialize BLEDelegate once settings are loaded:
+      System.println("initializing BLEDelegate");
+      if (Toybox has :BluetoothLowEnergy) {
+        //eucPM.setManager();
+        bleDelegate = new eucBLEDelegate(frameDecoder.init());
+        BluetoothLowEnergy.setDelegate(bleDelegate);
+        eucPM.registerProfiles();
+        if (eucData.useEngo == true) {
+          engoPM.init();
+          engoPM.registerProfiles();
+        }
+      }
+      // end of bleDelegate
+      // initialize alarms
+      EUCAlarms.alarmsInit();
+      // initialize DF recorded fields
+      fieldsInitialize();
+      // draw logo
+      if (eucData.logoFill.length() > 10) {
+        fill_logo = stringToArrays(eucData.logoFill);
+      }
+      if (eucData.logoEmpty.length() > 10) {
+        empty_logo = stringToArrays(eucData.logoEmpty);
+      }
 
-    if (eucData.paired == true) {
-      if (delay < 0) {
-        updateFitData(info);
-        getFieldValues();
-        /*
+      // System.println(fill_logo);
+      eucData.logoFill = ""; // cleaning doesn't free memory, probably useless
+      eucData.logoEmpty = "";
+    }
+    //End of DF Init ----------------------------------------------------------------
+
+    if (bleDelegate != null) {
+      var computeStartTime = System.getTimer();
+      if (info.elapsedTime != null) {
+        activityElapsedTime = info.elapsedTime;
+      }
+      if (info.elapsedDistance != null) {
+        activityElapsedDist = info.elapsedDistance;
+      }
+
+      if (info.timerState != null) {
+        activityTimerState = info.timerState;
+      }
+      if (info.timerTime != null) {
+        eucData.activityTimerTime = info.timerTime;
+      }
+      eucData.timerState = activityTimerState;
+      if (eucData.useEngo == true) {
+        engoUpdate();
+        // check if cfg config is beeing updated to display a message :
+        if (info has :distanceToNextPoint && info has :nameOfNextPoint) {
+          if (info.distanceToNextPoint != null) {
+            nextPointDistance = info.distanceToNextPoint;
+          } else {
+            nextPointDistance = null;
+            eucData.engoPageNb = 2; // remove navig view
+          }
+          if (
+            info.nameOfNextPoint != null &&
+            info.nameOfNextPoint.length() > 0
+          ) {
+            nextPointName = info.nameOfNextPoint.substring(1, null);
+            turnId = info.nameOfNextPoint.substring(0, 1);
+          } else {
+            nextPointName = null;
+            turnId = null;
+          }
+        }
+      }
+      //System.println("nextPointName: " + nextPointName);
+      //System.println("nextPointDistance: " + nextPointDistance);
+      //System.println("turnId: " + turnId);
+
+      //eucData.paired = true;
+
+      if (eucData.paired == true) {
+        if (delay < 0) {
+          updateFitData(info);
+          getFieldValues();
+          /*
         EUCAlarms.checkAlarms();
         
         if (fakeVariaObj != null) {
@@ -677,9 +715,9 @@ class GarminEUCDF extends WatchUi.DataField {
           Varia.processTarget(fakeVariaObj);
           Varia.processTarget(fakeVariaObj);
         }*/
-      } else {
-        //  fakeVariaObj = fakeVaria(3);
-        /*
+        } else {
+          //  fakeVariaObj = fakeVaria(3);
+          /*
         if (AppStorage.getSetting("resumeDectectionMethod") == 0) {
           if (info.elapsedTime == null || info.elapsedTime < 300000) {
             resetVariables();
@@ -689,32 +727,32 @@ class GarminEUCDF extends WatchUi.DataField {
         if (AppStorage.getSetting("resumeDectectionMethod") == 1) {
           // if activity is not started yet
           */
-        if (info.timerState == 1) {
-          loadStoredValues();
-        }
-        /* V0.0.38
+          if (info.timerState == 1) {
+            loadStoredValues();
+          }
+          /* V0.0.38
         else {
           resetVariables();
           reset = true;
         }*/
-      }
-      // }
-      //System.println(info.averageSpeed);
-
-      delay = delay - 1;
-    } else {
-      if (
-        eucData.useRadar == true &&
-        eucData.radar != null &&
-        eucData.timerState == 3
-      ) {
-        try {
-          Varia.processTarget(eucData.radar.getRadarInfo()); // surrounding by try because varia may disconnect (unexpected crashes were observed)
-        } catch (e instanceof Lang.Exception) {
-          // System.println(e.getErrorMessage());
         }
-      }
-      /*
+        // }
+        //System.println(info.averageSpeed);
+
+        delay = delay - 1;
+      } else {
+        if (
+          eucData.useRadar == true &&
+          eucData.radar != null &&
+          eucData.timerState == 3
+        ) {
+          try {
+            Varia.processTarget(eucData.radar.getRadarInfo()); // surrounding by try because varia may disconnect (unexpected crashes were observed)
+          } catch (e instanceof Lang.Exception) {
+            // System.println(e.getErrorMessage());
+          }
+        }
+        /*
       delay = delay - 1; //to remove
       if (delay == -10) {
         onTimerStart();
@@ -725,8 +763,9 @@ class GarminEUCDF extends WatchUi.DataField {
       if (delay == -30) {
         onTimerReset();
       }*/
+      }
+      eucData.DFComputeInterval = System.getTimer() - computeStartTime;
     }
-    eucData.DFComputeInterval = System.getTimer() - computeStartTime;
   }
   function getVariaVoltage() {
     var variaVoltage = null;
@@ -977,7 +1016,7 @@ class GarminEUCDF extends WatchUi.DataField {
       } else {
         var scr_height = dc.getHeight();
         var scr_width = dc.getWidth();
-        if (fieldNB == 6) {
+        if (eucData.fieldNB == 6) {
           var gap;
           var fieldNameFont = Graphics.FONT_XTINY;
           var fieldValueFont = nb_Font;
@@ -1108,7 +1147,7 @@ class GarminEUCDF extends WatchUi.DataField {
           );
         }
         // 8 fields layout
-        if (fieldNB == 8) {
+        if (eucData.fieldNB == 8) {
           var gap;
           var fieldNameFont = Graphics.FONT_XTINY;
           var fieldValueFont = nb_Font;
