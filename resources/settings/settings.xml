@@ -1,9 +1,11 @@
 <settings>
+<!--
   <setting
                 propertyKey="@Properties.settingsUrl"
                 title="@Strings.settingsUrl">
                 <settingConfig type="alphaNumeric"/>
     </setting>
+    -->
 <setting
             propertyKey="@Properties.fieldNB"
             title="@Strings.fieldNB">  
@@ -402,8 +404,8 @@
                     <listEntry value="1">@Strings.wheelBrand1</listEntry>
                     <listEntry value="2">@Strings.wheelBrand2</listEntry>
                     <listEntry value="3">@Strings.wheelBrand3</listEntry>
-                    <listEntry value="4">@Strings.wheelBrand4</listEntry>
-                    <listEntry value="5">@Strings.wheelBrand5</listEntry> 
+
+          
                     
                 </settingConfig>
             </setting>
@@ -486,7 +488,7 @@
                 type="numeric"
                 min="0"
                 max="100"
-                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
             propertyKey="@Properties.alarmThreshold2_PWM_p1"
@@ -495,7 +497,7 @@
                 type="numeric"
                 min="0"
                 max="100"
-                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
             propertyKey="@Properties.alarmThreshold_speed_p1"
@@ -504,7 +506,7 @@
                 type="numeric"
                 min="0"
                 max="200"
-                errorMessage="@Strings.alarmThreshold_speed_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
             propertyKey="@Properties.alarmThreshold_temp_p1"
@@ -513,7 +515,7 @@
                 type="numeric"
                 min="0"
                 max="120"
-                errorMessage="@Strings.alarmThreshold_temp_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
 
         <setting
@@ -529,8 +531,7 @@
                     <listEntry value="1">@Strings.wheelBrand1</listEntry>
                     <listEntry value="2">@Strings.wheelBrand2</listEntry>
                     <listEntry value="3">@Strings.wheelBrand3</listEntry>
-                    <listEntry value="4">@Strings.wheelBrand4</listEntry>
-                    <listEntry value="5">@Strings.wheelBrand5</listEntry> 
+
                     
                 </settingConfig>
             </setting>
@@ -613,7 +614,7 @@
                 type="numeric"
                 min="0"
                 max="100"
-                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
             propertyKey="@Properties.alarmThreshold2_PWM_p2"
@@ -622,7 +623,7 @@
                 type="numeric"
                 min="0"
                 max="100"
-                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
             propertyKey="@Properties.alarmThreshold_speed_p2"
@@ -631,7 +632,7 @@
                 type="numeric"
                 min="0"
                 max="200"
-                errorMessage="@Strings.alarmThreshold_speed_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
             propertyKey="@Properties.alarmThreshold_temp_p2"
@@ -640,7 +641,7 @@
                 type="numeric"
                 min="0"
                 max="120"
-                errorMessage="@Strings.alarmThreshold_temp_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
 
 
@@ -657,8 +658,7 @@
                     <listEntry value="1">@Strings.wheelBrand1</listEntry>
                     <listEntry value="2">@Strings.wheelBrand2</listEntry>
                     <listEntry value="3">@Strings.wheelBrand3</listEntry>
-                    <listEntry value="4">@Strings.wheelBrand4</listEntry>
-                    <listEntry value="5">@Strings.wheelBrand5</listEntry> 
+
                 </settingConfig>
             </setting>
             <setting
@@ -740,7 +740,7 @@
                 type="numeric"
                 min="0"
                 max="100"
-                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
             propertyKey="@Properties.alarmThreshold2_PWM_p3"
@@ -749,7 +749,7 @@
                 type="numeric"
                 min="0"
                 max="100"
-                errorMessage="@Strings.alarmThreshold_PWM_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
             propertyKey="@Properties.alarmThreshold_speed_p3"
@@ -758,7 +758,7 @@
                 type="numeric"
                 min="0"
                 max="200"
-                errorMessage="@Strings.alarmThreshold_speed_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
             propertyKey="@Properties.alarmThreshold_temp_p3"
@@ -767,7 +767,7 @@
                 type="numeric"
                 min="0"
                 max="120"
-                errorMessage="@Strings.alarmThreshold_temp_ErrorMessage" />
+                errorMessage="@Strings.ErrorMessage" />
         </setting>
 
 <setting

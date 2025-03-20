@@ -1,78 +1,80 @@
 import Toybox.Lang;
-
-function setSettings(profile) {
+using Toybox.Application.Properties;
+using Toybox.System;
+function setSettings(profile as Number) {
+  System.println(profile);
   eucData.fieldIDs = [
-    AppStorage.getSetting("field1"),
-    AppStorage.getSetting("field2"),
-    AppStorage.getSetting("field3"),
-    AppStorage.getSetting("field4"),
-    AppStorage.getSetting("field5"),
-    AppStorage.getSetting("field6"),
-    AppStorage.getSetting("field7"),
-    AppStorage.getSetting("field8"),
+    Properties.getValue("field1"),
+    Properties.getValue("field2"),
+    Properties.getValue("field3"),
+    Properties.getValue("field4"),
+    Properties.getValue("field5"),
+    Properties.getValue("field6"),
+    Properties.getValue("field7"),
+    Properties.getValue("field8"),
   ];
-  eucData.fieldNB = AppStorage.getSetting("fieldNB");
-  eucData.useEngo = AppStorage.getSetting("useEngo");
-  eucData.engoTouch = AppStorage.getSetting("engoTouch");
+  eucData.fieldNB = Properties.getValue("fieldNB");
+  eucData.useEngo = Properties.getValue("useEngo");
+  eucData.engoTouch = Properties.getValue("engoTouch");
 
-  eucData.useRadar = AppStorage.getSetting("useRadar");
-  eucData.convertToFahrenheit = AppStorage.getSetting("convertToFahrenheit");
-  eucData.motorbikeHeadset = AppStorage.getSetting("motorbikeHeadset");
-  eucData.variaCloseAlarmDistThr = AppStorage.getSetting(
+  eucData.useRadar = Properties.getValue("useRadar");
+  eucData.convertToFahrenheit = Properties.getValue("convertToFahrenheit");
+  eucData.motorbikeHeadset = Properties.getValue("motorbikeHeadset");
+  eucData.variaCloseAlarmDistThr = Properties.getValue(
     "variaCloseAlarmDistThr"
   );
-  eucData.variaFarAlarmDistThr = AppStorage.getSetting("variaFarAlarmDistThr");
-  eucData.displayNorth = AppStorage.getSetting("displayNorth");
-  eucData.displayWind = AppStorage.getSetting("displayWind");
-  eucData.vibeIntensity = AppStorage.getSetting("vibeIntensity");
+  eucData.variaFarAlarmDistThr = Properties.getValue("variaFarAlarmDistThr");
+  eucData.displayNorth = Properties.getValue("displayNorth");
+  eucData.displayWind = Properties.getValue("displayWind");
+  eucData.vibeIntensity = Properties.getValue("vibeIntensity");
 
-  eucData.debug = AppStorage.getSetting("debugView");
-  eucData.logoFill = AppStorage.getSetting("logoFill");
-  eucData.logoEmpty = AppStorage.getSetting("logoEmpty");
-  eucData.logoColor = AppStorage.getSetting("logoColor").toNumberWithBase(16);
-  eucData.linesColor = AppStorage.getSetting("linesColor").toNumberWithBase(16);
-  eucData.txtColor = AppStorage.getSetting("txtColor").toNumberWithBase(16);
+  eucData.debug = Properties.getValue("debugView");
+  eucData.logoFill = Properties.getValue("logoFill");
+  eucData.logoEmpty = Properties.getValue("logoEmpty");
+  eucData.logoColor = Properties.getValue("logoColor").toNumberWithBase(16);
+  eucData.linesColor = Properties.getValue("linesColor").toNumberWithBase(16);
+  eucData.txtColor = Properties.getValue("txtColor").toNumberWithBase(16);
   eucData.txtColor_unpr =
-    AppStorage.getSetting("txtColor_unpr").toNumberWithBase(16);
-  eucData.fontID = AppStorage.getSetting("font");
-  eucData.logoOffsetx = AppStorage.getSetting("logoOffsetx");
-  eucData.logoOffsety = AppStorage.getSetting("logoOffsety");
-  eucData.drawLines = AppStorage.getSetting("drawLines");
-  for (var i = 1; i < 4; i++) {
-    eucData.wheelBrand = AppStorage.getSetting("wheelBrand_p" + i);
-    eucData.gothPWN = AppStorage.getSetting("begodeCF_p" + i);
-    eucData.currentCorrection = AppStorage.getSetting(
-      "currentCorrection_p" + i
-    );
-    eucData.rotationSpeed = AppStorage.getSetting("rotationSpeed_PWM_p" + i);
-    eucData.rotationVoltage = AppStorage.getSetting(
-      "rotationVoltage_PWM_p" + i
-    );
-    eucData.powerFactor = AppStorage.getSetting("powerFactor_PWM_p" + i);
-    eucData.voltage_scaling = AppStorage.getSetting(
-      "voltageCorrectionFactor_p" + i
-    );
-    eucData.speedCorrectionFactor = AppStorage.getSetting(
-      "speedCorrectionFactor_p" + i
-    );
-    eucData.alarmThreshold_PWM = AppStorage.getSetting(
-      "alarmThreshold_PWM_p" + i
-    );
-    eucData.alarmThreshold2_PWM = AppStorage.getSetting(
-      "alarmThreshold2_PWM_p" + i
-    );
-    eucData.alarmThreshold_speed = AppStorage.getSetting(
-      "alarmThreshold_speed_p" + i
-    );
-    eucData.alarmThreshold_temp = AppStorage.getSetting(
-      "alarmThreshold_temp_p" + i
-    );
-    eucData.convertToMiles = AppStorage.getSetting("convertToMiles_p" + i);
-  }
+    Properties.getValue("txtColor_unpr").toNumberWithBase(16);
+  eucData.fontID = Properties.getValue("font");
+  eucData.logoOffsetx = Properties.getValue("logoOffsetx");
+  eucData.logoOffsety = Properties.getValue("logoOffsety");
+  eucData.drawLines = Properties.getValue("drawLines");
 
+  eucData.wheelBrand = Properties.getValue("wheelBrand_p" + profile);
+  eucData.gothPWN = Properties.getValue("begodeCF_p" + profile);
+  eucData.currentCorrection = Properties.getValue(
+    "currentCorrection_p" + profile
+  );
+  eucData.rotationSpeed = Properties.getValue("rotationSpeed_PWM_p" + profile);
+  eucData.rotationVoltage = Properties.getValue(
+    "rotationVoltage_PWM_p" + profile
+  );
+  eucData.powerFactor = Properties.getValue("powerFactor_PWM_p" + profile);
+  eucData.voltage_scaling = Properties.getValue(
+    "voltageCorrectionFactor_p" + profile
+  );
+  eucData.speedCorrectionFactor = Properties.getValue(
+    "speedCorrectionFactor_p" + profile
+  );
+  eucData.alarmThreshold_PWM = Properties.getValue(
+    "alarmThreshold_PWM_p" + profile
+  );
+  eucData.alarmThreshold2_PWM = Properties.getValue(
+    "alarmThreshold2_PWM_p" + profile
+  );
+  eucData.alarmThreshold_speed = Properties.getValue(
+    "alarmThreshold_speed_p" + profile
+  );
+  eucData.alarmThreshold_temp = Properties.getValue(
+    "alarmThreshold_temp_p" + profile
+  );
+  eucData.convertToMiles = Properties.getValue("convertToMiles_p" + profile);
+
+  return true;
   //  Storage.setValue("lastProfileIdx", profile);
 }
-
+(:easyconfig)
 function setJSONSettings(JSONSettings as Dictionary) {
   // Global Settings (not associated with a specific ProfileName) :
   if (JSONSettings.get("useEngo") != null) {
@@ -216,119 +218,147 @@ function setJSONSettings(JSONSettings as Dictionary) {
         //  System.println("fallback to default settings for DF-view");
         //fallback to default
         eucData.fieldIDs = [
-          AppStorage.getSetting("field1"),
-          AppStorage.getSetting("field2"),
-          AppStorage.getSetting("field3"),
-          AppStorage.getSetting("field4"),
-          AppStorage.getSetting("field5"),
-          AppStorage.getSetting("field6"),
-          AppStorage.getSetting("field7"),
-          AppStorage.getSetting("field8"),
+          Properties.getValue("field1"),
+          Properties.getValue("field2"),
+          Properties.getValue("field3"),
+          Properties.getValue("field4"),
+          Properties.getValue("field5"),
+          Properties.getValue("field6"),
+          Properties.getValue("field7"),
+          Properties.getValue("field8"),
         ];
-        eucData.fieldNB = AppStorage.getSetting("fieldNB");
+        eucData.fieldNB = Properties.getValue("fieldNB");
         break;
       }
     }
   }
   // end of global Setting
 
-  var profileNb = (
+  eucData.loadedProfile = (
     (JSONSettings.get("defaultProfile") as Dictionary).get("v") as String
   ).toNumber();
-  if (JSONSettings.get("currentCorrection_p" + profileNb) != null) {
+  if (JSONSettings.get("currentCorrection_p" + eucData.loadedProfile) != null) {
     eucData.currentCorrection = (
-      (JSONSettings.get("currentCorrection_p" + profileNb) as Dictionary).get(
-        "v"
-      ) as String
+      (
+        JSONSettings.get("currentCorrection_p" + eucData.loadedProfile) as
+          Dictionary
+      ).get("v") as String
     ).toNumber();
   }
 
-  if (JSONSettings.get("rotationSpeed_PWM_p" + profileNb) != null) {
+  if (JSONSettings.get("rotationSpeed_PWM_p" + eucData.loadedProfile) != null) {
     eucData.rotationSpeed = (
-      (JSONSettings.get("rotationSpeed_PWM_p" + profileNb) as Dictionary).get(
-        "v"
-      ) as String
+      (
+        JSONSettings.get("rotationSpeed_PWM_p" + eucData.loadedProfile) as
+          Dictionary
+      ).get("v") as String
     ).toFloat();
   }
-  if (JSONSettings.get("rotationVoltage_PWM_p" + profileNb) != null) {
+  if (
+    JSONSettings.get("rotationVoltage_PWM_p" + eucData.loadedProfile) != null
+  ) {
     eucData.rotationVoltage = (
-      (JSONSettings.get("rotationVoltage_PWM_p" + profileNb) as Dictionary).get(
-        "v"
-      ) as String
+      (
+        JSONSettings.get("rotationVoltage_PWM_p" + eucData.loadedProfile) as
+          Dictionary
+      ).get("v") as String
     ).toFloat();
   }
-  if (JSONSettings.get("powerFactor_PWM_p" + profileNb) != null) {
+  if (JSONSettings.get("powerFactor_PWM_p" + eucData.loadedProfile) != null) {
     eucData.powerFactor = (
-      (JSONSettings.get("powerFactor_PWM_p" + profileNb) as Dictionary).get(
-        "v"
-      ) as String
+      (
+        JSONSettings.get("powerFactor_PWM_p" + eucData.loadedProfile) as
+          Dictionary
+      ).get("v") as String
     ).toFloat();
   }
-  if (JSONSettings.get("voltageCorrectionFactor_p" + profileNb) != null) {
+  if (
+    JSONSettings.get("voltageCorrectionFactor_p" + eucData.loadedProfile) !=
+    null
+  ) {
     eucData.voltage_scaling = (
       (
-        JSONSettings.get("voltageCorrectionFactor_p" + profileNb) as Dictionary
+        JSONSettings.get("voltageCorrectionFactor_p" + eucData.loadedProfile) as
+          Dictionary
       ).get("v") as String
     ).toFloat();
   }
 
-  if (JSONSettings.get("speedCorrectionFactor_p" + profileNb) != null) {
+  if (
+    JSONSettings.get("speedCorrectionFactor_p" + eucData.loadedProfile) != null
+  ) {
     eucData.speedCorrectionFactor = (
       (
-        JSONSettings.get("speedCorrectionFactor_p" + profileNb) as Dictionary
+        JSONSettings.get("speedCorrectionFactor_p" + eucData.loadedProfile) as
+          Dictionary
       ).get("v") as String
     ).toFloat();
   }
-  if (JSONSettings.get("alarmThreshold_PWM_p" + profileNb) != null) {
+  if (
+    JSONSettings.get("alarmThreshold_PWM_p" + eucData.loadedProfile) != null
+  ) {
     eucData.alarmThreshold_PWM = (
-      (JSONSettings.get("alarmThreshold_PWM_p" + profileNb) as Dictionary).get(
-        "v"
-      ) as String
-    ).toNumber();
-  }
-  if (JSONSettings.get("alarmThreshold2_PWM_p" + profileNb) != null) {
-    eucData.alarmThreshold2_PWM = (
-      (JSONSettings.get("alarmThreshold2_PWM_p" + profileNb) as Dictionary).get(
-        "v"
-      ) as String
-    ).toNumber();
-  }
-  if (JSONSettings.get("alarmThreshold_speed_p" + profileNb) != null) {
-    eucData.alarmThreshold_speed = (
       (
-        JSONSettings.get("alarmThreshold_speed_p" + profileNb) as Dictionary
+        JSONSettings.get("alarmThreshold_PWM_p" + eucData.loadedProfile) as
+          Dictionary
       ).get("v") as String
     ).toNumber();
   }
-  if (JSONSettings.get("alarmThreshold_temp_p" + profileNb) != null) {
-    eucData.alarmThreshold_temp = (
-      (JSONSettings.get("alarmThreshold_temp_p" + profileNb) as Dictionary).get(
-        "v"
-      ) as String
+  if (
+    JSONSettings.get("alarmThreshold2_PWM_p" + eucData.loadedProfile) != null
+  ) {
+    eucData.alarmThreshold2_PWM = (
+      (
+        JSONSettings.get("alarmThreshold2_PWM_p" + eucData.loadedProfile) as
+          Dictionary
+      ).get("v") as String
     ).toNumber();
   }
-  if (JSONSettings.get("wheelBrand_p" + profileNb) != null) {
+  if (
+    JSONSettings.get("alarmThreshold_speed_p" + eucData.loadedProfile) != null
+  ) {
+    eucData.alarmThreshold_speed = (
+      (
+        JSONSettings.get("alarmThreshold_speed_p" + eucData.loadedProfile) as
+          Dictionary
+      ).get("v") as String
+    ).toNumber();
+  }
+  if (
+    JSONSettings.get("alarmThreshold_temp_p" + eucData.loadedProfile) != null
+  ) {
+    eucData.alarmThreshold_temp = (
+      (
+        JSONSettings.get("alarmThreshold_temp_p" + eucData.loadedProfile) as
+          Dictionary
+      ).get("v") as String
+    ).toNumber();
+  }
+  if (JSONSettings.get("wheelBrand_p" + eucData.loadedProfile) != null) {
     eucData.wheelBrand = (
-      (JSONSettings.get("wheelBrand_p" + profileNb) as Dictionary).get("v") as
-        String
+      (
+        JSONSettings.get("wheelBrand_p" + eucData.loadedProfile) as Dictionary
+      ).get("v") as String
     ).toNumber();
   }
   /*
-  if (JSONSettings.get("wheelName_p" + profileNb) != null) {
+  if (JSONSettings.get("wheelName_p" + eucData.loadedProfile) != null) {
     eucData.wheelName = (
-      JSONSettings.get("wheelName_p" + profileNb) as Dictionary
+      JSONSettings.get("wheelName_p" + eucData.loadedProfile) as Dictionary
     ).get("v");
   }*/
-  if (JSONSettings.get("begodeCF_p" + profileNb) != null) {
+  if (JSONSettings.get("begodeCF_p" + eucData.loadedProfile) != null) {
     eucData.gothPWN = (
-      JSONSettings.get("begodeCF_p" + profileNb) as Dictionary
+      JSONSettings.get("begodeCF_p" + eucData.loadedProfile) as Dictionary
     ).get("v");
   }
 
-  if (JSONSettings.get("convertToMiles_p" + profileNb) != null) {
+  if (JSONSettings.get("convertToMiles_p" + eucData.loadedProfile) != null) {
     eucData.convertToMiles = (
-      JSONSettings.get("convertToMiles_p" + profileNb) as Dictionary
+      JSONSettings.get("convertToMiles_p" + eucData.loadedProfile) as Dictionary
     ).get("v");
   }
   return true;
 }
+(:legacy)
+function setJSONSettings(JSONSettings as Dictionary) {}

@@ -6,6 +6,8 @@ module eucData {
   var settingsUrl;
   var ready = false;
   var settingsChanged = false;
+  var profilesNb = 0;
+  var loadedProfile = 1;
   var BLEReadInterval = 0;
   var BLEReadProcTime = 0;
   var BLEWriteInterval = 0;
@@ -16,7 +18,6 @@ module eucData {
   var topBar = 0;
   var maxDisplayedSpeed = 0;
   var isFirst = false;
-  var profile = "";
   var logoFill = "";
   var logoEmpty = "";
   var logoOffsetx = 0;
@@ -28,7 +29,7 @@ module eucData {
   var linesColor = 0xffffff;
   var drawLines = true;
   var wheelBrand;
-  var paired = true;
+  var paired = false;
   var debug = false;
 
   var displayNorth = false;
@@ -92,7 +93,7 @@ module eucData {
   // Engo
   var useEngo = false;
   var engoPaired = false;
-  var engoPage = 1;
+  var engoPage = 3;
   var engoBattery = null;
   var engoTouch = 0;
   var engoPageNb = 3;
@@ -103,8 +104,12 @@ module eucData {
   var nextPointName = null;
   var nextPointDistance = null;
 
-  // Units
+  var ETE = null;
+  var ETA = null;
 
+  var customLayout = true;
+
+  // Units
   var convertToMiles = false;
   var convertToFahrenheit = false;
 

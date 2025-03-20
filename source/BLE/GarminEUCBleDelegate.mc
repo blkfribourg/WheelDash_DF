@@ -1,5 +1,6 @@
 using Toybox.BluetoothLowEnergy as Ble;
 using Toybox.Application.Storage;
+using Toybox.Application.Properties;
 import Toybox.Lang;
 using Toybox.AntPlus;
 
@@ -20,7 +21,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var engoGestureNotif = false;
   var _cbCharacteristicWrite = null;
   var rawcmd = null;
-  var rawcmdError = null;
+
   var engoDisplayInit = false;
   var cfgList = new [0]b;
   var isUpdatingBleParams as Toybox.Lang.Boolean = false;
@@ -30,7 +31,8 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
   var euc_BLE_TX_startTime;
   var BLE_RX_startTime;
-
+  var cmdStacking = null;
+  var writeConfigCmd = "FFD00017776865656C64617368000000000500000000AA";
   // engo display strings
   var distUnit = "";
   var spdUnit = "";
@@ -42,7 +44,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     decoder = _decoder;
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
-    eucData.isFirst = false;
+    //eucData.isFirst = false;
     if (eucData.useRadar == true) {
       eucData.radar = new AntPlus.BikeRadar(null);
     }
@@ -51,26 +53,29 @@ class eucBLEDelegate extends Ble.BleDelegate {
     characteristic as Toybox.BluetoothLowEnergy.Characteristic,
     status as Toybox.BluetoothLowEnergy.Status
   ) as Void {
+    /*
     if (eucData.debug) {
       if (BLE_RX_startTime != null) {
         eucData.BLEWriteInterval = System.getTimer() - BLE_RX_startTime;
       }
       BLE_RX_startTime = System.getTimer();
-    }
+    }*/
     // _log("onCharacteristicWrite", [characteristic, status]);
-    if (characteristic.equals(engo_rx) && cfgPacketsTotal != null) {
-      cfgUpdateStatus();
-    }
-    if (isUpdatingBleParams && !isBleParamsUpdated) {
-      isUpdatingBleParams = false;
-      if (status == Toybox.BluetoothLowEnergy.STATUS_SUCCESS) {
-        isBleParamsUpdated = true;
+    if (characteristic.equals(engo_rx)) {
+      if (cfgPacketsTotal != null) {
+        cfgUpdateStatus();
       }
-    } else {
-      // TODO: Refactor to avoid callback like this
-      var _cb = _cbCharacteristicWrite;
-      if (_cb != null) {
-        _cb.invoke(characteristic, status);
+      if (isUpdatingBleParams && !isBleParamsUpdated) {
+        isUpdatingBleParams = false;
+        if (status == Toybox.BluetoothLowEnergy.STATUS_SUCCESS) {
+          isBleParamsUpdated = true;
+        }
+      } else {
+        // TODO: Refactor to avoid callback like this
+        var _cb = _cbCharacteristicWrite;
+        if (_cb != null) {
+          _cb.invoke(characteristic, status);
+        }
       }
     }
   }
@@ -114,7 +119,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
       if (eucData.useEngo == true) {
         if (device.getService(engoPM.BLE_SERV_ACTIVELOOK) != null) {
-          // System.println("Engo connected");
+          System.println("Engo connected");
 
           engo_service = device.getService(engoPM.BLE_SERV_ACTIVELOOK);
 
@@ -185,63 +190,48 @@ class eucBLEDelegate extends Ble.BleDelegate {
   }
 
   function isFirstConnection() {
-    // resetting profileScanResult if wheelName changed :
-    if (
-      !AppStorage.getSetting("wheelName_p1").equals(
-        Storage.getValue("profile1Name")
-      )
-    ) {
-      Storage.deleteValue("profile1Sr");
+    // resetting profileScanResult if wheelName changed (deleting associated footprint):
+
+    var maxProfile = eucData.profilesNb;
+    //   System.println(maxProfile);
+    if (maxProfile == 0) {
+      // not using Easy config -> max profile number is 3
+      maxProfile = 3;
     }
-    if (
-      !AppStorage.getSetting("wheelName_p2").equals(
-        Storage.getValue("profile2Name")
-      )
-    ) {
-      Storage.deleteValue("profile2Sr");
-    }
-    if (
-      !AppStorage.getSetting("wheelName_p3").equals(
-        Storage.getValue("profile3Name")
-      )
-    ) {
-      Storage.deleteValue("profile3Sr");
+    for (var i = 1; i < maxProfile; i++) {
+      var pName = Properties.getValue("wheelName_p" + i) as String;
+      if (!pName.equals(Storage.getValue("profile" + i + "Name"))) {
+        Storage.deleteValue("profile" + i + "Sr");
+      }
     }
 
-    if (eucData.profile == 1 && Storage.getValue("profile1Sr") == null) {
-      return true;
-    } else if (eucData.profile == 2 && Storage.getValue("profile2Sr") == null) {
-      return true;
-    } else if (eucData.profile == 3 && Storage.getValue("profile3Sr") == null) {
+    // If a footprint doesn't exist, return true, else return false
+    if (Storage.getValue("profile" + eucData.loadedProfile + "Sr") == null) {
       return true;
     } else {
       return false;
     }
   }
 
+  // This function is used to store the footprint and the EUC name on the persistant storage
   function storeSR(sr) {
-    if (eucData.profile == 1) {
-      Storage.setValue("profile1Sr", sr);
-      Storage.setValue("profile1Name", AppStorage.getSetting("wheelName_p1"));
-    } else if (eucData.profile == 2) {
-      Storage.setValue("profile2Sr", sr);
-      Storage.setValue("profile2Name", AppStorage.getSetting("wheelName_p2"));
-    } else if (eucData.profile == 3) {
-      Storage.setValue("profile3Sr", sr);
-      Storage.setValue("profile3Name", AppStorage.getSetting("wheelName_p3"));
-    }
+    Storage.setValue("profile" + eucData.loadedProfile + "Sr", sr);
+    Storage.setValue(
+      "profile" + eucData.loadedProfile + "Name",
+      Properties.getValue("wheelName_p" + eucData.loadedProfile)
+    );
   }
+
+  // This function is used to load the footprint from the persistant storage
   function loadSR() {
-    if (eucData.profile == 1) {
-      return Storage.getValue("profile1Sr");
-    } else if (eucData.profile == 2) {
-      return Storage.getValue("profile2Sr");
-    } else if (eucData.profile == 3) {
-      return Storage.getValue("profile3Sr");
+    var profileSR = Storage.getValue("profile" + eucData.loadedProfile + "Sr");
+    if (profileSR != null) {
+      return profileSR;
     } else {
       return false;
     }
   }
+
   //! @param scanResults An iterator of new scan results
   function onScanResults(scanResults as Ble.Iterator) {
     // System.println("scanning");
@@ -305,7 +295,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
                   result
                 ) == true
               ) {
-                //System.println("EngoFound!");
+                System.println("EngoFound!");
                 Ble.setScanState(Ble.SCAN_STATE_OFF);
                 try {
                   // Do something here
@@ -354,14 +344,17 @@ class eucBLEDelegate extends Ble.BleDelegate {
       }
     } else {
       if (eucData.engoPaired == true) {
-        // System.println("EngoPairedIsTrue, descript");
+        //  System.println("EngoPairedIsTrue, descript");
+        //   System.println(engo_userInput);
+        //   System.println(engoGestureNotif);
         if (currentChar.equals(engo_userInput) && engoGestureNotif == true) {
           try {
             engo_rx.requestWrite([0xff, 0x06, 0x00, 0x05, 0xaa]b, {
               :writeType => Ble.WRITE_TYPE_DEFAULT,
             });
+            //   System.println("send firm req");
           } catch (e instanceof Lang.Exception) {
-            // System.println(e.getErrorMessage());
+            System.println(e.getErrorMessage());
           }
         } else {
           enableGesture();
@@ -376,6 +369,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
     //   System.println("CharacteristicChanged");
     if (char.equals(euc_char)) {
+      /*
       if (eucData.useEngo) {
         if (euc_BLE_TX_startTime != null) {
           eucData.BLEReadInterval = System.getTimer() - euc_BLE_TX_startTime;
@@ -389,12 +383,13 @@ class eucBLEDelegate extends Ble.BleDelegate {
           //  engoUpdate();
         }
       }
+      
       if (eucData.debug) {
         if (euc_BLE_TX_startTime != null) {
           eucData.BLEReadInterval = System.getTimer() - euc_BLE_TX_startTime;
         }
         euc_BLE_TX_startTime = System.getTimer();
-      }
+      }*/
       if (firstChar == true) {
         // beep
         try {
@@ -432,63 +427,168 @@ class eucBLEDelegate extends Ble.BleDelegate {
           // System.println(e.getErrorMessage());
         }
       }
+      /*
       if (eucData.debug) {
         eucData.BLEReadProcTime = System.getTimer() - euc_BLE_TX_startTime;
-      }
+      }*/
     }
     if (char.equals(engo_tx)) {
       //System.println(value);
       //System.println("EngoCharChanged");
-      if (value[1] == 0x06) {
-        //firmware vers
-        if (value.size() > 9) {
-          var firm = value.slice(4, 8);
-          //System.println("firm: " + firm);
-        }
+      if (value[0] == 0xff) {
+        if (value[1] == 0x06) {
+          //firmware vers
+          if (value.size() > 9) {
+            var firm = value.slice(4, 8);
+            //System.println("firm: " + firm);
+          }
 
-        //req cfg list
-        sendRawCmd(engo_rx, [0xff, 0xd3, 0x00, 0x05, 0xaa]b);
-      }
-      if (value[0] == 0xff && value[1] == 0x05) {
-        //battery
-        eucData.engoBattery = value[4];
-      }
-      if (value[1] == 0xd3 && value[value.size() - 1] != 0xaa) {
-        cfgReadFlag = true;
-        //cfg list
-        checkCfgName(value);
-        return;
-      }
-      if (cfgReadFlag == true && value[value.size() - 1] != 0xaa) {
-        checkCfgName(value);
-        return;
-      }
-      if (cfgReadFlag == true && value[value.size() - 1] == 0xaa) {
-        checkCfgName(value);
-        cfgReadFlag = false;
-        if (engoCfgOK != true) {
-          //   System.println("wheeldash conf not found");
-          engoCfgOK = false;
+          //req cfg list
+          sendRawCmd(engo_rx, [0xff, 0xd3, 0x00, 0x05, 0xaa]b);
+        }
+        if (value[1] == 0x05) {
+          //battery
+          eucData.engoBattery = value[4];
+        }
+        if (value[1] == 0xd3 && value[value.size() - 1] != 0xaa) {
+          cfgReadFlag = true;
+          // System.println("cfgReadFlagSet");
+          //cfg list
+          checkCfgName(value);
+          return;
+        }
+      } else {
+        // System.println("cfgRead :" + cfgReadFlag);
+        if (cfgReadFlag == true && value[value.size() - 1] != 0xaa) {
+          //  System.print("reread?");
+          checkCfgName(value);
+          return;
+        }
+        if (cfgReadFlag == true && value[value.size() - 1] == 0xaa) {
+          System.println("lastcheck");
+
+          checkCfgName(value);
+          cfgReadFlag = false;
+          //System.println(engoCfgOK);
+          if (engoCfgOK != true) {
+            //  System.println("wheeldash conf not found");
+            engoCfgOK = false;
+          }
         }
       }
-      if (engoCfgOK == false) {
+      if (engoCfgOK == false && cfgPacketsTotal == null) {
         clearScreen();
         sendRawCmd(engo_rx, getWriteCmd("updating config", 195, 110, 4, 5, 16));
         sendRawCmd(engo_rx, getWriteCmd("please wait...", 195, 70, 4, 5, 16));
         cfgPacketsTotal = 0;
-        System.println("uploading config");
+        // System.println("received:" + value);
+        // System.println("uploading config");
+
         for (var i = 0; i < getJson(:EngoCfg1).size(); i++) {
           var charNb = getJson(:EngoCfg1)[i].length();
           cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
           var cmd = arrayToRawCmd(getJson(:EngoCfg1)[i]);
+
           sendRawCmd(engo_rx, cmd);
         }
         for (var i = 0; i < getJson(:EngoCfg2).size(); i++) {
           var charNb = getJson(:EngoCfg2)[i].length();
           cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
           var cmd = arrayToRawCmd(getJson(:EngoCfg2)[i]);
+
           sendRawCmd(engo_rx, cmd);
         }
+        for (var i = 0; i < getJson(:EngoCfg3).size(); i++) {
+          var charNb = getJson(:EngoCfg3)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg3)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg4).size(); i++) {
+          var charNb = getJson(:EngoCfg4)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg4)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg5).size(); i++) {
+          var charNb = getJson(:EngoCfg5)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg5)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg6).size(); i++) {
+          var charNb = getJson(:EngoCfg6)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg6)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg7).size(); i++) {
+          var charNb = getJson(:EngoCfg7)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg7)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg8).size(); i++) {
+          var charNb = getJson(:EngoCfg8)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg8)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg9).size(); i++) {
+          var charNb = getJson(:EngoCfg9)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg9)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg10).size(); i++) {
+          var charNb = getJson(:EngoCfg10)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg10)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg11).size(); i++) {
+          var charNb = getJson(:EngoCfg11)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg11)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg12).size(); i++) {
+          var charNb = getJson(:EngoCfg12)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg12)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg13).size(); i++) {
+          var charNb = getJson(:EngoCfg13)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg13)[i]);
+
+          sendRawCmd(engo_rx, cmd);
+        }
+        for (var i = 0; i < getJson(:EngoCfg14).size(); i++) {
+          var charNb = getJson(:EngoCfg14)[i].length();
+          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+          var cmd = arrayToRawCmd(getJson(:EngoCfg14)[i]);
+          sendRawCmd(engo_rx, cmd);
+        }
+        if (eucData.customLayout == true) {
+          buildCustomPage();
+        }
+        sendRawCmd(
+          engo_rx,
+          arrayToRawCmd(writeConfigCmd) //write cfg cmd
+        );
+
         //   System.println("upload ongoing");
 
         // req Cfg list again;
@@ -500,11 +600,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
           sendRawCmd(engo_rx, [0xff, 0x21, 0x00, 0x06, 0x01, 0xaa]b);
         }
 
-        //System.println("gesture enabled");
+        System.println("gesture enabled");
         engoGestureOK = true;
       }
       if (engoCfgOK == true && engoDisplayInit == false) {
-        //System.println("select cfg");
+        System.println("select cfg");
 
         eucData.engoCfgUpdate = null;
         EUCAlarms.textAlert = "none";
@@ -517,7 +617,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
           ]b
         );
         //
-        //System.println("clearing screen");
+        System.println("clearing screen");
         clearScreen();
         //System.println("displaying page 1");
 
@@ -534,25 +634,10 @@ class eucBLEDelegate extends Ble.BleDelegate {
         engoDisplayInit = true;
       }
     }
-    if (engoDisplayInit == true) {
-      // set string vars
 
-      if (eucData.convertToMiles) {
-        distUnit = " mi";
-        spdUnit = " mph";
-      } else {
-        distUnit = " km";
-        spdUnit = " km/h";
-      }
-      if (eucData.convertToFahrenheit) {
-        tempUnit = "F";
-      } else {
-        tempUnit = "C";
-      }
-    }
     if (char.equals(engo_userInput)) {
       if (value[0] == 0x01) {
-        //System.println("gesture detected");
+        // System.println("gesture detected");
         eucData.engoPage = eucData.engoPage + 1;
         if (eucData.engoPage > eucData.engoPageNb) {
           eucData.engoPage = 1;
@@ -581,7 +666,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
   }
   function checkCfgName(value) {
     cfgList.addAll(value);
-    //System.println(cfgList);
+    //m  System.println("checkNameCfgList: " + cfgList);
     if (cfgList[1] == 0xd3 && cfgList[cfgList.size() - 1] == 0xaa) {
       var names = new [0]b;
       var tempName = new [0]b;
@@ -607,9 +692,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
           ) {
             //checking version
             var cfgEngoVer = cfgList.slice(i + 5, i + 9);
-            var cfgVer = arrayToRawCmd(
-              getJson(:EngoCfg2)[getJson(:EngoCfg2).size() - 2]
-            ).slice(14, 18);
+            var cfgVer = arrayToRawCmd(writeConfigCmd).slice(14, 18);
             //  System.println(cfgVer);
             //  System.println(cfgEngoVer);
             if (cfgEngoVer.equals(cfgVer)) {
@@ -650,15 +733,15 @@ class eucBLEDelegate extends Ble.BleDelegate {
   //coder même principe pour descriptor ? ou implementer même methode qu'activelook
   function sendRawCmd(char, buffer) {
     var bufferToSend = []b;
-    if (rawcmdError != null) {
-      bufferToSend.addAll(rawcmdError);
-      rawcmdError = null;
+    if (cmdStacking != null) {
+      bufferToSend.addAll(cmdStacking);
+      cmdStacking = null;
     }
     bufferToSend.addAll(buffer);
     try {
       if (bufferToSend.size() > 20) {
         var sendNow = bufferToSend.slice(0, 20);
-        rawcmdError = bufferToSend.slice(20, null);
+        cmdStacking = bufferToSend.slice(20, null);
         _cbCharacteristicWrite = self.method(:__onWrite_finishPayload);
         char.requestWrite(sendNow, {
           :writeType => BluetoothLowEnergy.WRITE_TYPE_WITH_RESPONSE,
@@ -669,11 +752,65 @@ class eucBLEDelegate extends Ble.BleDelegate {
         });
       }
     } catch (e) {
-      rawcmdError = bufferToSend;
+      cmdStacking = bufferToSend;
       rawcmd = null;
       // onBleError(e);
     }
   }
+
+  function flushCmdStacking() {
+    //  System.println("flushing : " + cmdStacking.size());
+    //  _log("flushCmdStacking",[cmdStacking == null ? 0 : cmdStacking.size()]);
+    var indexIncompleteCmd = indexIncompleteCmd() as Toybox.Lang.Number;
+    cmdStacking =
+      indexIncompleteCmd != 0
+        ? cmdStacking.slice(null, indexIncompleteCmd)
+        : null;
+    resetGraphicEngine();
+    //  _log("flushCmdStacking",[cmdStacking == null ? 0 : arrayToHex(cmdStacking)]);
+  }
+
+  function flushCmdStackingIfSup(value as Toybox.Lang.Number) {
+    if (cmdStacking != null) {
+      if (cmdStacking.size() > value) {
+        //   _log("flushCmdStackingIfSup",[value,cmdStacking == null ? 0 : cmdStacking.size()]);
+        flushCmdStacking();
+      }
+    }
+  }
+
+  function indexIncompleteCmd() {
+    if (cmdStacking) {
+      //  _log("indexIncompleteCmd",[arrayToHex(cmdStacking)]);
+      for (var i = 0; i < cmdStacking.size(); i++) {
+        if (cmdStacking[i] == 0xaa) {
+          if (cmdStacking.size() > i + 1) {
+            if (cmdStacking[i + 1] == 0xff) {
+              return i + 1;
+            }
+          }
+        }
+      }
+    }
+    return 0;
+  }
+  function resetGraphicEngine() {
+    //   _log("resetGraphicEngine", []);
+    holdAndFlush(0xff);
+  }
+
+  function holdAndFlush(value) {
+    sendRawCmd(engo_rx, commandBuffer(0x39, [value]b));
+  }
+  function commandBuffer(id, data) {
+    var buffer = new [0]b;
+    buffer.addAll([0xff, id, 0x00, 0x05 + data.size()]b);
+    buffer.addAll(data);
+    buffer.add(0xaa);
+    //_log("buffer",[buffer]);
+    return buffer;
+  }
+
   function cfgUpdateStatus() {
     // means update started
 
@@ -682,6 +819,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     eucData.engoCfgUpdate =
       " updt " + ((cfgPacketsCount * 100) / cfgPacketsTotal).toString() + "%";
     if (cfgPacketsCount >= cfgPacketsTotal) {
+      //      System.println("done?");
       cfgPacketsTotal = null;
       eucData.engoCfgUpdate = "Loading";
     }
@@ -744,5 +882,57 @@ class eucBLEDelegate extends Ble.BleDelegate {
     }
     result.add(0x00);
     return result;
+  }
+
+  function buildCustomPage() {
+    var cmdArray = new [0];
+
+    cmdArray.add(
+      saveCustomLayout(22, [0, 0], [117, 40], 3, [84, 34], 34, [89, 3])
+    );
+    cmdArray.add(
+      saveCustomLayout(23, [0, 0], [117, 40], 3, [84, 34], 24, [89, 3])
+    );
+    cmdArray.add(
+      saveCustomLayout(24, [0, 0], [117, 40], 3, [84, 34], 25, [89, 3])
+    );
+    cmdArray.add(
+      saveCustomLayout(25, [0, 0], [117, 40], 3, [84, 34], 31, [89, 3]) //top speed
+    );
+    cmdArray.add(
+      saveCustomLayout(26, [0, 0], [117, 40], 3, [84, 34], 30, [89, 3])
+    );
+    cmdArray.add(
+      saveCustomLayout(27, [0, 0], [117, 40], 3, [84, 34], 35, [89, 3])
+    );
+    cmdArray.add(
+      saveCustomLayout(28, [0, 0], [117, 40], 3, [84, 34], 36, [89, 3])
+    );
+    cmdArray.add(
+      saveCustomLayout(29, [0, 0], [117, 40], 3, [84, 34], 27, [89, 3]) // trip dist ?
+    );
+    cmdArray.add(
+      saveCustomPage(
+        3,
+        [7, 10, 22, 23, 24, 29, 25, 26, 27, 28], // GPS_SPD,BATT,TEMP,DIST - TOP_SPD,AVG_SPD,CAR_DIST,CAR_SPD
+        [
+          [152, 205],
+          [30, 205],
+          [152, 150],
+          [152, 110],
+          [152, 70],
+          [152, 30],
+          [30, 150],
+          [30, 110],
+          [30, 70],
+          [30, 30],
+        ]
+      )
+    );
+    for (var i = 0; i < cmdArray.size(); i++) {
+      var charNb = cmdArray[i].size();
+      cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 20);
+      sendRawCmd(engo_rx, cmdArray[i]);
+    }
   }
 }

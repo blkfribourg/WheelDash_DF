@@ -49,7 +49,10 @@ module Varia {
     triggerVariaAlarm = true;
     var variaNow = new Time.Moment(Time.now().value());
 
-    if (nextVariaTrigger != null && nextVariaTrigger.compare(variaNow) >= 0) {
+    if (
+      nextVariaTrigger != null &&
+      nextVariaTrigger.compare(variaNow as Time.Moment) >= 0
+    ) {
       triggerVariaAlarm = false;
     }
     if (

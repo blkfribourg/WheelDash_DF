@@ -10,9 +10,6 @@ class GarminEUCApp extends Application.AppBase {
 
   function initialize() {
     AppBase.initialize();
-
-    eucData.settingsUrl = AppStorage.getSetting("settingsUrl");
-    eucData.profile = AppStorage.getSetting("defaultProfile");
   }
 
   // onStart() is called on application start up
@@ -28,12 +25,7 @@ class GarminEUCApp extends Application.AppBase {
     // function getInitialView() as Array<Views or InputDelegates>? {
     //queue = new BleQueue();
 
-    view = new GarminEUCDF();
-    return [view]; //Connect IQ7
+    return [new GarminEUCDF()]; //Connect IQ7
     // return [view] as Array<Views or InputDelegates>?;
-  }
-
-  function getApp() as GarminEUCApp {
-    return Application.getApp() as GarminEUCApp;
   }
 }

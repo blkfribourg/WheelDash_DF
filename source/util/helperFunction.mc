@@ -312,6 +312,56 @@ function pagePayload(textArray) {
   return payload;
 }
 
+function saveCustomLayout(
+  id as Number,
+  coord as Array,
+  dimension as Array,
+  font as Number,
+  txtCoord as Array,
+  img as Number,
+  imgCoord as Array
+) {
+  var imgExt = [0x00, img]b;
+  imgExt.addAll(encodeint16(imgCoord[0]));
+  imgExt.addAll(encodeint16(imgCoord[1]));
+  var txtExt = [0x04, 0x1]b;
+  var layoutCmd = [
+    0xff,
+    0x60,
+    0x00,
+    0x1e, // total size
+    id,
+    0x08, //extented size
+  ]b;
+  layoutCmd.addAll(encodeint16(coord[0]));
+  layoutCmd.add(coord[1]);
+  layoutCmd.addAll(encodeint16(dimension[0]));
+  layoutCmd.add(dimension[1]);
+  layoutCmd.addAll([0x0f, 0x00, font, 0x01]b);
+  layoutCmd.addAll(encodeint16(txtCoord[0]));
+  layoutCmd.add(txtCoord[1]);
+  layoutCmd.addAll([0x04, 0x01]b);
+  layoutCmd.addAll(txtExt);
+  layoutCmd.addAll(imgExt);
+  layoutCmd.add(0xaa);
+  return layoutCmd;
+}
+
+function saveCustomPage(
+  id as Number,
+  layoutArray as Array,
+  CoordArray as Array
+) {
+  var pageCmd = [0xff, 0x80, 0x00, layoutArray.size() * 4 + 6, id]b;
+  for (var i = 0; i < layoutArray.size(); i++) {
+    pageCmd.add(layoutArray[i]);
+    pageCmd.addAll(encodeint16(CoordArray[i][0]));
+    pageCmd.add(CoordArray[i][1]);
+  }
+  pageCmd.add(0xaa);
+  return pageCmd;
+}
+
 function getJson(symbol) {
   return WatchUi.loadResource(Rez.JsonData[symbol]);
 }

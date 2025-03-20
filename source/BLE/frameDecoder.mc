@@ -1,12 +1,14 @@
 import Toybox.Lang;
 using Toybox.BluetoothLowEnergy as Ble;
-
+using Toybox.System;
 module frameDecoder {
   function init() {
     if (eucData.wheelBrand == 0) {
+      //  System.println("init GW");
       return new GwDecoder();
     }
     if (eucData.wheelBrand == 1) {
+      //   System.println("init Veteran");
       return new VeteranDecoder();
     }
     if (eucData.wheelBrand == 2 || eucData.wheelBrand == 3) {

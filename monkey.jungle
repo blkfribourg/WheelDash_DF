@@ -1,1 +1,12 @@
 project.manifest = manifest.xml
+base.excludeAnnotations = legacy
+fenix5plus.excludeAnnotations = easyconfig
+marq2aviator.excludeAnnotations = easyconfig
+marqadventurer.excludeAnnotations = easyconfig
+marqathlete.excludeAnnotations = easyconfig
+marqaviator.excludeAnnotations = easyconfig
+marqcaptain.excludeAnnotations = easyconfig
+marqcommander.excludeAnnotations = easyconfig
+marqdriver.excludeAnnotations = easyconfig
+marqexpedition.excludeAnnotations = easyconfig
+marqgolfer.excludeAnnotations = easyconfig

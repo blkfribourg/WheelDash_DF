@@ -5,6 +5,7 @@ import Toybox.Graphics;
 using Toybox.Math;
 import Toybox.System;
 using Toybox.Application.Storage;
+using Toybox.Application.Properties;
 class GarminEUCDF extends WatchUi.DataField {
   var bleDelegate = null;
   var fill_logo;
@@ -59,15 +60,34 @@ class GarminEUCDF extends WatchUi.DataField {
   var prevTurnId = "";
   var nextPointName = null;
   var nextPointDistance = null;
-
+  var distanceToDestination = null;
   // var navigationData = null;
   //var RadarConnState = -1;
   private var cDrawables = {};
   var web;
+  var webTimeReq;
 
   function initialize() {
+    DataField.initialize();
+    // getSettingsUrl();
+
+    eucData.loadedProfile = Properties.getValue("defaultProfile");
     // EasyConfig ---------------------------------------
     System.println("init");
+    //  easyConfInit();
+    eucData.JSONFetch = "none";
+    //load custom number font
+  }
+  (:easyconfig)
+  function getSettingsUrl() {
+    eucData.settingsUrl = Properties.getValue("settingsUrl");
+  }
+  (:legacy)
+  function getSettingsUrl() {
+    eucData.settingsUrl = "";
+  }
+  (:easyconfig)
+  function easyConfInit() {
     var uidsize = 10;
     if (eucData.settingsUrl.length() > uidsize) {
       eucData.JSONFetch = "started";
@@ -85,21 +105,18 @@ class GarminEUCDF extends WatchUi.DataField {
       // delete local JSON if no URL is set
       Storage.deleteValue("JSONSettings");
     }
+  }
 
-    DataField.initialize();
-
-    //load custom number font
-    if (eucData.fontID == 0) {
-      nb_Font = WatchUi.loadResource(Rez.Fonts.Roboto);
-    } else {
-      nb_Font = WatchUi.loadResource(Rez.Fonts.Rajdhani);
-    }
+  (:legacy)
+  function easyConfInit() {
+    eucData.JSONFetch = "none";
+    System.println("legacy");
   }
 
   public function restoreValues(
     _maxTemp,
     _minTemp,
-    _maxVoltage,
+    // _maxVoltage,
     _minVoltage,
     _maxBatteryPerc,
     _minBatteryPerc,
@@ -111,7 +128,7 @@ class GarminEUCDF extends WatchUi.DataField {
   ) {
     maxTemp = _maxTemp;
     minTemp = _minTemp;
-    maxVoltage = _maxVoltage;
+    //  maxVoltage = _maxVoltage;
     minVoltage = _minVoltage;
     maxBatteryPerc = _maxBatteryPerc;
     minBatteryPerc = _minBatteryPerc;
@@ -306,6 +323,7 @@ class GarminEUCDF extends WatchUi.DataField {
       maxSpeed = eucData.correctedSpeed;
       mMaxSpeedField.setData(maxSpeed); // id 7
     }
+
     if (eucData.PWM > maxPWM) {
       maxPWM = eucData.PWM;
       mMaxPWMField.setData(maxPWM); // id 8
@@ -360,6 +378,7 @@ class GarminEUCDF extends WatchUi.DataField {
       }
       sessionDistance =
         eucData.CorrectedTotalDistance - startingEUCTripDistance;
+
       //avgSpeed = sessionDistance / (elapsedTime.value() / 3600.0);
       avgSpeed = sessionDistance / (elapsedTime / 3600.0);
     } else {
@@ -413,6 +432,11 @@ class GarminEUCDF extends WatchUi.DataField {
           mAvgUsedBatteryField.setData(batteryUsg);
         }
       }
+      /*
+      sessionDistance = 125.7; // TO DEL
+      averageMovingSpeed = 27.2;
+      maxSpeed = 52.3;
+      */
     }
 
     if (eucData.useRadar == true) {
@@ -598,20 +622,37 @@ class GarminEUCDF extends WatchUi.DataField {
   // Calculate the data to display in the field here
   //var fakeVariaObj;
   function compute(info) {
-    System.println("Compute");
     // DF init ---------------------------------------------------------------------
     // If settings are not loaded, load settings:
-    if (eucData.JSONFetch.equals("none")) {
-      setSettings(eucData.profile);
+
+    if (eucData.JSONFetch.equals("none") && eucData.ready != true) {
+      eucData.ready = setSettings(eucData.loadedProfile);
     } else {
-      System.println(eucData.JSONFetch);
-      if (web != null && !eucData.JSONFetch.equals("fetched")) {
-        web.fetch();
-        System.println("webReq started");
+      if (
+        web != null &&
+        !eucData.JSONFetch.equals("fetched") &&
+        eucData.ready != true
+      ) {
+        EUCAlarms.textAlert = "Fetching EasyConfig cfg";
+        if (webTimeReq == null) {
+          System.println("webReq");
+          web.fetch();
+          webTimeReq = System.getTimer();
+        } else {
+          System.println(System.getTimer() - webTimeReq);
+          if (
+            System.getTimer() - webTimeReq > 1000 ||
+            System.getTimer() - webTimeReq < 0 // in the unlikely event timer is rolled over during fetch
+          ) {
+            System.println("webReq");
+            web.fetch();
+            webTimeReq = System.getTimer();
+          }
+        }
       }
     }
     if (eucData.JSONFetch.equals("fetched")) {
-      System.println("settings fetched");
+      // System.println("settings fetched");
       var JSONSettings =
         (Storage.getValue("JSONSettings") as Dictionary).get("settings") as
         Dictionary;
@@ -619,13 +660,16 @@ class GarminEUCDF extends WatchUi.DataField {
         // should check how profile is applied : no need for profile, just parse the setting first
         eucData.ready = setJSONSettings(JSONSettings);
         // eucData.JSONFetch = "done";
+        EUCAlarms.textAlert = "none";
       }
     }
 
-    if (
-      bleDelegate == null &&
-      (eucData.ready == true || eucData.JSONFetch.equals("none"))
-    ) {
+    if (bleDelegate == null && eucData.ready == true) {
+      if (eucData.fontID == 0) {
+        nb_Font = WatchUi.loadResource(Rez.Fonts.Roboto);
+      } else {
+        nb_Font = WatchUi.loadResource(Rez.Fonts.Rajdhani);
+      }
       // Initialize BLEDelegate once settings are loaded:
       System.println("initializing BLEDelegate");
       if (Toybox has :BluetoothLowEnergy) {
@@ -634,6 +678,7 @@ class GarminEUCDF extends WatchUi.DataField {
         BluetoothLowEnergy.setDelegate(bleDelegate);
         eucPM.registerProfiles();
         if (eucData.useEngo == true) {
+          System.print("engoInit");
           engoPM.init();
           engoPM.registerProfiles();
         }
@@ -675,13 +720,17 @@ class GarminEUCDF extends WatchUi.DataField {
       eucData.timerState = activityTimerState;
       if (eucData.useEngo == true) {
         engoUpdate();
-        // check if cfg config is beeing updated to display a message :
-        if (info has :distanceToNextPoint && info has :nameOfNextPoint) {
+
+        if (
+          info has :distanceToNextPoint &&
+          info has :nameOfNextPoint &&
+          info has :distanceToDestination
+        ) {
+          eucData.engoPageNb = 4;
           if (info.distanceToNextPoint != null) {
             nextPointDistance = info.distanceToNextPoint;
           } else {
             nextPointDistance = null;
-            eucData.engoPageNb = 2; // remove navig view
           }
           if (
             info.nameOfNextPoint != null &&
@@ -693,6 +742,32 @@ class GarminEUCDF extends WatchUi.DataField {
             nextPointName = null;
             turnId = null;
           }
+          if (info.distanceToDestination != null) {
+            distanceToDestination = info.distanceToDestination;
+          }
+          if (info has :averageSpeed) {
+            if (
+              info.distanceToDestination != null &&
+              info.averageSpeed != null &&
+              info.averageSpeed > 0
+            ) {
+              var ETEsec = Math.round(
+                info.distanceToDestination / info.averageSpeed
+              ).toNumber();
+              var ETEmn = ETEsec / 60;
+              eucData.ETE = [ETEmn / 60, ETEmn % 60, ETEsec % 60];
+
+              var now = new Time.Moment(Time.now().value());
+              var ETA = now.add(new Time.Duration(ETEsec));
+              var ETATime = Time.Gregorian.info(ETA, Time.FORMAT_SHORT);
+              eucData.ETA = [ETATime.hour, ETATime.min, ETATime.sec];
+            } else {
+              eucData.ETE = null;
+              eucData.ETA = null;
+            }
+          }
+        } else {
+          eucData.engoPageNb = 3;
         }
       }
       //System.println("nextPointName: " + nextPointName);
@@ -718,13 +793,13 @@ class GarminEUCDF extends WatchUi.DataField {
         } else {
           //  fakeVariaObj = fakeVaria(3);
           /*
-        if (AppStorage.getSetting("resumeDectectionMethod") == 0) {
+        if (Properties.getValue("resumeDectectionMethod") == 0) {
           if (info.elapsedTime == null || info.elapsedTime < 300000) {
             resetVariables();
             reset = "yes";
           }
         }
-        if (AppStorage.getSetting("resumeDectectionMethod") == 1) {
+        if (Properties.getValue("resumeDectectionMethod") == 1) {
           // if activity is not started yet
           */
           if (info.timerState == 1) {
@@ -800,7 +875,9 @@ class GarminEUCDF extends WatchUi.DataField {
         bleDelegate.getEngoBattery();
       }
       var textArray = new [6];
-
+      if (eucData.engoPage == 3) {
+        textArray = new [10];
+      }
       // var xpos = 225;
       var currentTime = System.getClockTime();
       if (eucData.engoBattery != null) {
@@ -816,19 +893,19 @@ class GarminEUCDF extends WatchUi.DataField {
       );
       if (eucData.engoPage == 1) {
         prevTurnId = null;
-        textArray[2] = getHexText(valueRound(eucData.PWM, "%.1f") + " %", 0, 1);
+        textArray[2] = getHexText(valueRound(eucData.PWM, "%1d") + " %", 0, 1);
         textArray[3] = getHexText(
-          valueRound(eucData.correctedSpeed, "%.1f") + " km/h",
+          valueRound(eucData.correctedSpeed, "%1d") + " km/h",
           0,
           1
         );
         textArray[4] = getHexText(
-          valueRound(eucData.correctedTemperature, "%.1f") + " *C",
+          valueRound(eucData.correctedTemperature, "%1d") + " *C",
           0,
           1
         );
         textArray[5] = getHexText(
-          valueRound(currentBatteryPerc, "%.1f") + " %",
+          valueRound(currentBatteryPerc, "%1d") + " %",
           0,
           1
         );
@@ -850,11 +927,9 @@ class GarminEUCDF extends WatchUi.DataField {
           chrono = null;
         }
         textArray[2] = getHexText(
-          chrono[0].format("%02d") +
+          chrono[0].format("%02d") + ":" + chrono[1].format("%02d") /*+
             ":" +
-            chrono[1].format("%02d") +
-            ":" +
-            chrono[2].format("%02d"),
+            chrono[2].format("%02d")*/,
           0,
           1
         );
@@ -864,17 +939,17 @@ class GarminEUCDF extends WatchUi.DataField {
           1
         );
         textArray[4] = getHexText(
-          valueRound(averageMovingSpeed, "%.1f") + " km/h",
+          valueRound(averageMovingSpeed, "%1d") + " km/h",
           0,
           1
         );
-        textArray[5] = getHexText(valueRound(maxSpeed, "%.1f") + " km/h", 0, 1);
+        textArray[5] = getHexText(valueRound(maxSpeed, "%1d") + " km/h", 0, 1);
       }
-      if (eucData.engoPage == 3) {
+      if (eucData.engoPage == 4) {
         //Chrono page 1
         if (nextPointDistance != null) {
           textArray[2] = getHexText(
-            valueRound(nextPointDistance, "%.1f") + " m",
+            valueRound(nextPointDistance, "%1d") + " m",
             0,
             0
           );
@@ -882,16 +957,28 @@ class GarminEUCDF extends WatchUi.DataField {
           textArray[2] = getHexText("", 0, 0);
         }
         if (nextPointName != null) {
-          var multiLineName = multiline(nextPointName);
+          //   var multiLineName = multiline(nextPointName);
           //  System.println(multiLineName);
-          textArray[3] = getHexText(multiLineName[0], 0, 0);
-          textArray[4] = getHexText(multiLineName[1], 0, 0);
+          textArray[3] = getHexText(nextPointName, 0, 0);
+          //  textArray[4] = getHexText(multiLineName[1], 0, 0);
         } else {
           //System.println("NameNull");
           //implement word wrap
-          textArray[3] = getHexText("", 0, 0); // si plus de 20 char word wrap et ligne suivante!
+          textArray[3] = getHexText("", 0, 0); // si plus de 20 char word wrap et ligne suivante! -> inutile garmin coupe à 20 caractères
+          // textArray[4] = getHexText("", 0, 0);
+        }
+        if (distanceToDestination != null) {
+          textArray[4] = getHexText(
+            "Dist. to dest: " +
+              valueRound(distanceToDestination / 1000.0, "%.1f") +
+              " km",
+            0,
+            0
+          );
+        } else {
           textArray[4] = getHexText("", 0, 0);
         }
+
         textArray = textArray.slice(0, 5);
 
         if (turnId != null) {
@@ -912,11 +999,85 @@ class GarminEUCDF extends WatchUi.DataField {
             }
           }
         }
+        // send ETA & ETE for now using img & text command :
+        if (eucData.ETA != null) {
+          bleDelegate.sendCommands(getImgCmd(38, 210, 170));
+          bleDelegate.sendCommands(
+            getWriteCmd(
+              eucData.ETA[0].format("%02d") +
+                ":" +
+                eucData.ETA[1].format("%02d") +
+                " ",
+              250,
+              170,
+              4,
+              1,
+              15
+            )
+          );
+        }
+
+        if (eucData.ETE != null) {
+          bleDelegate.sendCommands(getImgCmd(39, 58, 170));
+          bleDelegate.sendCommands(
+            getWriteCmd(
+              eucData.ETE[0].format("%02d") +
+                ":" +
+                eucData.ETE[1].format("%02d") +
+                " ",
+
+              100,
+              170,
+              4,
+              1,
+              15
+            )
+          );
+        }
+      }
+      if (eucData.engoPage == 3) {
+        prevTurnId = null;
+        var PosInfo = Position.getInfo();
+        var GPS_speed = null;
+        if (PosInfo.accuracy > 1 && PosInfo.speed != null) {
+          if (eucData.convertToMiles) {
+            GPS_speed = convertKmToMiles(PosInfo.speed * 3.6);
+          } else {
+            GPS_speed = PosInfo.speed * 3.6;
+          }
+        }
+        var targetSpeed = eucData.variaTargetSpeed;
+        if (targetSpeed != null) {
+          if (eucData.convertToMiles) {
+            targetSpeed = convertKmToMiles(targetSpeed * 3.6);
+          } else {
+            targetSpeed = targetSpeed * 3.6;
+          }
+        }
+
+        textArray[2] = getHexText(valueRound(GPS_speed, "%1d"), 0, 1);
+        textArray[3] = getHexText(valueRound(currentBatteryPerc, "%1d"), 0, 1);
+        textArray[4] = getHexText(
+          valueRound(eucData.correctedTemperature, "%1d"),
+          0,
+          1
+        );
+        textArray[5] = getHexText(valueRound(sessionDistance, "%.1f"), 0, 1);
+
+        textArray[6] = getHexText(valueRound(maxSpeed, "%1d"), 0, 1);
+        textArray[7] = getHexText(valueRound(averageMovingSpeed, "%1d"), 0, 1);
+        textArray[8] = getHexText(
+          valueRound(eucData.variaTargetDist, "%1d"),
+          0,
+          1
+        );
+        textArray[9] = getHexText(valueRound(targetSpeed, "%1d"), 0, 1);
       }
 
       var data = pagePayload(textArray);
 
       // System.println(getPageCmd(data, eucData.engoPage));
+      bleDelegate.flushCmdStackingIfSup(200);
       bleDelegate.sendCommands(getPageCmd(data, eucData.engoPage));
       //    bleDelegate.sendCommands(cmdTime);
     }
@@ -986,7 +1147,7 @@ class GarminEUCDF extends WatchUi.DataField {
       if (eucData.isFirst && !eucData.paired) {
         var textToDisplay =
           "Profile " +
-          eucData.profile +
+          eucData.loadedProfile +
           " 1st connection\nPlease turn on your wheel\n and wait for connection\n\nensure only one wheel is ON!\n\nIf you enjoy this app :\n ko-fi.com/wheeldash";
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.clear();
@@ -1001,7 +1162,7 @@ class GarminEUCDF extends WatchUi.DataField {
       } else if (eucData.isFirst && eucData.paired && delay > 0) {
         var textToDisplay =
           "Profile " +
-          eucData.profile +
+          eucData.loadedProfile +
           " connected.\n\nSaving wheel footprint...";
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
         dc.clear();

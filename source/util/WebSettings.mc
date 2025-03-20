@@ -1,7 +1,7 @@
 import Toybox.Communications;
 import Toybox.System;
 import Toybox.Lang;
-
+using Toybox.Application.Properties;
 using Toybox.WatchUi;
 using Toybox.Application.Storage;
 
@@ -18,7 +18,7 @@ class WebSettings {
     uid = _uid;
     url = _url;
   }
-
+  (:background)
   function fetch() {
     var options = {
       :method => Communications.HTTP_REQUEST_METHOD_POST, // set HTTP method
@@ -32,6 +32,7 @@ class WebSettings {
     };
     if (Communications has :makeWebRequest) {
       //  System.println(url);
+
       Communications.makeWebRequest(
         url,
         { "uid" => uid },
@@ -41,46 +42,21 @@ class WebSettings {
       fetchCnt++;
     }
   }
-  function setSettings(json) {
+  function setSettings(json as Dictionary) {
     if (json != null) {
       Storage.setValue("JSONSettings", json);
-      System.println("writing json to local storage"); // saving json to appstorage:
+      setProfilesNb(json.get("settings") as Dictionary);
     }
 
     eucData.settingsChanged = true;
   }
-  function settingsChanged(json as Dictionary) {
-    // checking if a stored JSON exists :
-    var storedJSON = Storage.getValue("JSONSettings") as Dictionary;
-    //if stored JSON exists and is the same as the new one, return false
-
-    //System.print(settings);
-
-    if (storedJSON != null) {
-      System.println("Existing localJSON");
-
-      if (compareJSON(storedJSON, json) == true) {
-        System.println("same");
-        return false;
-      } else {
-        // Storage.setValue("JSONSettings", json);
-        System.println("diff");
-        return true;
-      }
-    } else {
-      System.println("no localJSON detected");
-      Storage.setValue("JSONSettings", json);
-
-      return false;
-    }
-  }
-
+  (:background)
   public function onReceive(
     responseCode as Number,
-    data as Dictionary<String, Object?> or String or Null
+    data as Dictionary or String or Null
   ) as Void {
     System.println(responseCode);
-    System.println(data);
+    //System.println(data);
     if (responseCode == 200 && data != null) {
       setSettings(data);
       //}
@@ -105,56 +81,57 @@ class WebSettings {
   }
 
   function compareJSON(json1 as Dictionary, json2 as Dictionary) {
-    // if jsons are identical returns true, else returns false
+    // If both are not dictionaries, compare directly
+    if (!(json1 instanceof Dictionary) || !(json2 instanceof Dictionary)) {
+      return json1.equals(json2);
+    }
 
+    // Get keys and compare their sizes
     var keys1 = json1.keys() as Array;
     var keys2 = json2.keys() as Array;
     if (keys1.size() != keys2.size()) {
       return false;
     }
-    //System.println(keys1.size());
+
     for (var i = 0; i < keys1.size(); i++) {
-      var firstLvl = json1.get(keys1[i]) as Dictionary;
-      if (firstLvl instanceof Dictionary) {
-        var secondLvlKeys = firstLvl.keys();
-        for (var j = 0; j < secondLvlKeys.size(); j++) {
-          // System.println(secondLvlKeys);
-          if (secondLvlKeys instanceof Array) {
-            var thirdLvl = firstLvl.get(secondLvlKeys[j]);
+      var key = keys1[i];
+      if (!json2.hasKey(key)) {
+        return false;
+      }
 
-            if (thirdLvl instanceof Dictionary) {
-              var thirdLvlKeys = thirdLvl.keys();
-              if (thirdLvlKeys instanceof Array) {
-                for (var k = 0; k < thirdLvlKeys.size(); k++) {
-                  var value1 = (
-                    (json1.get(keys1[i]) as Dictionary).get(secondLvlKeys[j]) as
-                      Dictionary
-                  ).get(thirdLvlKeys[k]);
-                  var value2 = (
-                    (json2.get(keys1[i]) as Dictionary).get(secondLvlKeys[j]) as
-                      Dictionary
-                  ).get(thirdLvlKeys[k]);
+      var value1 = json1.get(key);
+      var value2 = json2.get(key);
 
-                  if (!value1.equals(value2)) {
-                    //System.println("keys " + keys1[i] + " are different");
-                    return false;
-                  }
-                }
-              }
-            }
-          }
-          //  System.println(secondLvl);
-        }
-      } else {
-        var value1 = json1.get(keys1[i]);
-        var value2 = json2.get(keys1[i]);
-
-        if (!value1.equals(value2)) {
-          //System.println("keys " + keys1[i] + " are different");
+      // If both values are dictionaries, recurse
+      if (value1 instanceof Dictionary && value2 instanceof Dictionary) {
+        if (!compareJSON(value1, value2)) {
           return false;
+        }
+      } else if (!value1.equals(value2)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function setProfilesNb(json) {
+    var keys = json.keys() as Array;
+    for (var i = 0; i < keys.size(); i++) {
+      //System.println(keys[i]);
+      var currentKey = json.get(keys[i]) as Dictionary;
+
+      //checking if additionnal profiles:
+      var pStrIdx = keys[i].find("_p");
+      if (pStrIdx != null) {
+        var pStr = keys[i].substring(pStrIdx + 2, null);
+        if (pStr != null) {
+          if (pStr.toNumber() > eucData.profilesNb) {
+            //     System.println("new profile detected:" + pStr);
+            eucData.profilesNb = pStr.toNumber(); // updating last profile id
+          }
         }
       }
     }
-    return true;
   }
 }
