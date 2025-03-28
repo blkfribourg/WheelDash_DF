@@ -19,7 +19,15 @@ function string_to_byte_array(plain_text) {
 function valueRound(value, format) {
   if (value != null) {
     var rounded;
-    rounded = Math.round(value * 100) / 100;
+    if (format.equals("%1d")) {
+      rounded = Math.round(value);
+    } else if (format.equals("%.1f")) {
+      rounded = Math.round(value * 10) / 10.0;
+    } else if (format.equals("%.2f")) {
+      rounded = Math.round(value * 100) / 100.0;
+    } else {
+      return "--"; // Unsupported format
+    }
     return rounded.format(format);
   } else {
     return "--";

@@ -934,7 +934,7 @@ class GarminEUCDF extends WatchUi.DataField {
           1
         );
         textArray[3] = getHexText(
-          valueRound(sessionDistance, "%.1f") + " km",
+          valueRound(sessionDistance, "%1d") + " km",
           0,
           1
         );
@@ -970,7 +970,7 @@ class GarminEUCDF extends WatchUi.DataField {
         if (distanceToDestination != null) {
           textArray[4] = getHexText(
             "Dist. to dest: " +
-              valueRound(distanceToDestination / 1000.0, "%.1f") +
+              valueRound(distanceToDestination / 1000.0, "%1d") +
               " km",
             0,
             0
@@ -1062,7 +1062,7 @@ class GarminEUCDF extends WatchUi.DataField {
           0,
           1
         );
-        textArray[5] = getHexText(valueRound(sessionDistance, "%.1f"), 0, 1);
+        textArray[5] = getHexText(valueRound(sessionDistance, "%1d"), 0, 1);
 
         textArray[6] = getHexText(valueRound(maxSpeed, "%1d"), 0, 1);
         textArray[7] = getHexText(valueRound(averageMovingSpeed, "%1d"), 0, 1);
