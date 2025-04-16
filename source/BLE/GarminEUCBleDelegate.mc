@@ -198,9 +198,10 @@ class eucBLEDelegate extends Ble.BleDelegate {
       // not using Easy config -> max profile number is 3
       maxProfile = 3;
     }
-    for (var i = 1; i < maxProfile; i++) {
+    for (var i = 1; i <= maxProfile; i++) {
       var pName = Properties.getValue("wheelName_p" + i) as String;
       if (!pName.equals(Storage.getValue("profile" + i + "Name"))) {
+        //System.println("Deleting profile" + i + "Name");
         Storage.deleteValue("profile" + i + "Sr");
       }
     }
