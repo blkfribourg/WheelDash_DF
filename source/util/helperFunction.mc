@@ -446,3 +446,33 @@ function concatCmd(cmds) {
   }
   return cmd;
 }
+
+function estimateSoc(
+  packVoltage as Number,
+  seriesCount as Number,
+  minCellVoltage as Number
+) as Float {
+  var vCell = packVoltage / seriesCount;
+  var soc;
+
+  // Clamp cell voltage within valid range
+  if (vCell >= 4.2) {
+    soc = 100.0;
+  } else if (vCell <= minCellVoltage) {
+    soc = 0.0;
+  } else {
+    // Use dynamic range between minCellVoltage and 4.2V
+    var range = 4.2 - minCellVoltage;
+    var offset = vCell - minCellVoltage;
+    soc = (offset / range) * 100.0;
+  }
+
+  // Clamp and round to 2 decimal places
+  if (soc > 100.0) {
+    soc = 100.0;
+  } else if (soc < 0.0) {
+    soc = 0.0;
+  }
+
+  return Math.round(soc * 100.0) / 100.0;
+}

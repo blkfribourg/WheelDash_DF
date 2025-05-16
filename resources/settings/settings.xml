@@ -517,6 +517,15 @@
                 max="120"
                 errorMessage="@Strings.ErrorMessage" />
         </setting>
+        <setting
+            propertyKey="@Properties.minCellVolt_p1"
+            title="@Strings.minCellVolt_p1">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="3.5"
+                errorMessage="@Strings.ErrorMessage" />
+        </setting>
 
         <setting
                 propertyKey="@Properties.wheelName_p2"
@@ -643,6 +652,15 @@
                 max="120"
                 errorMessage="@Strings.ErrorMessage" />
         </setting>
+        <setting
+            propertyKey="@Properties.minCellVolt_p2"
+            title="@Strings.minCellVolt_p2">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="3.5"
+                errorMessage="@Strings.ErrorMessage" />
+        </setting>
 
 
         <setting
@@ -767,6 +785,15 @@
                 type="numeric"
                 min="0"
                 max="120"
+                errorMessage="@Strings.ErrorMessage" />
+        </setting>
+        <setting
+            propertyKey="@Properties.minCellVolt_p3"
+            title="@Strings.minCellVolt_p3">
+            <settingConfig
+                type="numeric"
+                min="0"
+                max="3.5"
                 errorMessage="@Strings.ErrorMessage" />
         </setting>
 

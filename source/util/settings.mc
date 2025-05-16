@@ -70,6 +70,7 @@ function setSettings(profile as Number) {
     "alarmThreshold_temp_p" + profile
   );
   eucData.convertToMiles = Properties.getValue("convertToMiles_p" + profile);
+  eucData.minCellVolt = Properties.getValue("minCellVolt_p" + profile);
 
   return true;
   //  Storage.setValue("lastProfileIdx", profile);
@@ -341,6 +342,14 @@ function setJSONSettings(JSONSettings as Dictionary) {
       ).get("v") as String
     ).toNumber();
   }
+  if (JSONSettings.get("minCellVolt_p" + eucData.loadedProfile) != null) {
+    eucData.minCellVolt = (
+      (
+        JSONSettings.get("minCellVolt_p" + eucData.loadedProfile) as Dictionary
+      ).get("v") as String
+    ).toFloat();
+  }
+
   /*
   if (JSONSettings.get("wheelName_p" + eucData.loadedProfile) != null) {
     eucData.wheelName = (
