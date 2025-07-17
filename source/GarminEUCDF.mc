@@ -874,40 +874,42 @@ class GarminEUCDF extends WatchUi.DataField {
         engoBattReq = 0;
         bleDelegate.getEngoBattery();
       }
-      var textArray = new [6];
+      var textArray = new [0];
       if (eucData.engoPage == 3) {
         textArray = new [10];
       }
       // var xpos = 225;
       var currentTime = System.getClockTime();
       if (eucData.engoBattery != null) {
-        textArray[0] = getHexText(eucData.engoBattery + " %", 0, 0);
+        textArray.add(getHexText(eucData.engoBattery + " %", 0, 0));
       } else {
-        textArray[0] = getHexText(" ", 0, 0);
+        textArray.add(getHexText(" ", 0, 0));
       }
 
-      textArray[1] = getHexText(
-        currentTime.hour.format("%02d") + ":" + currentTime.min.format("%02d"),
-        0,
-        0
+      textArray.add(
+        getHexText(
+          currentTime.hour.format("%02d") +
+            ":" +
+            currentTime.min.format("%02d"),
+          0,
+          0
+        )
       );
       if (eucData.engoPage == 1) {
         prevTurnId = null;
-        textArray[2] = getHexText(valueRound(eucData.PWM, "%1d") + " %", 0, 1);
-        textArray[3] = getHexText(
-          valueRound(eucData.correctedSpeed, "%1d") + " km/h",
-          0,
-          1
+        textArray.add(getHexText(valueRound(eucData.PWM, "%1d") + " %", 0, 1));
+        textArray.add(
+          getHexText(valueRound(eucData.correctedSpeed, "%1d") + " km/h", 0, 1)
         );
-        textArray[4] = getHexText(
-          valueRound(eucData.correctedTemperature, "%1d") + " *C",
-          0,
-          1
+        textArray.add(
+          getHexText(
+            valueRound(eucData.correctedTemperature, "%1d") + " *C",
+            0,
+            1
+          )
         );
-        textArray[5] = getHexText(
-          valueRound(currentBatteryPerc, "%1d") + " %",
-          0,
-          1
+        textArray.add(
+          getHexText(valueRound(currentBatteryPerc, "%1d") + " %", 0, 1)
         );
       }
       if (eucData.engoPage == 2) {
@@ -926,60 +928,58 @@ class GarminEUCDF extends WatchUi.DataField {
         } else {
           chrono = null;
         }
-        textArray[2] = getHexText(
-          chrono[0].format("%02d") + ":" + chrono[1].format("%02d") /*+
+        textArray.add(
+          getHexText(
+            chrono[0].format("%02d") + ":" + chrono[1].format("%02d") /*+
             ":" +
             chrono[2].format("%02d")*/,
-          0,
-          1
+            0,
+            1
+          )
         );
-        textArray[3] = getHexText(
-          valueRound(sessionDistance, "%1d") + " km",
-          0,
-          1
+        textArray.add(
+          getHexText(valueRound(sessionDistance, "%1d") + " km", 0, 1)
         );
-        textArray[4] = getHexText(
-          valueRound(averageMovingSpeed, "%1d") + " km/h",
-          0,
-          1
+        textArray.add(
+          getHexText(valueRound(averageMovingSpeed, "%1d") + " km/h", 0, 1)
         );
-        textArray[5] = getHexText(valueRound(maxSpeed, "%1d") + " km/h", 0, 1);
+        textArray.add(getHexText(valueRound(maxSpeed, "%1d") + " km/h", 0, 1));
       }
       if (eucData.engoPage == 4) {
         //Chrono page 1
         if (nextPointDistance != null) {
-          textArray[2] = getHexText(
-            valueRound(nextPointDistance, "%1d") + " m",
-            0,
-            0
+          textArray.add(
+            getHexText(valueRound(nextPointDistance, "%1d") + " m", 0, 0)
           );
         } else {
-          textArray[2] = getHexText("", 0, 0);
+          textArray.add(getHexText("", 0, 0));
         }
         if (nextPointName != null) {
           //   var multiLineName = multiline(nextPointName);
           //  System.println(multiLineName);
-          textArray[3] = getHexText(nextPointName, 0, 0);
+          textArray.add(getHexText(nextPointName, 0, 0));
           //  textArray[4] = getHexText(multiLineName[1], 0, 0);
         } else {
           //System.println("NameNull");
           //implement word wrap
-          textArray[3] = getHexText("", 0, 0); // si plus de 20 char word wrap et ligne suivante! -> inutile garmin coupe à 20 caractères
+          textArray.add(getHexText("", 0, 0)); // si plus de 20 char word wrap et ligne suivante! -> inutile garmin coupe à 20 caractères
           // textArray[4] = getHexText("", 0, 0);
         }
         if (distanceToDestination != null) {
-          textArray[4] = getHexText(
-            "Dist. to dest: " +
-              valueRound(distanceToDestination / 1000.0, "%1d") +
-              " km",
-            0,
-            0
+          textArray.add(
+            getHexText(
+              "Dist. to dest: " +
+                valueRound(distanceToDestination / 1000.0, "%1d") +
+                " km",
+              0,
+              0
+            )
           );
         } else {
-          textArray[4] = getHexText("", 0, 0);
+          textArray.add(getHexText("", 0, 0));
         }
 
-        textArray = textArray.slice(0, 5);
+        //  textArray = textArray.slice(0, 5);
 
         if (turnId != null) {
           if (!turnId.equals(prevTurnId)) {
@@ -1055,23 +1055,19 @@ class GarminEUCDF extends WatchUi.DataField {
           }
         }
 
-        textArray[2] = getHexText(valueRound(GPS_speed, "%1d"), 0, 1);
-        textArray[3] = getHexText(valueRound(currentBatteryPerc, "%1d"), 0, 1);
-        textArray[4] = getHexText(
-          valueRound(eucData.correctedTemperature, "%1d"),
-          0,
-          1
+        textArray.add(getHexText(valueRound(GPS_speed, "%1d"), 0, 1));
+        textArray.add(getHexText(valueRound(currentBatteryPerc, "%1d"), 0, 1));
+        textArray.add(
+          getHexText(valueRound(eucData.correctedTemperature, "%1d"), 0, 1)
         );
-        textArray[5] = getHexText(valueRound(sessionDistance, "%1d"), 0, 1);
+        textArray.add(getHexText(valueRound(sessionDistance, "%1d"), 0, 1));
 
-        textArray[6] = getHexText(valueRound(maxSpeed, "%1d"), 0, 1);
-        textArray[7] = getHexText(valueRound(averageMovingSpeed, "%1d"), 0, 1);
-        textArray[8] = getHexText(
-          valueRound(eucData.variaTargetDist, "%1d"),
-          0,
-          1
+        textArray.add(getHexText(valueRound(maxSpeed, "%1d"), 0, 1));
+        textArray.add(getHexText(valueRound(averageMovingSpeed, "%1d"), 0, 1));
+        textArray.add(
+          getHexText(valueRound(eucData.variaTargetDist, "%1d"), 0, 1)
         );
-        textArray[9] = getHexText(valueRound(targetSpeed, "%1d"), 0, 1);
+        textArray.add(getHexText(valueRound(targetSpeed, "%1d"), 0, 1));
       }
 
       var data = pagePayload(textArray);

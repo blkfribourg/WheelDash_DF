@@ -422,7 +422,7 @@
                     <settingConfig
                         type="numeric"
                         min="0"
-                        max="2"
+                        max="3"
                         errorMessage="@Strings.ErrorMessage" />
                 </setting>
                 <setting
@@ -459,7 +459,7 @@
             <settingConfig
                 type="numeric"
                 min="0"
-                max="140"
+                max="200"
                 errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
@@ -468,7 +468,7 @@
             <settingConfig
                 type="numeric"
                 min="48"
-                max="136"
+                max="202"
                 errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
@@ -557,7 +557,7 @@
                     <settingConfig
                         type="numeric"
                         min="0"
-                        max="2"
+                        max="3"
                         errorMessage="@Strings.ErrorMessage" />
                 </setting>
                 <setting
@@ -594,7 +594,7 @@
             <settingConfig
                 type="numeric"
                 min="0"
-                max="140"
+                max="200"
                 errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
@@ -603,7 +603,7 @@
             <settingConfig
                 type="numeric"
                 min="48"
-                max="136"
+                max="202"
                 errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
@@ -692,7 +692,7 @@
                     <settingConfig
                         type="numeric"
                         min="0"
-                        max="2"
+                        max="3"
                         errorMessage="@Strings.ErrorMessage" />
                 </setting>
                 <setting
@@ -729,7 +729,7 @@
             <settingConfig
                 type="numeric"
                 min="0"
-                max="140"
+                max="200"
                 errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
@@ -738,7 +738,7 @@
             <settingConfig
                 type="numeric"
                 min="48"
-                max="136"
+                max="202"
                 errorMessage="@Strings.ErrorMessage" />
         </setting>
         <setting
