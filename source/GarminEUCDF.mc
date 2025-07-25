@@ -875,10 +875,7 @@ class GarminEUCDF extends WatchUi.DataField {
         bleDelegate.getEngoBattery();
       }
       var textArray = new [0];
-      if (eucData.engoPage == 3) {
-        textArray = new [10];
-      }
-      // var xpos = 225;
+
       var currentTime = System.getClockTime();
       if (eucData.engoBattery != null) {
         textArray.add(getHexText(eucData.engoBattery + " %", 0, 0));

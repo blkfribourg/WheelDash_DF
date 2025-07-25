@@ -126,7 +126,11 @@ module eucData {
       if (minCellVolt != 0) {
         if (wheelBrand == 0) {
           // note this may not work for recent begode EUCs (reports real voltage)
-          battery = estimateSoc(voltage, 16 * voltage_scaling, minCellVolt);
+          battery = estimateSoc(
+            voltage * voltage_scaling,
+            16 * voltage_scaling,
+            minCellVolt
+          );
         }
         if (wheelBrand == 1) {
           var cellNbS = 24;
