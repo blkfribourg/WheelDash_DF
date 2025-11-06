@@ -4,11 +4,9 @@ using Toybox.System;
 module frameDecoder {
   function init() {
     if (eucData.wheelBrand == 0) {
-      //  System.println("init GW");
       return new GwDecoder();
     }
     if (eucData.wheelBrand == 1) {
-      //   System.println("init Veteran");
       return new VeteranDecoder();
     }
     if (eucData.wheelBrand == 2 || eucData.wheelBrand == 3) {
@@ -26,11 +24,9 @@ class GwDecoder {
         // process frame and guess type
         if (frame[18].toNumber() == 0) {
           // Frame A
-          //System.println("Frame A detected");
           processFrameA(frame);
         } else if (frame[18].toNumber() == 4) {
           // Frame B
-          //System.println("Frame B detected");
           processFrameB(frame);
         }
       }

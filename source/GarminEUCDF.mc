@@ -11,7 +11,6 @@ class GarminEUCDF extends WatchUi.DataField {
   var fill_logo;
   var empty_logo;
   var delay = 3;
-  // var firstCall = true;
 
   var fieldNames;
   var fieldValues;
@@ -61,8 +60,6 @@ class GarminEUCDF extends WatchUi.DataField {
   var nextPointName = null;
   var nextPointDistance = null;
   var distanceToDestination = null;
-  // var navigationData = null;
-  //var RadarConnState = -1;
   private var cDrawables = {};
   var web;
   var webTimeReq;
@@ -295,6 +292,7 @@ class GarminEUCDF extends WatchUi.DataField {
   var avgPower = 0.0;
   var movingmsec = 0.0;
   var averageMovingSpeed = 0.0;
+  var lastComputeTime = 0;
   var EUCBatteryPercStart = null;
   var batteryUsg = 0;
   var currentbatteryUsg = 0;
@@ -367,19 +365,20 @@ class GarminEUCDF extends WatchUi.DataField {
       mMinBatteryField.setData(minBatteryPerc);
     }
 
-    // var currentMoment = new Time.Moment(Time.now().value());
-    // var elapsedTime = startingMoment.subtract(currentMoment);
     var elapsedTime = garminInfo.timerTime / 1000.0; // convert to seconds
-    //System.println("elaspsed :" + elapsedTime.value());
-    if (elapsedTime != 0 && eucData.CorrectedTotalDistance > 0) {
-      //if (elapsedTime.value() != 0 && eucData.CorrectedTotalDistance > 0) {
-      if (startingEUCTripDistance == 0) {
-        startingEUCTripDistance = eucData.CorrectedTotalDistance;
+    
+    // Initialize starting distance when EUC data becomes available
+    if (startingEUCTripDistance == 0 && eucData.CorrectedTotalDistance > 0) {
+      startingEUCTripDistance = eucData.CorrectedTotalDistance;
+    }
+    
+    // Calculate session distance and average speed
+    if (elapsedTime != 0 && startingEUCTripDistance > 0) {
+      sessionDistance = eucData.CorrectedTotalDistance - startingEUCTripDistance;
+      // Ensure sessionDistance is never negative due to initialization timing
+      if (sessionDistance < 0) {
+        sessionDistance = 0.0;
       }
-      sessionDistance =
-        eucData.CorrectedTotalDistance - startingEUCTripDistance;
-
-      //avgSpeed = sessionDistance / (elapsedTime.value() / 3600.0);
       avgSpeed = sessionDistance / (elapsedTime / 3600.0);
     } else {
       sessionDistance = 0.0;
@@ -389,64 +388,70 @@ class GarminEUCDF extends WatchUi.DataField {
 
     mAvgSpeedField.setData(avgSpeed); // id 12
 
-    sumCurrent = sumCurrent + currentCurrent;
-    sumPower = sumPower + currentPower;
-    avgCurrent = sumCurrent / callNb;
-    avgPower = sumPower / callNb;
+    // Only accumulate averages when EUC is connected and providing valid data
+    if (eucData.paired && currentCurrent > 0) {
+      sumCurrent = sumCurrent + currentCurrent;
+      sumPower = sumPower + currentPower;
+      avgCurrent = sumCurrent / callNb;
+      avgPower = sumPower / callNb;
+    }
 
-    if (eucData.correctedSpeed > 2.5) {
-      movingmsec = movingmsec + 1000;
+    // Calculate moving time using actual intervals
+    var currentTime = System.getTimer();
+    if (lastComputeTime > 0 && eucData.correctedSpeed > 2.5) {
+      // Handle timer rollover
+      var actualInterval = (currentTime >= lastComputeTime)
+        ? currentTime - lastComputeTime
+        : 1000; // fallback to ~1sec if timer rolled over
+      movingmsec = movingmsec + actualInterval;
       averageMovingSpeed = sessionDistance / (movingmsec / 3600000.0);
     }
+    lastComputeTime = currentTime;
 
     mAvgMvSpeedField.setData(averageMovingSpeed);
     //mAvgPowerField.setData(sumPower / callNb); // id 14
 
+    // Update battery usage calculations
     if (currentBatteryPerc > 0) {
-      if (EUCBatteryPercStart == null) {
+      // Initialize or update starting battery percentage
+      if (EUCBatteryPercStart == null || EUCBatteryPercStart < currentBatteryPerc) {
         EUCBatteryPercStart = currentBatteryPerc;
-      } else {
-        if (EUCBatteryPercStart < currentBatteryPerc) {
-          EUCBatteryPercStart = currentBatteryPerc;
-        }
       }
+      
       if (sessionDistance > 0) {
-        currentbatteryUsg =
-          (EUCBatteryPercStart - currentBatteryPerc) / sessionDistance;
+        currentbatteryUsg = (EUCBatteryPercStart - currentBatteryPerc) / sessionDistance;
         batteryUsgValues.add(currentbatteryUsg);
+        
         if (batteryUsgValues.size() > 10) {
           batteryUsgValues = batteryUsgValues.slice(1, batteryUsgValues.size());
-          var tempBatteryUsg = 0;
+          
+          // Calculate average battery usage from recent values
+          var tempBatteryUsg = 0.0;
           var valueCnt = 0;
           for (var i = 0; i < batteryUsgValues.size(); i++) {
-            var currentBatteryUsg = batteryUsgValues[i];
-            if (currentBatteryUsg != null) {
-              tempBatteryUsg = tempBatteryUsg + currentBatteryUsg;
+            if (batteryUsgValues[i] != null) {
+              tempBatteryUsg += batteryUsgValues[i];
               valueCnt++;
             }
           }
-          if (valueCnt != 0) {
+          
+          if (valueCnt > 0) {
             batteryUsg = tempBatteryUsg / valueCnt;
+            mAvgUsedBatteryField.setData(batteryUsg);
           }
-
-          mAvgUsedBatteryField.setData(batteryUsg);
         }
       }
-      /*
-      sessionDistance = 125.7; // TO DEL
-      averageMovingSpeed = 27.2;
-      maxSpeed = 52.3;
-      */
     }
 
     if (eucData.useRadar == true) {
       mVehRelativeSpdField.setData(eucData.variaTargetSpeed);
       mVehTotalCntField.setData(eucData.totalVehCount);
     }
+
+    // Perform periodic save if needed
+    performPeriodicSave();
   }
   function resetVariables() {
-    //System.println("reset variables");
-    //startingMoment = new Time.Moment(Time.now().value());
     maxSpeed = 0.0;
     maxPWM = 0.0;
     maxCurrent = 0.0;
@@ -471,146 +476,233 @@ class GarminEUCDF extends WatchUi.DataField {
     avgSpeed = 0.0;
     avgCurrent = 0.0;
     avgPower = 0.0;
+    movingmsec = 0.0;
+    averageMovingSpeed = 0.0;
+    lastComputeTime = 0;
+
+    // Reset previous values for change detection
+    prevMaxSpeed = 0.0;
+    prevMaxPWM = 0.0;
+    prevMaxCurrent = 0.0;
+    prevMaxPower = 0.0;
+    prevMaxTemp = -255.0;
+    prevMinTemp = 255.0;
+    prevMinVoltage = 255.0;
+    prevMaxVoltage = 0.0;
+    prevMinBatteryPerc = 101.0;
+    prevMaxBatteryPerc = 0.0;
+  }
+
+  function hasMinMaxAvgDataChanged() {
+    return (maxSpeed != prevMaxSpeed ||
+            maxPWM != prevMaxPWM ||
+            maxCurrent != prevMaxCurrent ||
+            maxPower != prevMaxPower ||
+            maxTemp != prevMaxTemp ||
+            minTemp != prevMinTemp ||
+            minVoltage != prevMinVoltage ||
+            maxVoltage != prevMaxVoltage ||
+            minBatteryPerc != prevMinBatteryPerc ||
+            maxBatteryPerc != prevMaxBatteryPerc);
+  }
+
+  function updatePreviousMinMaxAvgValues() {
+    prevMaxSpeed = maxSpeed;
+    prevMaxPWM = maxPWM;
+    prevMaxCurrent = maxCurrent;
+    prevMaxPower = maxPower;
+    prevMaxTemp = maxTemp;
+    prevMinTemp = minTemp;
+    prevMinVoltage = minVoltage;
+    prevMaxVoltage = maxVoltage;
+    prevMinBatteryPerc = minBatteryPerc;
+    prevMaxBatteryPerc = maxBatteryPerc;
+  }
+
+  function saveProgressData() {
+    // Always save fast-changing computation values
+    Storage.setValue("callNb", callNb);
+    Storage.setValue("sumCurrent", sumCurrent);
+    Storage.setValue("sumPower", sumPower);
+    Storage.setValue("movingmsec", movingmsec);
+    Storage.setValue("sessionDistance", sessionDistance);
+    Storage.setValue("avgSpeed", avgSpeed);
+    Storage.setValue("avgCurrent", avgCurrent);
+    Storage.setValue("avgPower", avgPower);
+
+    // Save constants that rarely change
+    Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
+    Storage.setValue("EUCBatteryPercStart", EUCBatteryPercStart);
+
+    // Save min/max values only if they changed
+    if (hasMinMaxAvgDataChanged()) {
+      Storage.setValue("maxSpeed", maxSpeed);
+      Storage.setValue("maxPWM", maxPWM);
+      Storage.setValue("maxCurrent", maxCurrent);
+      Storage.setValue("maxPower", maxPower);
+      Storage.setValue("maxTemp", maxTemp);
+      Storage.setValue("minTemp", minTemp);
+      Storage.setValue("minVoltage", minVoltage);
+      Storage.setValue("maxVoltage", maxVoltage);
+      Storage.setValue("minBatteryPerc", minBatteryPerc);
+      Storage.setValue("maxBatteryPerc", maxBatteryPerc);
+
+      updatePreviousMinMaxAvgValues();
+
+      if (eucData.debug) {
+        System.println("Min/max values saved");
+      }
+    }
+
+    if (eucData.useRadar == true) {
+      Storage.setValue("totalVehCount", eucData.totalVehCount);
+    }
+  }
+
+  function performPeriodicSave() {
+    var currentTime = System.getTimer();
+
+    // Save every 30 seconds (handle timer rollover)
+    if (currentTime - lastSaveTime >= saveInterval || currentTime < lastSaveTime) {
+      saveProgressData();
+      lastSaveTime = currentTime;
+
+      if (eucData.debug) {
+        System.println("Periodic save performed");
+      }
+    }
   }
   function getFieldValues() {
     for (var field_id = 0; field_id < eucData.fieldNB; field_id++) {
-      if (eucData.fieldIDs[field_id] == 0) {
-        fieldNames[field_id] = "SPEED";
-        fieldValues[field_id] = valueRound(eucData.correctedSpeed, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 1) {
-        fieldNames[field_id] = "VOLTAGE";
-        fieldValues[field_id] = valueRound(currentVoltage, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 2) {
-        fieldNames[field_id] = "TRP DIST";
-        fieldValues[field_id] = valueRound(sessionDistance, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 3) {
-        fieldNames[field_id] = "CURR";
-        fieldValues[field_id] = valueRound(currentCurrent, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 4) {
-        fieldNames[field_id] = "TEMP";
-        fieldValues[field_id] = valueRound(
-          eucData.correctedTemperature,
-          "%.1f"
-        );
-      }
-      if (eucData.fieldIDs[field_id] == 5) {
-        fieldNames[field_id] = "TT DIST";
-        fieldValues[field_id] = valueRound(
-          eucData.CorrectedTotalDistance,
-          "%.1f"
-        );
-      }
-      if (eucData.fieldIDs[field_id] == 6) {
-        fieldNames[field_id] = "PWM";
-        fieldValues[field_id] = valueRound(eucData.PWM, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 7) {
-        fieldNames[field_id] = "BATT %";
-        fieldValues[field_id] = valueRound(currentBatteryPerc, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 8) {
-        fieldNames[field_id] = "BATT USG";
-        fieldValues[field_id] = valueRound(batteryUsg, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 9) {
-        fieldNames[field_id] = "MIN TEMP";
-        fieldValues[field_id] = valueRound(minTemp, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 10) {
-        fieldNames[field_id] = "MAX TEMP";
-        fieldValues[field_id] = valueRound(maxTemp, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 11) {
-        fieldNames[field_id] = "MAX SPD";
-        fieldValues[field_id] = valueRound(maxSpeed, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 12) {
-        fieldNames[field_id] = "AVG SPD";
-        fieldValues[field_id] = valueRound(avgSpeed, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 13) {
-        fieldNames[field_id] = "AVG MV SPD";
-        fieldValues[field_id] = valueRound(averageMovingSpeed, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 14) {
-        fieldNames[field_id] = "MIN VOLT";
-        fieldValues[field_id] = valueRound(minVoltage, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 15) {
-        fieldNames[field_id] = "MAX VOLT";
-        fieldValues[field_id] = valueRound(maxVoltage, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 16) {
-        fieldNames[field_id] = "MAX CURR";
-        fieldValues[field_id] = valueRound(maxCurrent, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 17) {
-        fieldNames[field_id] = "AVG CURR";
-        fieldValues[field_id] = valueRound(avgCurrent, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 18) {
-        fieldNames[field_id] = "MIN BATT %";
-        fieldValues[field_id] = valueRound(minBatteryPerc, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 19) {
-        fieldNames[field_id] = "MAX BATT %";
-        fieldValues[field_id] = valueRound(maxBatteryPerc, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 20) {
-        fieldNames[field_id] = "AVG PWR";
-        fieldValues[field_id] = valueRound(avgPower, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 21) {
-        fieldNames[field_id] = "MAX PWR";
-        fieldValues[field_id] = valueRound(maxPower, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 22) {
-        fieldNames[field_id] = "VEH SPD";
-        var targetSpeed = eucData.variaTargetSpeed;
-        if (targetSpeed != null) {
-          if (eucData.convertToMiles) {
-            targetSpeed = convertKmToMiles(targetSpeed * 3.6);
-          } else {
-            targetSpeed = targetSpeed * 3.6;
+      var fieldType = eucData.fieldIDs[field_id];
+      
+      switch (fieldType) {
+        case 0:
+          fieldNames[field_id] = "SPEED";
+          fieldValues[field_id] = valueRound(eucData.correctedSpeed, "%.1f");
+          break;
+        case 1:
+          fieldNames[field_id] = "VOLTAGE";
+          fieldValues[field_id] = valueRound(currentVoltage, "%.1f");
+          break;
+        case 2:
+          fieldNames[field_id] = "TRP DIST";
+          fieldValues[field_id] = valueRound(sessionDistance, "%.1f");
+          break;
+        case 3:
+          fieldNames[field_id] = "CURR";
+          fieldValues[field_id] = valueRound(currentCurrent, "%.1f");
+          break;
+        case 4:
+          fieldNames[field_id] = "TEMP";
+          fieldValues[field_id] = valueRound(eucData.correctedTemperature, "%.1f");
+          break;
+        case 5:
+          fieldNames[field_id] = "TT DIST";
+          fieldValues[field_id] = valueRound(eucData.CorrectedTotalDistance, "%.1f");
+          break;
+        case 6:
+          fieldNames[field_id] = "PWM";
+          fieldValues[field_id] = valueRound(eucData.PWM, "%.1f");
+          break;
+        case 7:
+          fieldNames[field_id] = "BATT %";
+          fieldValues[field_id] = valueRound(currentBatteryPerc, "%.1f");
+          break;
+        case 8:
+          fieldNames[field_id] = "BATT USG";
+          fieldValues[field_id] = valueRound(batteryUsg, "%.1f");
+          break;
+        case 9:
+          fieldNames[field_id] = "MIN TEMP";
+          fieldValues[field_id] = valueRound(minTemp, "%.1f");
+          break;
+        case 10:
+          fieldNames[field_id] = "MAX TEMP";
+          fieldValues[field_id] = valueRound(maxTemp, "%.1f");
+          break;
+        case 11:
+          fieldNames[field_id] = "MAX SPD";
+          fieldValues[field_id] = valueRound(maxSpeed, "%.1f");
+          break;
+        case 12:
+          fieldNames[field_id] = "AVG SPD";
+          fieldValues[field_id] = valueRound(avgSpeed, "%.1f");
+          break;
+        case 13:
+          fieldNames[field_id] = "AVG MV SPD";
+          fieldValues[field_id] = valueRound(averageMovingSpeed, "%.1f");
+          break;
+        case 14:
+          fieldNames[field_id] = "MIN VOLT";
+          fieldValues[field_id] = valueRound(minVoltage, "%.1f");
+          break;
+        case 15:
+          fieldNames[field_id] = "MAX VOLT";
+          fieldValues[field_id] = valueRound(maxVoltage, "%.1f");
+          break;
+        case 16:
+          fieldNames[field_id] = "MAX CURR";
+          fieldValues[field_id] = valueRound(maxCurrent, "%.1f");
+          break;
+        case 17:
+          fieldNames[field_id] = "AVG CURR";
+          fieldValues[field_id] = valueRound(avgCurrent, "%.1f");
+          break;
+        case 18:
+          fieldNames[field_id] = "MIN BATT %";
+          fieldValues[field_id] = valueRound(minBatteryPerc, "%.1f");
+          break;
+        case 19:
+          fieldNames[field_id] = "MAX BATT %";
+          fieldValues[field_id] = valueRound(maxBatteryPerc, "%.1f");
+          break;
+        case 20:
+          fieldNames[field_id] = "AVG PWR";
+          fieldValues[field_id] = valueRound(avgPower, "%.1f");
+          break;
+        case 21:
+          fieldNames[field_id] = "MAX PWR";
+          fieldValues[field_id] = valueRound(maxPower, "%.1f");
+          break;
+        case 22:
+          fieldNames[field_id] = "VEH SPD";
+          var targetSpeed = eucData.variaTargetSpeed;
+          if (targetSpeed != null) {
+            targetSpeed = eucData.convertToMiles ? convertKmToMiles(targetSpeed * 3.6) : targetSpeed * 3.6;
           }
-        }
-        fieldValues[field_id] = valueRound(targetSpeed, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 23) {
-        fieldNames[field_id] = "VEH DST";
-        fieldValues[field_id] = valueRound(eucData.variaTargetDist, "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 24) {
-        fieldNames[field_id] = "VEH NB";
-        fieldValues[field_id] = valueRound(eucData.variaTargetNb, "%1d");
-      }
-      if (eucData.fieldIDs[field_id] == 25) {
-        fieldNames[field_id] = "RD V";
-        fieldValues[field_id] = valueRound(getVariaVoltage(), "%.1f");
-      }
-      if (eucData.fieldIDs[field_id] == 26) {
-        fieldNames[field_id] = "TIME";
-        var CurrentTime = System.getClockTime();
-
-        fieldValues[field_id] =
-          CurrentTime.hour.format("%d") + ":" + CurrentTime.min.format("%02d");
-      }
-      if (eucData.fieldIDs[field_id] == 27) {
-        fieldNames[field_id] = "GPS SPD";
-        var PosInfo = Position.getInfo();
-        var GPS_speed = null;
-        if (PosInfo.accuracy > 1 && PosInfo.speed != null) {
-          if (eucData.convertToMiles) {
-            GPS_speed = convertKmToMiles(PosInfo.speed * 3.6);
-          } else {
-            GPS_speed = PosInfo.speed * 3.6;
+          fieldValues[field_id] = valueRound(targetSpeed, "%.1f");
+          break;
+        case 23:
+          fieldNames[field_id] = "VEH DST";
+          fieldValues[field_id] = valueRound(eucData.variaTargetDist, "%.1f");
+          break;
+        case 24:
+          fieldNames[field_id] = "VEH NB";
+          fieldValues[field_id] = valueRound(eucData.variaTargetNb, "%1d");
+          break;
+        case 25:
+          fieldNames[field_id] = "RD V";
+          fieldValues[field_id] = valueRound(getVariaVoltage(), "%.1f");
+          break;
+        case 26:
+          fieldNames[field_id] = "TIME";
+          var CurrentTime = System.getClockTime();
+          fieldValues[field_id] = CurrentTime.hour.format("%d") + ":" + CurrentTime.min.format("%02d");
+          break;
+        case 27:
+          fieldNames[field_id] = "GPS SPD";
+          var PosInfo = Position.getInfo();
+          var GPS_speed = null;
+          if (PosInfo.accuracy > 1 && PosInfo.speed != null) {
+            GPS_speed = eucData.convertToMiles ? convertKmToMiles(PosInfo.speed * 3.6) : PosInfo.speed * 3.6;
           }
-        }
-        fieldValues[field_id] = valueRound(GPS_speed, "%.1f");
+          fieldValues[field_id] = valueRound(GPS_speed, "%.1f");
+          break;
+        default:
+          fieldNames[field_id] = "NC";
+          fieldValues[field_id] = "--";
+          break;
       }
     }
   }
@@ -619,6 +711,22 @@ class GarminEUCDF extends WatchUi.DataField {
   var activityElapsedDist = "";
   var activityTimerState = "";
   var reset = "no";
+
+  // Periodic save mechanism
+  var lastSaveTime = 0;
+  var saveInterval = 30000; // Save every 30 seconds (in milliseconds)
+
+  // Previous values for change detection (only slow-changing min/max/avg values)
+  var prevMaxSpeed = 0.0;
+  var prevMaxPWM = 0.0;
+  var prevMaxCurrent = 0.0;
+  var prevMaxPower = 0.0;
+  var prevMaxTemp = -255.0;
+  var prevMinTemp = 255.0;
+  var prevMinVoltage = 255.0;
+  var prevMaxVoltage = 0.0;
+  var prevMinBatteryPerc = 101.0;
+  var prevMaxBatteryPerc = 0.0;
   // Calculate the data to display in the field here
   //var fakeVariaObj;
   function compute(info) {
@@ -1654,6 +1762,7 @@ class GarminEUCDF extends WatchUi.DataField {
       movingmsec = Storage.getValue("movingmsec");
     }
     if (Storage.getValue("avgCurrent") != null) {
+      avgCurrent = Storage.getValue("avgCurrent");
     }
     if (Storage.getValue("avgPower") != null) {
       avgPower = Storage.getValue("avgPower");

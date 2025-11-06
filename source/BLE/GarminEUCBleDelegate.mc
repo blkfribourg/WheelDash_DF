@@ -53,13 +53,12 @@ class eucBLEDelegate extends Ble.BleDelegate {
     characteristic as Toybox.BluetoothLowEnergy.Characteristic,
     status as Toybox.BluetoothLowEnergy.Status
   ) as Void {
-    /*
     if (eucData.debug) {
       if (BLE_RX_startTime != null) {
         eucData.BLEWriteInterval = System.getTimer() - BLE_RX_startTime;
       }
       BLE_RX_startTime = System.getTimer();
-    }*/
+    }
     // _log("onCharacteristicWrite", [characteristic, status]);
     if (characteristic.equals(engo_rx)) {
       if (cfgPacketsTotal != null) {
@@ -99,14 +98,6 @@ class eucBLEDelegate extends Ble.BleDelegate {
           } catch (e instanceof Lang.Exception) {
             // System.println(e.getErrorMessage());
           }
-          //        eucData.timeWhenConnected = new Time.Moment(Time.now().value());
-
-          /* NOT WORKING
-        if (device.getName() != null || device.getName().length != 0) {
-          eucData.name = device.getName();
-        } else {
-          eucData.name = "Unknown";
-        }*/
         } else {
           try {
             Ble.unpairDevice(device);
@@ -123,28 +114,17 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
           engo_service = device.getService(engoPM.BLE_SERV_ACTIVELOOK);
 
-          engo_tx =
-            engo_service != null
-              ? engo_service.getCharacteristic(engoPM.BLE_CHAR_TX)
-              : null;
+          if (engo_service != null) {
+            engo_tx = engo_service.getCharacteristic(engoPM.BLE_CHAR_TX);
+            engo_rx = engo_service.getCharacteristic(engoPM.BLE_CHAR_RX);
+            engo_userInput = engo_service.getCharacteristic(engoPM.BLE_CHAR_USERINPUT);
+          } else {
+            engo_tx = null;
+            engo_rx = null;
+            engo_userInput = null;
+          }
 
-          engo_rx =
-            engo_service != null
-              ? engo_service.getCharacteristic(engoPM.BLE_CHAR_RX)
-              : null;
-
-          engo_userInput =
-            engo_service != null
-              ? engo_service.getCharacteristic(engoPM.BLE_CHAR_USERINPUT)
-              : null;
-
-          if (
-            engo_service != null &&
-            engo_tx != null &&
-            engo_rx != null &&
-            engo_userInput != null
-          ) {
-            // System.println("EngoNotifOn");
+          if (engo_tx != null && engo_rx != null && engo_userInput != null) {
             var cccd = engo_tx.getDescriptor(Ble.cccdUuid());
             try {
               cccd.requestWrite([0x01, 0x00]b);
@@ -752,15 +732,17 @@ class eucBLEDelegate extends Ble.BleDelegate {
           :writeType => BluetoothLowEnergy.WRITE_TYPE_WITH_RESPONSE,
         });
       }
-    } catch (e) {
+    } catch (e instanceof Lang.Exception) {
+      // On write error, preserve command for retry
       cmdStacking = bufferToSend;
       rawcmd = null;
-      // onBleError(e);
+      if (eucData.debug) {
+        System.println("BLE write error: " + e.getErrorMessage());
+      }
     }
   }
 
   function flushCmdStacking() {
-    //  System.println("flushing : " + cmdStacking.size());
     //  _log("flushCmdStacking",[cmdStacking == null ? 0 : cmdStacking.size()]);
     var indexIncompleteCmd = indexIncompleteCmd() as Toybox.Lang.Number;
     cmdStacking =
@@ -768,13 +750,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
         ? cmdStacking.slice(null, indexIncompleteCmd)
         : null;
     resetGraphicEngine();
-    //  _log("flushCmdStacking",[cmdStacking == null ? 0 : arrayToHex(cmdStacking)]);
   }
 
   function flushCmdStackingIfSup(value as Toybox.Lang.Number) {
     if (cmdStacking != null) {
       if (cmdStacking.size() > value) {
-        //   _log("flushCmdStackingIfSup",[value,cmdStacking == null ? 0 : cmdStacking.size()]);
         flushCmdStacking();
       }
     }
@@ -782,7 +762,6 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
   function indexIncompleteCmd() {
     if (cmdStacking) {
-      //  _log("indexIncompleteCmd",[arrayToHex(cmdStacking)]);
       for (var i = 0; i < cmdStacking.size(); i++) {
         if (cmdStacking[i] == 0xaa) {
           if (cmdStacking.size() > i + 1) {
