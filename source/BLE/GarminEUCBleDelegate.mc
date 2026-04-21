@@ -89,12 +89,11 @@ class eucBLEDelegate extends Ble.BleDelegate {
             ? euc_service.getCharacteristic(eucPM.EUC_CHAR)
             : null;
         if (euc_service != null && euc_char != null) {
+          eucData.paired = true;
+          firstChar = true;
           cccd = euc_char.getDescriptor(Ble.cccdUuid());
           try {
             cccd.requestWrite([0x01, 0x00]b);
-
-            eucData.paired = true;
-            firstChar = true;
           } catch (e instanceof Lang.Exception) {
             // System.println(e.getErrorMessage());
           }
@@ -158,6 +157,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
       if (EUCDevice != null && EUCDevice.equals(device)) {
         eucData.paired = false;
         firstChar = false;
+        eucData.version = 0;
         try {
           Ble.unpairDevice(device);
         } catch (e instanceof Lang.Exception) {
