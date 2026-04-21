@@ -12,7 +12,7 @@ class WebSettings {
   var jsonSettings;
   var uid;
   var url;
-  var callable = new Lang.Method($, :onReceive);
+ // var callable = new Lang.Method($, :onReceive);
 
   function setParams(_uid, _url) {
     uid = _uid;
