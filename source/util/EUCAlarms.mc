@@ -171,8 +171,7 @@ module EUCAlarms {
           eucData.PWM < PWM2_thr &&
           triggerAlarm == true
         ) {
-          nextTrigger = new Time.Moment(Time.now().value());
-          nextTrigger.add(new Time.Duration(1));
+          nextTrigger = new Time.Moment(Time.now().value()).add(new Time.Duration(1));
           if (PWMVibe != null && eucData.vibeIntensity != 0) {
             Attention.vibrate(PWMVibe);
             vibeKilled = false;
@@ -192,14 +191,12 @@ module EUCAlarms {
             playSound(PWMDangerTone);
             toneKilled = false;
           }
-          nextTrigger = new Time.Moment(Time.now().value());
-          nextTrigger.add(new Time.Duration(1));
+          nextTrigger = new Time.Moment(Time.now().value()).add(new Time.Duration(1));
           PWMAlarm = true;
         }
       } else {
         if (eucData.PWM > PWM1_thr && triggerAlarm == true) {
-          nextTrigger = new Time.Moment(Time.now().value());
-          nextTrigger.add(new Time.Duration(1));
+          nextTrigger = new Time.Moment(Time.now().value()).add(new Time.Duration(1));
           if (PWMVibe != null && eucData.vibeIntensity != 0) {
             Attention.vibrate(PWMVibe);
             vibeKilled = false;
@@ -223,8 +220,7 @@ module EUCAlarms {
         PWMAlarm == false
       ) {
         // PWM alarm have priority over temperature alarm
-        nextTrigger = new Time.Moment(Time.now().value());
-        nextTrigger.add(new Time.Duration(1));
+        nextTrigger = new Time.Moment(Time.now().value()).add(new Time.Duration(1));
         if (tempVibe != null && eucData.vibeIntensity != 0) {
           Attention.vibrate(tempVibe);
           vibeKilled = false;
@@ -251,8 +247,7 @@ module EUCAlarms {
         PWMAlarm == false &&
         tempAlarm == false
       ) {
-        nextTrigger = new Time.Moment(Time.now().value());
-        nextTrigger.add(new Time.Duration(1));
+        nextTrigger = new Time.Moment(Time.now().value()).add(new Time.Duration(1));
 
         // PWM alarm and temperature alarm have priority over speed alarm
         if (speedVibe != null && eucData.vibeIntensity != 0) {

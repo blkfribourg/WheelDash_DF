@@ -64,8 +64,7 @@ module Varia {
       if (Attention has :playTone && triggerVariaAlarm == true) {
         //   System.println("triggerFar");
         Attention.playTone(Attention.TONE_DISTANCE_ALERT);
-        nextVariaTrigger = new Time.Moment(Time.now().value());
-        nextVariaTrigger.add(triggerDelay);
+        nextVariaTrigger = new Time.Moment(Time.now().value()).add(triggerDelay);
       }
     }
     if (
@@ -76,8 +75,7 @@ module Varia {
       if (Attention has :playTone && triggerVariaAlarm == true) {
         //  System.println("triggerclose");
         Attention.playTone(Attention.TONE_ALARM);
-        nextVariaTrigger = new Time.Moment(Time.now().value());
-        nextVariaTrigger.add(triggerDelay);
+        nextVariaTrigger = new Time.Moment(Time.now().value()).add(triggerDelay);
       }
     }
   }

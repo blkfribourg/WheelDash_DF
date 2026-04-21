@@ -371,15 +371,20 @@ class eucBLEDelegate extends Ble.BleDelegate {
         }
         euc_BLE_TX_startTime = System.getTimer();
       }*/
-      if (firstChar == true) {
-        // beep
-        try {
-          euc_char.requestWrite(string_to_byte_array("b" as String), {
-            :writeType => Ble.WRITE_TYPE_DEFAULT,
-          });
+      if (firstChar) {
+        if (eucData.wheelBrand == 1 && eucData.version == 0) {
+          // LeaperKim version not yet decoded from the first MTU fragment — retry on next packet
+        } else {
           firstChar = false;
-        } catch (e instanceof Lang.Exception) {
-          // System.println(e.getErrorMessage());
+          if (eucData.wheelBrand <= 1) {
+            try {
+              var cmd = (eucData.wheelBrand == 1 && eucData.version >= 3)
+                ? [0x4c, 0x6b, 0x41, 0x70, 0x0e, 0x00, 0x80, 0x80, 0x80, 0x01,
+                   0xca, 0x87, 0xe6, 0x6f]b
+                : string_to_byte_array("b");
+              euc_char.requestWrite(cmd, {:writeType => Ble.WRITE_TYPE_DEFAULT});
+            } catch (e instanceof Lang.Exception) {}
+          }
         }
       }
 
