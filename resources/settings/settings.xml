@@ -432,6 +432,13 @@
                         type="boolean"
                     />
                 </setting>
+                <setting
+                    propertyKey="@Properties.enableBeep_p1"
+                    title="@Strings.enableBeep_p1">
+                    <settingConfig
+                        type="boolean"
+                    />
+                </setting>
 
                 <setting
                 propertyKey="@Properties.currentCorrection_p1"
@@ -567,6 +574,13 @@
                         type="boolean"
                     />
                 </setting>
+                <setting
+                    propertyKey="@Properties.enableBeep_p2"
+                    title="@Strings.enableBeep_p2">
+                    <settingConfig
+                        type="boolean"
+                    />
+                </setting>
 
                 <setting
                 propertyKey="@Properties.currentCorrection_p2"
@@ -698,6 +712,13 @@
                 <setting
                     propertyKey="@Properties.begodeCF_p3"
                     title="@Strings.begodeCF_p3">
+                    <settingConfig
+                        type="boolean"
+                    />
+                </setting>
+                <setting
+                    propertyKey="@Properties.enableBeep_p3"
+                    title="@Strings.enableBeep_p3">
                     <settingConfig
                         type="boolean"
                     />

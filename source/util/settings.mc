@@ -42,6 +42,7 @@ function setSettings(profile as Number) {
   eucData.drawLines = Properties.getValue("drawLines");
 
   eucData.wheelBrand = Properties.getValue("wheelBrand_p" + profile);
+  eucData.enableBeep = Properties.getValue("enableBeep_p" + profile);
   eucData.gothPWN = Properties.getValue("begodeCF_p" + profile);
   eucData.currentCorrection = Properties.getValue(
     "currentCorrection_p" + profile

@@ -63,6 +63,7 @@ module eucData {
   var battery = 0;
   // Veteran specific
   var version = 0;
+  var enableBeep = false;
 
   // Kingsong specific
   var KSName = "";

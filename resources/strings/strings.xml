@@ -67,6 +67,9 @@
     <string id="begodeCF_p1">Begode with custom firmware (use hardware PWM) (profile1)</string>
     <string id="begodeCF_p2">Begode with custom firmware (use hardware PWM) (profile2)</string>
     <string id="begodeCF_p3">Begode with custom firmware (use hardware PWM) (profile3)</string>
+    <string id="enableBeep_p1">Enable connection beep (LK/NOSFET) (profile1)</string>
+    <string id="enableBeep_p2">Enable connection beep (LK/NOSFET) (profile2)</string>
+    <string id="enableBeep_p3">Enable connection beep (LK/NOSFET) (profile3)</string>
 
     <string id="speedCorrectionFactor_p1">Speed Correction Factor, to adjust wheel reported speed (profile1)</string>
     <string id="speedCorrectionFactor_p2">Speed Correction Factor, to adjust wheel reported speed (profile2)</string>

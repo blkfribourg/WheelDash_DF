@@ -322,7 +322,14 @@ class eucBLEDelegate extends Ble.BleDelegate {
         } catch (e instanceof Lang.Exception) {
           // System.println(e.getErrorMessage());
         }
-      }if (eucData.wheelBrand ==1){ 
+      }if (eucData.wheelBrand ==1){
+        if (eucData.version == 0) {
+          var storedV = Storage.getValue("profile" + eucData.loadedProfile + "LKVersion");
+          if (storedV != null) {
+            eucData.version = storedV as Float;
+          }
+        }
+        if (eucData.enableBeep) {
          try {
           var cmd = null;
           if (eucData.version<=3){
@@ -337,12 +344,10 @@ cmd = [ 0x4c, 0x6b, 0x41, 0x70, 0x0e, 0x00, 0x80, 0x80, 0x80, 0x01,
           if (cmd!=null){
         sendRawCmd(euc_char,cmd);
               }
-                   
-         
         } catch (e instanceof Lang.Exception) {
           // System.println(e.getErrorMessage());
         }
-        
+        }
       }
     } else {
       if (eucData.engoPaired == true) {

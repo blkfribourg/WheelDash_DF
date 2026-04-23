@@ -1,6 +1,7 @@
 import Toybox.Lang;
 using Toybox.BluetoothLowEnergy as Ble;
 using Toybox.System;
+using Toybox.Application.Storage;
 module frameDecoder {
   function init() {
     if (eucData.wheelBrand == 0) {
@@ -264,11 +265,15 @@ class VeteranDecoder {
       //from eucWatch :
       eucData.temperature = ((value[18] << 8) | value[19]) / 100;
       // implement chargeMode/speedAlert/speedTiltback later
+      var previousVersion = eucData.version;
       eucData.version =
         value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
           :offset => 28,
           :endianness => Lang.ENDIAN_BIG,
         }) / 1000.0;
+      if (previousVersion == 0 && eucData.version > 0) {
+        Storage.setValue("profile" + eucData.loadedProfile + "LKVersion", eucData.version);
+      }
       eucData.hPWM =
         value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
           :offset => 34,

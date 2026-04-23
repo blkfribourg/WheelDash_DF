@@ -39,6 +39,7 @@
     <property id="alarmThreshold_speed_p1" type="number">0</property>
     <property id="alarmThreshold_temp_p1" type="number">0</property>
     <property id="begodeCF_p1" type="boolean">false</property>
+    <property id="enableBeep_p1" type="boolean">false</property>
     <property id="minCellVolt_p1" type="float">0</property>
 
 
@@ -56,6 +57,7 @@
     <property id="alarmThreshold_speed_p2" type="number">0</property>
     <property id="alarmThreshold_temp_p2" type="number">0</property>
     <property id="begodeCF_p2" type="boolean">false</property>
+    <property id="enableBeep_p2" type="boolean">false</property>
     <property id="minCellVolt_p2" type="float">0</property>
 
     <property id="wheelBrand_p3" type="number">0</property>
@@ -72,6 +74,7 @@
     <property id="alarmThreshold_speed_p3" type="number">0</property>
     <property id="alarmThreshold_temp_p3" type="number">0</property>
     <property id="begodeCF_p3" type="boolean">false</property>
+    <property id="enableBeep_p3" type="boolean">false</property>
     <property id="minCellVolt_p3" type="float">0</property>
 
     <property id="debugMode" type="boolean">false</property>
