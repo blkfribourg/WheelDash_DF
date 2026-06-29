@@ -6,16 +6,12 @@ module Varia {
   var triggerVariaAlarm = false;
   var nextVariaTrigger;
   var triggerDelay;
+
   function processTarget(_target) {
     if (_target != null) {
-      if (_target.size != 0) {
+      if (_target.size() != 0) {
         if (_target[0].threat != 0) {
-          if (_target[0].threat == 1) {
-            triggerDelay = new Time.Duration(1);
-          }
-          if (_target[0].threat == 2) {
-            triggerDelay = (new Time.Duration(1)).divide(2);
-          }
+          triggerDelay = new Time.Duration(1);
           eucData.variaTargetDist = _target[0].range;
           eucData.variaTargetSpeed = _target[0].speed;
           soundAlert(_target[0].range);

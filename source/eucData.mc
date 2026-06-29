@@ -138,10 +138,23 @@ module eucData {
           if (version < 4) {
             cellNbS = 24;
           }
-          if ((version > 4 && version < 5) || version == 7) {
+          if (
+            (version >= 4 && version < 5) ||
+            (version >= 7 && version < 8) ||
+            (version >= 43 && version < 44) ||
+            (version >= 45 && version < 46)
+          ) {
             cellNbS = 30;
           }
-          if (version > 5 && version != 7) {
+          if (version >= 8 && version < 9) {
+            cellNbS = 42;
+          }
+          if (
+            (version >= 5 && version < 7) ||
+            (version >= 9 && version < 10) ||
+            (version >= 42 && version < 43) ||
+            (version >= 44 && version < 45)
+          ) {
             cellNbS = 36;
           }
           battery = estimateSoc(voltage, cellNbS, minCellVolt);
@@ -199,10 +212,11 @@ module eucData {
             }
           } else if (
             (version >= 4 && version < 5) ||
-            version == 7 ||
-            version == 43 // Aero
+            (version >= 7 && version < 8) ||
+            (version >= 43 && version < 44) ||
+            (version >= 45 && version < 46)
           ) {
-            // Patton
+            // Patton, Patton S, Nosfet Aero, Nosfet Xeno
             if (voltage > 125.25) {
               battery = 100.0;
             } else if (voltage > 102.0) {
@@ -212,8 +226,13 @@ module eucData {
             } else {
               battery = 0.0;
             }
-          } else if ((version >= 5 || version == 42) && version != 7) {
-            // Lynx
+          } else if (
+            (version >= 5 && version < 7) ||
+            (version >= 9 && version < 10) ||
+            (version >= 42 && version < 43) ||
+            (version >= 44 && version < 45)
+          ) {
+            // Lynx, Lynx S, Sherman L, Nosfet Apex, Nosfet Aeon
             if (voltage > 150.3) {
               battery = 100.0;
             } else if (voltage > 122.4) {
@@ -223,6 +242,19 @@ module eucData {
             } else {
               battery = 0.0;
             }
+          } else if (version >= 8 && version < 9) {
+            // Oryx
+            if (voltage > 175.35) {
+              battery = 100.0;
+            } else if (voltage > 142.8) {
+              battery = (voltage - 141.23) / 0.34125;
+            } else if (voltage > 138.86) {
+              battery = (voltage - 138.86) / 0.853125;
+            } else {
+              battery = 0.0;
+            }
+          } else {
+            battery = 1.0;
           }
         }
         //-----------------------------------------------------------

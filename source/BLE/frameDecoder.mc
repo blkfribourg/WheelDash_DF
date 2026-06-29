@@ -266,12 +266,13 @@ class VeteranDecoder {
       eucData.temperature = ((value[18] << 8) | value[19]) / 100;
       // implement chargeMode/speedAlert/speedTiltback later
       var previousVersion = eucData.version;
-      eucData.version =
-        value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+      eucData.version = Math.floor(
+        value.decodeNumber(Lang.NUMBER_FORMAT_UINT16, {
           :offset => 28,
           :endianness => Lang.ENDIAN_BIG,
-        }) / 1000.0;
-      if (previousVersion == 0 && eucData.version > 0) {
+        }) / 1000.0
+      ).toFloat();
+      if (previousVersion != eucData.version && eucData.version > 0) {
         Storage.setValue("profile" + eucData.loadedProfile + "LKVersion", eucData.version);
       }
       eucData.hPWM =
