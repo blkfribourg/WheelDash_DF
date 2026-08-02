@@ -90,6 +90,28 @@ function setSettings(profile as Number) {
 }
 (:easyconfig)
 function setJSONSettings(JSONSettings as Dictionary) {
+  // The remote EasyConfig JSON is external, unvalidated data: every block
+  // below assumes each present key's value is itself a Dictionary with a
+  // "v" entry. If the server (or a stale/edited local copy) ever sends a
+  // key without "v", .get("v") returns null and the subsequent
+  // toNumber()/toFloat() call throws -- uncaught, that crashes compute().
+  // Rather than null-guard ~30 near-identical blocks individually (higher
+  // risk of a transcription slip with no EasyConfig test payload on hand to
+  // verify against), fail safe the same way Varia's radar call and the BLE
+  // decoder calls do elsewhere in this codebase: catch and skip, retried
+  // next compute() tick.
+  try {
+    return parseJSONSettings(JSONSettings);
+  } catch (e instanceof Lang.Exception) {
+    if (eucData.debug) {
+      System.println("setJSONSettings error: " + e.getErrorMessage());
+    }
+    return false;
+  }
+}
+
+(:easyconfig)
+function parseJSONSettings(JSONSettings as Dictionary) as Boolean {
   // Global Settings (not associated with a specific ProfileName) :
   if (JSONSettings.get("useEngo") != null) {
     eucData.useEngo = (JSONSettings.get("useEngo") as Dictionary).get("v");

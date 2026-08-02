@@ -35,11 +35,14 @@ class GwDecoder {
   }
 
   // adapted from wheellog
+  const STATE_UNKNOWN = 0;
+  const STATE_COLLECTING = 1;
+  const STATE_DONE = 2;
   var oldc;
   var frame as ByteArray?;
-  var state = "unknown";
+  var state = STATE_UNKNOWN;
   function checkChar(c) {
-    if (state.equals("collecting") && frame != null) {
+    if (state == STATE_COLLECTING && frame != null) {
       frame.add(c);
       oldc = c;
 
@@ -49,12 +52,12 @@ class GwDecoder {
         (size == 20 && c.toNumber() != 24) ||
         (size > 20 && size <= 24 && c.toNumber() != 90)
       ) {
-        state = "unknown";
+        state = STATE_UNKNOWN;
         return false;
       }
 
       if (size == 24) {
-        state = "done";
+        state = STATE_DONE;
         return true;
       }
     } else {
@@ -63,7 +66,7 @@ class GwDecoder {
         frame = new [0]b;
         frame.add(85);
         frame.add(170);
-        state = "collecting";
+        state = STATE_COLLECTING;
       }
       oldc = c;
     }
@@ -152,14 +155,18 @@ class VeteranDecoder {
   }
 
   // adapted from wheellog
+  const STATE_UNKNOWN = 0;
+  const STATE_COLLECTING = 1;
+  const STATE_DONE = 2;
+  const STATE_LENSEARCH = 3;
   var old1 = 0;
   var old2 = 0;
   var len = 0;
   var usingCrc = false;
   var frame as ByteArray?;
-  var state = "unknown";
+  var state = STATE_UNKNOWN;
   function checkChar(c) {
-    if (state.equals("collecting") && frame != null) {
+    if (state == STATE_COLLECTING && frame != null) {
       var size = frame.size();
 
       if (
@@ -167,13 +174,13 @@ class VeteranDecoder {
         (size == 30 && !(c == 0x00 || c == 0x07)) ||
         (size == 23 && (c & 0xfe) != 0x00)
       ) {
-        state = "done";
+        state = STATE_DONE;
         reset();
         return false;
       }
       frame.add(c);
       if (size == len + 3) {
-        state = "done";
+        state = STATE_DONE;
         reset();
         if (len > 38 || usingCrc) {
           // new format with crc32
@@ -189,10 +196,10 @@ class VeteranDecoder {
         return true;
       }
       // break;
-    } else if (state.equals("lensearch")) {
+    } else if (state == STATE_LENSEARCH) {
       frame.add(c);
       len = c & 0xff;
-      state = "collecting";
+      state = STATE_COLLECTING;
       old2 = old1;
       old1 = c;
       //break;
@@ -206,7 +213,7 @@ class VeteranDecoder {
         frame.add(220);
         frame.add(90);
         frame.add(92);
-        state = "lensearch";
+        state = STATE_LENSEARCH;
       } else if (c.toNumber() == 90 && old1.toNumber() == 220) {
         old2 = old1;
       } else {
@@ -219,7 +226,7 @@ class VeteranDecoder {
   function reset() {
     old1 = 0;
     old2 = 0;
-    state = "unknown";
+    state = STATE_UNKNOWN;
   }
 
   function processFrame(value) {

@@ -31,6 +31,10 @@ class GarminEUCDF extends WatchUi.DataField {
   const VEH_RELATIVE_SPD_ID = 23;
   const VEH_TOTAL_CNT_ID = 24;
 
+  // renderNorthOnUI/renderWindOnUI compass-arrow geometry
+  const RAD_TO_DEG = -57.2958;
+  const COMPASS_REFERENCE_SCREEN_DIAM = 454.0; // arrow size was tuned against this screen size
+
   var mSpeedField = null;
   var mPWMField = null;
   var mVoltageField = null;
@@ -1664,8 +1668,8 @@ class GarminEUCDF extends WatchUi.DataField {
   function renderNorthOnUI(screenDiam, dc, posInfo) {
     var rawNorth = posInfo.heading;
     if (rawNorth != null) {
-      var north = rawNorth * -57.2958;
-      var ratio = 454.0 / screenDiam;
+      var north = rawNorth * RAD_TO_DEG;
+      var ratio = COMPASS_REFERENCE_SCREEN_DIAM / screenDiam;
 
       var arrow_width = (screenDiam * ratio) / 110;
 
@@ -1709,10 +1713,10 @@ class GarminEUCDF extends WatchUi.DataField {
       var rawNorth = posInfo.heading;
 
       if (rawNorth != null && windBearing != null) {
-        var north = rawNorth * -57.2958;
+        var north = rawNorth * RAD_TO_DEG;
         var wind = windBearing + north;
 
-        var ratio = 454.0 / screenDiam;
+        var ratio = COMPASS_REFERENCE_SCREEN_DIAM / screenDiam;
         var arrow_width = (screenDiam * ratio) / 110;
         var arrow_heigth = screenDiam / 2 - screenDiam / 20;
         var arrow_heigth2 = screenDiam / 2 - screenDiam / 25;
