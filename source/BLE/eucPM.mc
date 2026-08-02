@@ -26,20 +26,4 @@ module eucPM {
       Sys.println("e=" + e.getErrorMessage());
     }
   }
-  /*
-  function setGotwayOrVeteranOrKingsong() {
-    self.init();
-  }
-
-  function setManager() {
-    if (
-      eucData.wheelBrand == 0 ||
-      eucData.wheelBrand == 1 ||
-      eucData.wheelBrand == 2 ||
-      eucData.wheelBrand == 3
-    ) {
-      // System.println("GW PM");
-      setGotwayOrVeteranOrKingsong();
-    }
-  }*/
 }

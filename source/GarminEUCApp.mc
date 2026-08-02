@@ -3,11 +3,6 @@ import Toybox.Lang;
 import Toybox.WatchUi;
 
 class GarminEUCApp extends Application.AppBase {
-  private var view;
-  //  private var delegate;
-  private var eucBleDelegate;
-  private var currentProfile;
-
   function initialize() {
     AppBase.initialize();
   }

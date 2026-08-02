@@ -253,14 +253,29 @@ class eucBLEDelegate extends Ble.BleDelegate {
   //! the delegate stuck retrying pairDevice() on a device the system already
   //! considers paired. Excluding otherDevice matters because this app can
   //! have two independently-paired devices (EUC + Engo) at once.
+  //!
+  //! Only returns a device when exactly one candidate remains: at this point
+  //! in the flow the device isn't necessarily connected yet, so there's no
+  //! GATT service to check to tell an already-paired EUC apart from an
+  //! already-paired Engo. Guessing wrong here would risk mis-assigning
+  //! EUCDevice/engoDevice and later calling Ble.unpairDevice() on the wrong
+  //! physical device. When ambiguous, return null and let the caller retry
+  //! (cheap and harmless) -- this self-resolves once the system's own
+  //! onConnectedStateChanged callback delivers the real device, which *is*
+  //! disambiguated by its actual advertised GATT service.
   private function findPairedDeviceExcluding(otherDevice) {
     var iter = Ble.getPairedDevices();
+    var candidate = null;
     for (var d = iter.next(); d != null; d = iter.next()) {
       if (otherDevice == null || !d.equals(otherDevice)) {
-        return d;
+        if (candidate != null) {
+          // More than one other paired device -- ambiguous, don't guess.
+          return null;
+        }
+        candidate = d;
       }
     }
-    return null;
+    return candidate;
   }
 
   function isFirstConnection() {

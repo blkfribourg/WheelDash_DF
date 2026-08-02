@@ -1,4 +1,7 @@
-var cfgArray;
+// Maps a navigation turnId (single-char code from the activity's course/
+// navigation data, see GarminEUCDF.mc's turnId handling) to the Engo
+// glasses' built-in turn-arrow icon ID, sent over BLE to display on the
+// HUD. "r"/"f" map to null intentionally -- no matching icon on the glasses.
 var directionDict = {
   "z" => 40,
   "q" => 41,

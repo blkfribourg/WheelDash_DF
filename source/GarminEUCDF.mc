@@ -791,7 +791,6 @@ class GarminEUCDF extends WatchUi.DataField {
       // Initialize BLEDelegate once settings are loaded:
       System.println("initializing BLEDelegate");
       if (Toybox has :BluetoothLowEnergy) {
-        //eucPM.setManager();
         bleDelegate = new eucBLEDelegate(frameDecoder.init());
         BluetoothLowEnergy.setDelegate(bleDelegate);
         eucPM.registerProfiles();
