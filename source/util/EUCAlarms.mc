@@ -10,6 +10,7 @@ module EUCAlarms {
   var speedAlarm = false;
   var tempAlarm = false;
   var nextTrigger as Moment?;
+  var triggerDelay = new Time.Duration(1);
   var triggerAlarm = false;
   //  var displayingAlert = false;
   var PWM1_thr = 0;
@@ -158,7 +159,7 @@ module EUCAlarms {
   function checkAlarms() {
     // System.println("alarmCheck");
     triggerAlarm = true;
-    var now = new Time.Moment(Time.now().value());
+    var now = Time.now();
 
     if (nextTrigger != null && nextTrigger.compare(now) >= 0) {
       triggerAlarm = false;
@@ -171,7 +172,7 @@ module EUCAlarms {
           eucData.PWM < PWM2_thr &&
           triggerAlarm == true
         ) {
-          nextTrigger = new Time.Moment(Time.now().value()).add(new Time.Duration(1));
+          nextTrigger = Time.now().add(triggerDelay);
           if (PWMVibe != null && eucData.vibeIntensity != 0) {
             Attention.vibrate(PWMVibe);
             vibeKilled = false;
@@ -191,12 +192,12 @@ module EUCAlarms {
             playSound(PWMDangerTone);
             toneKilled = false;
           }
-          nextTrigger = new Time.Moment(Time.now().value()).add(new Time.Duration(1));
+          nextTrigger = Time.now().add(triggerDelay);
           PWMAlarm = true;
         }
       } else {
         if (eucData.PWM > PWM1_thr && triggerAlarm == true) {
-          nextTrigger = new Time.Moment(Time.now().value()).add(new Time.Duration(1));
+          nextTrigger = Time.now().add(triggerDelay);
           if (PWMVibe != null && eucData.vibeIntensity != 0) {
             Attention.vibrate(PWMVibe);
             vibeKilled = false;
@@ -220,7 +221,7 @@ module EUCAlarms {
         PWMAlarm == false
       ) {
         // PWM alarm have priority over temperature alarm
-        nextTrigger = new Time.Moment(Time.now().value()).add(new Time.Duration(1));
+        nextTrigger = Time.now().add(triggerDelay);
         if (tempVibe != null && eucData.vibeIntensity != 0) {
           Attention.vibrate(tempVibe);
           vibeKilled = false;
@@ -247,7 +248,7 @@ module EUCAlarms {
         PWMAlarm == false &&
         tempAlarm == false
       ) {
-        nextTrigger = new Time.Moment(Time.now().value()).add(new Time.Duration(1));
+        nextTrigger = Time.now().add(triggerDelay);
 
         // PWM alarm and temperature alarm have priority over speed alarm
         if (speedVibe != null && eucData.vibeIntensity != 0) {

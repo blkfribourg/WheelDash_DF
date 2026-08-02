@@ -29,8 +29,22 @@ class eucBLEDelegate extends Ble.BleDelegate {
   var cfgPacketsTotal = null;
   var cfgPacketsCount = 0;
 
+  // True between pairDevice() and the matching onConnectedStateChanged() for
+  // that device. Some Garmin devices (e.g. Fenix 8) keep delivering queued
+  // scan results while a pairing is pending (the watch asks the user to
+  // acknowledge the connection first), and a second pairDevice() call throws
+  // "Device Already Paired". If that races with a connection event, the
+  // device handle passed to onConnectedStateChanged can end up stale, and
+  // calling getService() on it crashes the app. These guards prevent the
+  // double pairDevice() call in the first place (fix mirrored from the
+  // VESCDash project, see commit "fix for Fenix8 crash on connection").
+  var eucPairing = false;
+  var engoPairing = false;
+
   var euc_BLE_TX_startTime;
   var BLE_RX_startTime;
+  var notifCount = 0;
+  var notifWindowStart;
   var cmdStacking = null;
   var writeConfigCmd = "FFD00017776865656C64617368000000000500000000AA";
   // engo display strings
@@ -44,7 +58,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
     decoder = _decoder;
     Ble.setScanState(Ble.SCAN_STATE_SCANNING);
     eucData.isFirst = isFirstConnection();
-    //eucData.isFirst = false;
+    //eucData.isFirst = true;
     if (eucData.useRadar == true) {
       eucData.radar = new AntPlus.BikeRadar(null);
     }
@@ -80,15 +94,30 @@ class eucBLEDelegate extends Ble.BleDelegate {
   }
   function onConnectedStateChanged(device, state) {
     //		view.deviceStatus=state;
+    if (device == null) {
+      // Observed in the wild: the system can call back with a null device
+      // (likely tied to the queued-scan-result race described above for
+      // eucPairing/engoPairing). Calling a method on it (device.getService)
+      // crashes with "Unexpected Type Error / Failed invoking <symbol>",
+      // which is a System Error, not a Lang.Exception -- try/catch around
+      // the call does NOT catch it, so this must be a null check done
+      // *before* touching device, not a try/catch around it.
+      return;
+    }
     if (state == Ble.CONNECTION_STATE_CONNECTED) {
-      if (device.getService(eucPM.EUC_SERVICE) != null) {
+      var eucService = null;
+      try {
+        eucService = device.getService(eucPM.EUC_SERVICE);
+      } catch (e instanceof Lang.Exception) {
+        eucService = null;
+      }
+      if (eucService != null) {
         var cccd;
-        euc_service = device.getService(eucPM.EUC_SERVICE);
-        euc_char =
-          euc_service != null
-            ? euc_service.getCharacteristic(eucPM.EUC_CHAR)
-            : null;
-        if (euc_service != null && euc_char != null) {
+        EUCDevice = device;
+        eucPairing = false;
+        euc_service = eucService;
+        euc_char = euc_service.getCharacteristic(eucPM.EUC_CHAR);
+        if (euc_char != null) {
           eucData.paired = true;
           firstChar = true;
           cccd = euc_char.getDescriptor(Ble.cccdUuid());
@@ -100,28 +129,30 @@ class eucBLEDelegate extends Ble.BleDelegate {
         } else {
           try {
             Ble.unpairDevice(device);
-            eucData.paired = false;
-            firstChar = false;
           } catch (e instanceof Lang.Exception) {
             // System.println(e.getErrorMessage());
           }
+          eucData.paired = false;
+          firstChar = false;
+          EUCDevice = null;
         }
       }
       if (eucData.useEngo == true) {
-        if (device.getService(engoPM.BLE_SERV_ACTIVELOOK) != null) {
+        var engoService = null;
+        try {
+          engoService = device.getService(engoPM.BLE_SERV_ACTIVELOOK);
+        } catch (e instanceof Lang.Exception) {
+          engoService = null;
+        }
+        if (engoService != null) {
           System.println("Engo connected");
 
-          engo_service = device.getService(engoPM.BLE_SERV_ACTIVELOOK);
-
-          if (engo_service != null) {
-            engo_tx = engo_service.getCharacteristic(engoPM.BLE_CHAR_TX);
-            engo_rx = engo_service.getCharacteristic(engoPM.BLE_CHAR_RX);
-            engo_userInput = engo_service.getCharacteristic(engoPM.BLE_CHAR_USERINPUT);
-          } else {
-            engo_tx = null;
-            engo_rx = null;
-            engo_userInput = null;
-          }
+          engoDevice = device;
+          engoPairing = false;
+          engo_service = engoService;
+          engo_tx = engo_service.getCharacteristic(engoPM.BLE_CHAR_TX);
+          engo_rx = engo_service.getCharacteristic(engoPM.BLE_CHAR_RX);
+          engo_userInput = engo_service.getCharacteristic(engoPM.BLE_CHAR_USERINPUT);
 
           if (engo_tx != null && engo_rx != null && engo_userInput != null) {
             var cccd = engo_tx.getDescriptor(Ble.cccdUuid());
@@ -135,16 +166,18 @@ class eucBLEDelegate extends Ble.BleDelegate {
             System.print("notif fail");
             try {
               Ble.unpairDevice(device);
-              eucData.engoPaired = false;
             } catch (e instanceof Lang.Exception) {
               // System.println(e.getErrorMessage());
             }
+            eucData.engoPaired = false;
+            engoDevice = null;
           }
         }
       }
     } else {
       if (engoDevice != null && engoDevice.equals(device)) {
         eucData.engoPaired = false;
+        engoPairing = false;
         //System.println("Engo Disconnected");
         resetEngo();
         try {
@@ -152,21 +185,82 @@ class eucBLEDelegate extends Ble.BleDelegate {
         } catch (e instanceof Lang.Exception) {
           // System.println(e.getErrorMessage());
         }
+        engoDevice = null;
         Ble.setScanState(Ble.SCAN_STATE_SCANNING);
       }
       if (EUCDevice != null && EUCDevice.equals(device)) {
         eucData.paired = false;
         firstChar = false;
         eucData.version = 0;
+        eucPairing = false;
         try {
           Ble.unpairDevice(device);
         } catch (e instanceof Lang.Exception) {
           // System.println(e.getErrorMessage());
         }
+        EUCDevice = null;
         Ble.setScanState(Ble.SCAN_STATE_SCANNING);
       }
       //BLE Disconnected
     }
+  }
+
+  //! Pair with the EUC scan result, never more than one attempt at a time.
+  //! See the eucPairing field comment for why this guard exists.
+  function pairToEUC(result) {
+    if (eucPairing || EUCDevice != null) {
+      return;
+    }
+    eucPairing = true;
+    try {
+      EUCDevice = Ble.pairDevice(result as Ble.ScanResult);
+    } catch (e instanceof Lang.Exception) {
+      // The system already accepted this pairing (e.g. Fenix 8 asked the
+      // user to acknowledge before onConnectedStateChanged fired) and
+      // pairDevice() threw "Device Already Paired" instead of returning a
+      // handle. Without this recovery, EUCDevice stays null, eucPairing
+      // resets below, and the next scan result retries pairDevice() on the
+      // same already-paired device forever. Reuse the handle the system
+      // already holds instead (fix mirrored from the VESCDash project, see
+      // commit "fix for Fenix8 crash on connection").
+      EUCDevice = findPairedDeviceExcluding(engoDevice);
+    }
+    if (EUCDevice == null) {
+      eucPairing = false;
+    }
+  }
+
+  //! Pair with the Engo scan result, never more than one attempt at a time.
+  //! See the engoPairing field comment for why this guard exists.
+  function pairToEngo(result) {
+    if (engoPairing || engoDevice != null) {
+      return;
+    }
+    engoPairing = true;
+    try {
+      engoDevice = Ble.pairDevice(result as Ble.ScanResult);
+    } catch (e instanceof Lang.Exception) {
+      // See the matching catch in pairToEUC for why this recovery is needed.
+      engoDevice = findPairedDeviceExcluding(EUCDevice);
+    }
+    if (engoDevice == null) {
+      engoPairing = false;
+    }
+  }
+
+  //! Find a system-paired device other than otherDevice, used to recover
+  //! from a pairDevice() "Device Already Paired" exception without leaving
+  //! the delegate stuck retrying pairDevice() on a device the system already
+  //! considers paired. Excluding otherDevice matters because this app can
+  //! have two independently-paired devices (EUC + Engo) at once.
+  private function findPairedDeviceExcluding(otherDevice) {
+    var iter = Ble.getPairedDevices();
+    for (var d = iter.next(); d != null; d = iter.next()) {
+      if (otherDevice == null || !d.equals(otherDevice)) {
+        return d;
+      }
+    }
+    return null;
   }
 
   function isFirstConnection() {
@@ -215,7 +309,9 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
   //! @param scanResults An iterator of new scan results
   function onScanResults(scanResults as Ble.Iterator) {
-    // System.println("scanning");
+    if (eucData.debug) {
+      System.println("scanning");
+    }
     if (eucData.isFirst) {
       var wheelFound = false;
       for (
@@ -224,6 +320,9 @@ class eucBLEDelegate extends Ble.BleDelegate {
         result = scanResults.next()
       ) {
         if (result instanceof Ble.ScanResult) {
+          if (eucData.debug) {
+            System.println(result.getServiceUuids().toString());
+          }
           if (eucData.wheelBrand == 0 || eucData.wheelBrand == 1) {
             wheelFound = contains(
               result.getServiceUuids(),
@@ -251,11 +350,8 @@ class eucBLEDelegate extends Ble.BleDelegate {
           if (wheelFound == true) {
             storeSR(result);
             Ble.setScanState(Ble.SCAN_STATE_OFF);
-            try {
-              EUCDevice = Ble.pairDevice(result as Ble.ScanResult);
-            } catch (e instanceof Lang.Exception) {
-              // System.println("EUCError: " + e.getErrorMessage());
-            }
+            pairToEUC(result);
+            break;
           }
         }
       }
@@ -278,12 +374,8 @@ class eucBLEDelegate extends Ble.BleDelegate {
               ) {
                 System.println("EngoFound!");
                 Ble.setScanState(Ble.SCAN_STATE_OFF);
-                try {
-                  // Do something here
-                  engoDevice = Ble.pairDevice(result as Ble.ScanResult);
-                } catch (e instanceof Lang.Exception) {
-                  //   System.println("hornError: " + e.getErrorMessage());
-                }
+                pairToEngo(result);
+                break;
                 //System.println("ConnectedToHorn?");
               }
             }
@@ -295,12 +387,7 @@ class eucBLEDelegate extends Ble.BleDelegate {
 
       var result = loadSR();
       if (result != false) {
-        try {
-          // Do something here
-          EUCDevice = Ble.pairDevice(result as Ble.ScanResult);
-        } catch (e instanceof Lang.Exception) {
-          // System.println("EUCError: " + e.getErrorMessage());
-        }
+        pairToEUC(result);
       }
     }
   }
@@ -390,27 +477,46 @@ cmd = [ 0x4c, 0x6b, 0x41, 0x70, 0x0e, 0x00, 0x80, 0x80, 0x80, 0x01,
           //  engoUpdate();
         }
       }
-      
+      */
+
       if (eucData.debug) {
         if (euc_BLE_TX_startTime != null) {
           eucData.BLEReadInterval = System.getTimer() - euc_BLE_TX_startTime;
         }
         euc_BLE_TX_startTime = System.getTimer();
-      }*/
-      
+
+        // raw notification arrival rate, independent of brand/decode success
+        notifCount++;
+        if (notifWindowStart == null) {
+          notifWindowStart = System.getTimer();
+        } else if (System.getTimer() - notifWindowStart >= 1000) {
+          eucData.BLENotifRate = notifCount;
+          notifCount = 0;
+          notifWindowStart = System.getTimer();
+        }
+      }
 
       //  System.println("EUCCharChanged");
-      if (
-        decoder != null &&
-        (eucData.wheelBrand == 0 || eucData.wheelBrand == 1)
-      ) {
-        decoder.frameBuffer(value);
-      }
-      if (
-        decoder != null &&
-        (eucData.wheelBrand == 2 || eucData.wheelBrand == 3)
-      ) {
-        decoder.processFrame(value);
+      // Malformed/short BLE payloads can trip an index/type error inside the
+      // decoder; wrapped for the same reason as the Varia call below (an
+      // uncaught exception here would kill the app).
+      try {
+        if (
+          decoder != null &&
+          (eucData.wheelBrand == 0 || eucData.wheelBrand == 1)
+        ) {
+          decoder.frameBuffer(value);
+        }
+        if (
+          decoder != null &&
+          (eucData.wheelBrand == 2 || eucData.wheelBrand == 3)
+        ) {
+          decoder.processFrame(value);
+        }
+      } catch (e instanceof Lang.Exception) {
+        if (eucData.debug) {
+          System.println("decoder error: " + e.getErrorMessage());
+        }
       }
       EUCAlarms.checkAlarms();
       if (
@@ -424,10 +530,9 @@ cmd = [ 0x4c, 0x6b, 0x41, 0x70, 0x0e, 0x00, 0x80, 0x80, 0x80, 0x01,
           // System.println(e.getErrorMessage());
         }
       }
-      /*
       if (eucData.debug) {
         eucData.BLEReadProcTime = System.getTimer() - euc_BLE_TX_startTime;
-      }*/
+      }
     }
     if (char.equals(engo_tx)) {
       //System.println(value);

@@ -743,16 +743,22 @@ class GarminEUCDF extends WatchUi.DataField {
       ) {
         EUCAlarms.textAlert = "Fetching EasyConfig cfg";
         if (webTimeReq == null) {
-          System.println("webReq");
+          if (eucData.debug) {
+            System.println("webReq");
+          }
           web.fetch();
           webTimeReq = System.getTimer();
         } else {
-          System.println(System.getTimer() - webTimeReq);
+          if (eucData.debug) {
+            System.println(System.getTimer() - webTimeReq);
+          }
           if (
             System.getTimer() - webTimeReq > 1000 ||
             System.getTimer() - webTimeReq < 0 // in the unlikely event timer is rolled over during fetch
           ) {
-            System.println("webReq");
+            if (eucData.debug) {
+              System.println("webReq");
+            }
             web.fetch();
             webTimeReq = System.getTimer();
           }
@@ -1020,7 +1026,11 @@ class GarminEUCDF extends WatchUi.DataField {
       if (eucData.engoPage == 2) {
         //Chrono page 1
         prevTurnId = null;
-        var chrono;
+        // chrono[0]/[1] are dereferenced unconditionally below, so this must
+        // never be null even though activityTimerTime theoretically can be
+        // (it's currently always initialized to 0, never null, but that's an
+        // invariant owned by eucData.mc, not this function).
+        var chrono = [0, 0, 0, 0];
         if (eucData.activityTimerTime != null) {
           var sec = eucData.activityTimerTime / 1000;
           var mn = sec / 60;
@@ -1030,8 +1040,6 @@ class GarminEUCDF extends WatchUi.DataField {
             sec % 60,
             eucData.activityTimerTime % 1000,
           ];
-        } else {
-          chrono = null;
         }
         textArray.add(
           getHexText(
@@ -1220,12 +1228,33 @@ class GarminEUCDF extends WatchUi.DataField {
         "BLEWI: " + eucData.BLEWriteInterval,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
+      dc.drawText(
+        alignAxe - xGap,
+        3 * space + yGap,
+        Graphics.FONT_TINY,
+        "BLENR: " + eucData.BLENotifRate,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe,
+        4 * space + yGap,
+        Graphics.FONT_TINY,
+        "Paired: " + eucData.paired,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
 
       dc.drawText(
         alignAxe - 2 * xGap,
         5 * space + yGap,
         Graphics.FONT_TINY,
         "DFCI: " + eucData.DFComputeInterval,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+      dc.drawText(
+        alignAxe - xGap,
+        6 * space + yGap,
+        Graphics.FONT_TINY,
+        "Brand: " + eucData.wheelBrand,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       ); /*
       dc.drawText(
@@ -1612,11 +1641,16 @@ class GarminEUCDF extends WatchUi.DataField {
           );
         }
 
-        if (eucData.displayWind == true && Position.getInfo().accuracy >= 2) {
-          renderWindOnUI(scr_width, dc);
-        }
-        if (eucData.displayNorth == true && Position.getInfo().accuracy >= 2) {
-          renderNorthOnUI(scr_width, dc);
+        if (eucData.displayWind == true || eucData.displayNorth == true) {
+          var posInfo = Position.getInfo();
+          if (posInfo.accuracy >= 2) {
+            if (eucData.displayWind == true) {
+              renderWindOnUI(scr_width, dc, posInfo);
+            }
+            if (eucData.displayNorth == true) {
+              renderNorthOnUI(scr_width, dc, posInfo);
+            }
+          }
         }
       }
     }
@@ -1627,8 +1661,8 @@ class GarminEUCDF extends WatchUi.DataField {
     }
     
 }*/
-  function renderNorthOnUI(screenDiam, dc) {
-    var rawNorth = Position.getInfo().heading;
+  function renderNorthOnUI(screenDiam, dc, posInfo) {
+    var rawNorth = posInfo.heading;
     if (rawNorth != null) {
       var north = rawNorth * -57.2958;
       var ratio = 454.0 / screenDiam;
@@ -1668,11 +1702,11 @@ class GarminEUCDF extends WatchUi.DataField {
     }
   }
 
-  function renderWindOnUI(screenDiam, dc) {
+  function renderWindOnUI(screenDiam, dc, posInfo) {
     var wx = Weather.getCurrentConditions();
     if (wx != null) {
-      var windBearing = Weather.getCurrentConditions().windBearing;
-      var rawNorth = Toybox.Position.getInfo().heading;
+      var windBearing = wx.windBearing;
+      var rawNorth = posInfo.heading;
 
       if (rawNorth != null && windBearing != null) {
         var north = rawNorth * -57.2958;

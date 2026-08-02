@@ -106,19 +106,19 @@ function UInt32FromBytesBE(bytes, starting) {
 }
 
 function decode2bytes(byte1, byte2) {
-  return (byte1 & 0xff) + (byte2 << 8);
+  return (byte1 & 0xff) + ((byte2 & 0xff) << 8);
 }
 function decode4bytes(byte1, byte2, byte3, byte4) {
-  return (byte1 << 16) + (byte2 << 24) + byte3 + (byte4 << 8);
+  // Word-swapped layout, not plain little-endian: (byte1,byte2) form the
+  // high 16 bits (byte1 low, byte2 high) and (byte3,byte4) form the low 16
+  // bits (byte3 low, byte4 high). Verified against a real Kingsong live-data
+  // frame (ESP32 sim's kingsongHex) -- decoding value[6..9]=00 00 9f 36 as a
+  // plain little-endian u32 gives an absurd ~900,000km odometer; this layout
+  // gives a plausible ~14km.
+  return (
+    ((byte1 & 0xff) << 16) + ((byte2 & 0xff) << 24) + (byte3 & 0xff) + ((byte4 & 0xff) << 8)
+  );
 }
-function decodeint16(byte1, byte2) {
-  return (byte1 << 8) | byte2;
-}
-
-function decodeint32(byte1, byte2, byte3, byte4) {
-  return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
-}
-
 function encodeint16(val) {
   return [(val >> 8) & 0xff, val & 0xff]b;
 }
@@ -431,6 +431,12 @@ function multiline(wholeString) {
 function trimSpace(str) {
   while (str.find(" ") == 0) {
     str = str.substring(1, null);
+  }
+  if (str.length() == 0) {
+    // All-whitespace (or empty) input: nothing left to trim. Without this,
+    // str.length() - 1 is -1 and substring(-1, null) on an empty string
+    // crashes the equals() call below.
+    return str;
   }
   //System.println(str.substring(str.length() - 1, null));
   while (str.substring(str.length() - 1, null).equals(" ")) {

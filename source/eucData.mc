@@ -1,5 +1,21 @@
 module eucData {
   //var GUI = false;
+  // Kingsong model -> pack-voltage-class lookup, shared by getBatteryPercentage().
+  // Hoisted to module scope: these were previously re-allocated on every call
+  // (every compute() tick while paired), which is unnecessary heap churn on a
+  // RAM-constrained watch for data that never changes at runtime.
+  const KSwheels84v = [
+    "KS-18L",
+    "KS-16X",
+    "KS-16XF",
+    "RW",
+    "KS-18LH",
+    "KS-18LY",
+    "KS-S18",
+  ];
+  const KSwheels100v = ["KS-S19"];
+  const KSwheels126v = ["KS-S20", "KS-S22"];
+
   var fieldNB;
   var fieldIDs;
   var JSONFetch = "";
@@ -12,6 +28,7 @@ module eucData {
   var BLEReadProcTime = 0;
   var BLEWriteInterval = 0;
   var DFComputeInterval = 0;
+  var BLENotifRate = 0;
   var orangeColoringThreshold = 80;
   var redColoringThreshold = 90;
   var mainNumber = 0;
@@ -28,7 +45,7 @@ module eucData {
   var txtColor_unpr = 0xff8000;
   var linesColor = 0xffffff;
   var drawLines = true;
-  var wheelBrand;
+  var wheelBrand=1;
   var paired = false;
   var debug = false;
 
@@ -161,17 +178,6 @@ module eucData {
         }
         if (wheelBrand == 2) {
           var cellNbS = 20;
-          var KSwheels84v = [
-            "KS-18L",
-            "KS-16X",
-            "KS-16XF",
-            "RW",
-            "KS-18LH",
-            "KS-18LY",
-            "KS-S18",
-          ];
-          var KSwheels100v = ["KS-S19"];
-          var KSwheels126v = ["KS-S20", "KS-S22"];
           if (KSwheels84v.indexOf(model) != -1) {
             cellNbS = 20;
           } else if (KSwheels100v.indexOf(model) != -1) {
@@ -261,18 +267,6 @@ module eucData {
         //Kingsong --------------------------------------------------
 
         if (wheelBrand == 2) {
-          var KSwheels84v = [
-            "KS-18L",
-            "KS-16X",
-            "KS-16XF",
-            "RW",
-            "KS-18LH",
-            "KS-18LY",
-            "KS-S18",
-          ];
-          var KSwheels100v = ["KS-S19"];
-          var KSwheels126v = ["KS-S20", "KS-S22"];
-
           if (KSwheels84v.indexOf(model) != -1) {
             if (voltage > 83.5) {
               battery = 100.0;

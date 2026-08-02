@@ -255,15 +255,11 @@ class VeteranDecoder {
           (value[12 + 1] & 0xff)) /
         1000.0;
 
-      /*
-    eucData.temperature =
-      value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
-        :offset => 18,
-        :endianness => Lang.ENDIAN_BIG,
-      }) / 100.0;
-      */
-      //from eucWatch :
-      eucData.temperature = ((value[18] << 8) | value[19]) / 100;
+      eucData.temperature =
+        value.decodeNumber(Lang.NUMBER_FORMAT_SINT16, {
+          :offset => 18,
+          :endianness => Lang.ENDIAN_BIG,
+        }) / 100.0;
       // implement chargeMode/speedAlert/speedTiltback later
       var previousVersion = eucData.version;
       eucData.version = Math.floor(
@@ -326,7 +322,7 @@ class KingsongDecoder {
             decode4bytes(value[6], value[7], value[8], value[9]) / 1000.0;
         }
         //eucData.current = decode2bytes(value[10], value[11]);
-        var KScurrent = (value[11] << 8) | value[10];
+        var KScurrent = ((value[11] & 0xff) << 8) | (value[10] & 0xff);
         if (32767 < KScurrent) {
           KScurrent = KScurrent - 65536;
         }

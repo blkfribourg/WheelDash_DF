@@ -1,8 +1,18 @@
 import Toybox.Lang;
 using Toybox.Application.Properties;
 using Toybox.System;
+function colorFromProperty(key as String, fallback as Number) as Number {
+  var raw = Properties.getValue(key);
+  if (raw == null) {
+    return fallback;
+  }
+  return raw.toNumberWithBase(16);
+}
+
 function setSettings(profile as Number) {
-  System.println(profile);
+  if (eucData.debug) {
+    System.println(profile);
+  }
   eucData.fieldIDs = [
     Properties.getValue("field1"),
     Properties.getValue("field2"),
@@ -31,17 +41,19 @@ function setSettings(profile as Number) {
   eucData.debug = Properties.getValue("debugView");
   eucData.logoFill = Properties.getValue("logoFill");
   eucData.logoEmpty = Properties.getValue("logoEmpty");
-  eucData.logoColor = Properties.getValue("logoColor").toNumberWithBase(16);
-  eucData.linesColor = Properties.getValue("linesColor").toNumberWithBase(16);
-  eucData.txtColor = Properties.getValue("txtColor").toNumberWithBase(16);
-  eucData.txtColor_unpr =
-    Properties.getValue("txtColor_unpr").toNumberWithBase(16);
+  eucData.logoColor = colorFromProperty("logoColor", eucData.logoColor);
+  eucData.linesColor = colorFromProperty("linesColor", eucData.linesColor);
+  eucData.txtColor = colorFromProperty("txtColor", eucData.txtColor);
+  eucData.txtColor_unpr = colorFromProperty(
+    "txtColor_unpr",
+    eucData.txtColor_unpr
+  );
   eucData.fontID = Properties.getValue("font");
   eucData.logoOffsetx = Properties.getValue("logoOffsetx");
   eucData.logoOffsety = Properties.getValue("logoOffsety");
   eucData.drawLines = Properties.getValue("drawLines");
 
-  eucData.wheelBrand = Properties.getValue("wheelBrand_p" + profile);
+ // eucData.wheelBrand = Properties.getValue("wheelBrand_p" + profile);
   eucData.enableBeep = Properties.getValue("enableBeep_p" + profile);
   eucData.gothPWN = Properties.getValue("begodeCF_p" + profile);
   eucData.currentCorrection = Properties.getValue(
