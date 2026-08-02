@@ -35,6 +35,13 @@ class GarminEUCDF extends WatchUi.DataField {
   const RAD_TO_DEG = -57.2958;
   const COMPASS_REFERENCE_SCREEN_DIAM = 454.0; // arrow size was tuned against this screen size
 
+  // See the resume-detection comment at its use site in compute(): a
+  // genuinely new activity's info.timerTime is near 0 for the whole
+  // multi-second window that check covers; a resumed one already has real
+  // history. This threshold just needs to sit safely above what a brand-new
+  // activity could accumulate in that window, well below any real ride.
+  const RESUME_MIN_TIMER_TIME_MS = 10000;
+
   var mSpeedField = null;
   var mPWMField = null;
   var mVoltageField = null;
@@ -455,48 +462,6 @@ class GarminEUCDF extends WatchUi.DataField {
     // Perform periodic save if needed
     performPeriodicSave();
   }
-  function resetVariables() {
-    maxSpeed = 0.0;
-    maxPWM = 0.0;
-    maxCurrent = 0.0;
-    maxPower = 0.0;
-    maxTemp = -255.0;
-    minTemp = 255.0;
-    eucData.PWM = 0.0;
-    eucData.correctedSpeed = 0.0;
-    currentCurrent = 0.0;
-    currentVoltage = 0.0;
-    currentBatteryPerc = 0.0;
-    sumCurrent = 0.0;
-    callNb = 0.0;
-    currentPower = 0.0;
-    sumPower = 0.0;
-    sessionDistance = 0.0;
-    startingEUCTripDistance = 0;
-    minVoltage = 255.0;
-    maxVoltage = 0.0;
-    minBatteryPerc = 101.0;
-    maxBatteryPerc = 0.0;
-    avgSpeed = 0.0;
-    avgCurrent = 0.0;
-    avgPower = 0.0;
-    movingmsec = 0.0;
-    averageMovingSpeed = 0.0;
-    lastComputeTime = 0;
-
-    // Reset previous values for change detection
-    prevMaxSpeed = 0.0;
-    prevMaxPWM = 0.0;
-    prevMaxCurrent = 0.0;
-    prevMaxPower = 0.0;
-    prevMaxTemp = -255.0;
-    prevMinTemp = 255.0;
-    prevMinVoltage = 255.0;
-    prevMaxVoltage = 0.0;
-    prevMinBatteryPerc = 101.0;
-    prevMaxBatteryPerc = 0.0;
-  }
-
   function hasMinMaxAvgDataChanged() {
     return (maxSpeed != prevMaxSpeed ||
             maxPWM != prevMaxPWM ||
@@ -908,25 +873,26 @@ class GarminEUCDF extends WatchUi.DataField {
           Varia.processTarget(fakeVariaObj);
         }*/
         } else {
-          //  fakeVariaObj = fakeVaria(3);
-          /*
-        if (Properties.getValue("resumeDectectionMethod") == 0) {
-          if (info.elapsedTime == null || info.elapsedTime < 300000) {
-            resetVariables();
-            reset = "yes";
-          }
-        }
-        if (Properties.getValue("resumeDectectionMethod") == 1) {
-          // if activity is not started yet
-          */
-          if (info.timerState == 1) {
+          // Distinguish "this DataField object was freshly (re)constructed
+          // while an activity that's already in progress resumes" (e.g. the
+          // user stopped and quickly resumed a ride) from "this really is a
+          // brand-new activity". timerState alone can't tell them apart --
+          // a freshly-started and a resumed activity both read as
+          // ON/PAUSED/STOPPED by the time this first runs. timerTime can:
+          // it's the CURRENT activity's own accumulated recording time, so
+          // a genuine resume already has real history, while a brand-new
+          // activity's timerTime is still near 0 for this whole
+          // multi-second window. Below the threshold, trust the fresh
+          // in-memory zeros from construction; above it, restore the saved
+          // session stats instead of showing a false "reset".
+          if (
+            info.timerState != null &&
+            info.timerState != 0 && // not TIMER_STATE_OFF
+            info.timerTime != null &&
+            info.timerTime > RESUME_MIN_TIMER_TIME_MS
+          ) {
             loadStoredValues();
           }
-          /* V0.0.38
-        else {
-          resetVariables();
-          reset = true;
-        }*/
         }
         // }
         //System.println(info.averageSpeed);
