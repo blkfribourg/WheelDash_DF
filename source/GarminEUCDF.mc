@@ -1350,96 +1350,40 @@ class GarminEUCDF extends WatchUi.DataField {
             dc.setColor(eucData.txtColor_unpr, Graphics.COLOR_TRANSPARENT);
           }
 
-          dc.drawText(
-            scr_width / 2,
-            gap,
-            fieldNameFont,
-            fieldNames[0],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width / 2,
-            gap + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[0],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          dc.drawText(
-            scr_width / 4,
-            scr_height / 4,
-            fieldNameFont,
-            fieldNames[1],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width / 4,
-            scr_height / 4 + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[1],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          dc.drawText(
-            scr_width - scr_width / 4,
-            scr_height / 4,
-            fieldNameFont,
-            fieldNames[2],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width - scr_width / 4,
-            scr_height / 4 + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[2],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          dc.drawText(
-            scr_width / 4,
-            scr_height / 2 + gap,
-            fieldNameFont,
-            fieldNames[3],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width / 4,
-            scr_height / 2 + gap + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[3],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          dc.drawText(
-            scr_width - scr_width / 4,
-            scr_height / 2 + gap,
-            fieldNameFont,
-            fieldNames[4],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width - scr_width / 4,
-            scr_height / 2 + gap + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[4],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          dc.drawText(
-            scr_width / 2,
-            scr_height - gap - fieldNameFontHeight - fieldValueFontHeight,
-            fieldNameFont,
-            fieldNames[5],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          dc.drawText(
-            scr_width / 2,
-            scr_height - gap - fieldValueFontHeight,
-            fieldValueFont,
-            fieldValues[5],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
+          // Every field in this layout draws the same way: name centered at
+          // (x, nameY), value centered at (x, nameY + fieldNameFontHeight)
+          // directly below it. Only (x, nameY) differ per slot -- extracted
+          // from the original per-field drawText calls verbatim, formula for
+          // formula, so on-screen positions are unchanged.
+          var sixFieldPositions = [
+            [scr_width / 2, gap], // field 0: top-center
+            [scr_width / 4, scr_height / 4], // field 1: left-upper
+            [scr_width - scr_width / 4, scr_height / 4], // field 2: right-upper
+            [scr_width / 4, scr_height / 2 + gap], // field 3: left-lower
+            [scr_width - scr_width / 4, scr_height / 2 + gap], // field 4: right-lower
+            [
+              scr_width / 2,
+              scr_height - gap - fieldNameFontHeight - fieldValueFontHeight,
+            ], // field 5: bottom-center
+          ];
+          for (var i = 0; i < sixFieldPositions.size(); i++) {
+            var x = sixFieldPositions[i][0];
+            var nameY = sixFieldPositions[i][1];
+            dc.drawText(
+              x,
+              nameY,
+              fieldNameFont,
+              fieldNames[i],
+              Graphics.TEXT_JUSTIFY_CENTER
+            );
+            dc.drawText(
+              x,
+              nameY + fieldNameFontHeight,
+              fieldValueFont,
+              fieldValues[i],
+              Graphics.TEXT_JUSTIFY_CENTER
+            );
+          }
         }
         // 8 fields layout
         if (eucData.fieldNB == 8) {
@@ -1496,7 +1440,11 @@ class GarminEUCDF extends WatchUi.DataField {
             dc.setColor(eucData.txtColor_unpr, Graphics.COLOR_TRANSPARENT);
           }
 
-          //1st field doesn't have a name
+          // Fields 0 and 7 are value-only (no name label, top and bottom
+          // center). Fields 1-6 follow the same name-above-value pattern as
+          // the 6-field layout: name centered at (x, nameY), value centered
+          // at (x, nameY + fieldNameFontHeight). (x, nameY) per slot
+          // extracted verbatim from the original per-field drawText calls.
           dc.drawText(
             scr_width / 2,
             gap,
@@ -1505,97 +1453,33 @@ class GarminEUCDF extends WatchUi.DataField {
             Graphics.TEXT_JUSTIFY_CENTER
           );
 
-          dc.drawText(
-            scr_width / 3.7,
-            scr_height / 6.4,
-            fieldNameFont,
-            fieldNames[1],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width / 3.7,
-            scr_height / 6.4 + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[1],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          dc.drawText(
-            scr_width - scr_width / 3.7,
-            scr_height / 6.4,
-            fieldNameFont,
-            fieldNames[2],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width - scr_width / 3.7,
-            scr_height / 6.4 + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[2],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          dc.drawText(
-            scr_width / 4.5,
-            scr_height / 2.6 + gap,
-            fieldNameFont,
-            fieldNames[3],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width / 4.5,
-            scr_height / 2.6 + gap + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[3],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          dc.drawText(
-            scr_width - scr_width / 4.5,
-            scr_height / 2.6 + gap,
-            fieldNameFont,
-            fieldNames[4],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width - scr_width / 4.5,
-            scr_height / 2.6 + gap + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[4],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          //
-          dc.drawText(
-            scr_width / 3.7,
-            scr_height / 1.6 + gap,
-            fieldNameFont,
-            fieldNames[5],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width / 3.7,
-            scr_height / 1.6 + gap + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[5],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-
-          dc.drawText(
-            scr_width - scr_width / 3.7,
-            scr_height / 1.6 + gap,
-            fieldNameFont,
-            fieldNames[6],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          dc.drawText(
-            scr_width - scr_width / 3.7,
-            scr_height / 1.6 + gap + fieldNameFontHeight,
-            fieldValueFont,
-            fieldValues[6],
-            Graphics.TEXT_JUSTIFY_CENTER
-          );
-          //
+          var eightFieldPositions = [
+            [scr_width / 3.7, scr_height / 6.4], // field 1: left-upper
+            [scr_width - scr_width / 3.7, scr_height / 6.4], // field 2: right-upper
+            [scr_width / 4.5, scr_height / 2.6 + gap], // field 3: left-mid
+            [scr_width - scr_width / 4.5, scr_height / 2.6 + gap], // field 4: right-mid
+            [scr_width / 3.7, scr_height / 1.6 + gap], // field 5: left-lower
+            [scr_width - scr_width / 3.7, scr_height / 1.6 + gap], // field 6: right-lower
+          ];
+          for (var i = 0; i < eightFieldPositions.size(); i++) {
+            var x = eightFieldPositions[i][0];
+            var nameY = eightFieldPositions[i][1];
+            var fieldIdx = i + 1;
+            dc.drawText(
+              x,
+              nameY,
+              fieldNameFont,
+              fieldNames[fieldIdx],
+              Graphics.TEXT_JUSTIFY_CENTER
+            );
+            dc.drawText(
+              x,
+              nameY + fieldNameFontHeight,
+              fieldValueFont,
+              fieldValues[fieldIdx],
+              Graphics.TEXT_JUSTIFY_CENTER
+            );
+          }
 
           dc.drawText(
             scr_width / 2,
