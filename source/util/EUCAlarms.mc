@@ -172,7 +172,7 @@ module EUCAlarms {
           eucData.PWM < PWM2_thr &&
           triggerAlarm == true
         ) {
-          nextTrigger = Time.now().add(triggerDelay);
+          nextTrigger = now.add(triggerDelay);
           if (PWMVibe != null && eucData.vibeIntensity != 0) {
             Attention.vibrate(PWMVibe);
             vibeKilled = false;
@@ -192,12 +192,12 @@ module EUCAlarms {
             playSound(PWMDangerTone);
             toneKilled = false;
           }
-          nextTrigger = Time.now().add(triggerDelay);
+          nextTrigger = now.add(triggerDelay);
           PWMAlarm = true;
         }
       } else {
         if (eucData.PWM > PWM1_thr && triggerAlarm == true) {
-          nextTrigger = Time.now().add(triggerDelay);
+          nextTrigger = now.add(triggerDelay);
           if (PWMVibe != null && eucData.vibeIntensity != 0) {
             Attention.vibrate(PWMVibe);
             vibeKilled = false;
@@ -221,7 +221,7 @@ module EUCAlarms {
         PWMAlarm == false
       ) {
         // PWM alarm have priority over temperature alarm
-        nextTrigger = Time.now().add(triggerDelay);
+        nextTrigger = now.add(triggerDelay);
         if (tempVibe != null && eucData.vibeIntensity != 0) {
           Attention.vibrate(tempVibe);
           vibeKilled = false;
@@ -248,7 +248,7 @@ module EUCAlarms {
         PWMAlarm == false &&
         tempAlarm == false
       ) {
-        nextTrigger = Time.now().add(triggerDelay);
+        nextTrigger = now.add(triggerDelay);
 
         // PWM alarm and temperature alarm have priority over speed alarm
         if (speedVibe != null && eucData.vibeIntensity != 0) {

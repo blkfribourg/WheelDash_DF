@@ -601,102 +601,37 @@ cmd = [ 0x4c, 0x6b, 0x41, 0x70, 0x0e, 0x00, 0x80, 0x80, 0x80, 0x01,
         // System.println("received:" + value);
         // System.println("uploading config");
 
-        for (var i = 0; i < getJson(:EngoCfg1).size(); i++) {
-          var charNb = getJson(:EngoCfg1)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg1)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg2).size(); i++) {
-          var charNb = getJson(:EngoCfg2)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg2)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg3).size(); i++) {
-          var charNb = getJson(:EngoCfg3)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg3)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg4).size(); i++) {
-          var charNb = getJson(:EngoCfg4)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg4)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg5).size(); i++) {
-          var charNb = getJson(:EngoCfg5)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg5)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg6).size(); i++) {
-          var charNb = getJson(:EngoCfg6)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg6)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg7).size(); i++) {
-          var charNb = getJson(:EngoCfg7)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg7)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg8).size(); i++) {
-          var charNb = getJson(:EngoCfg8)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg8)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg9).size(); i++) {
-          var charNb = getJson(:EngoCfg9)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg9)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg10).size(); i++) {
-          var charNb = getJson(:EngoCfg10)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg10)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg11).size(); i++) {
-          var charNb = getJson(:EngoCfg11)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg11)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg12).size(); i++) {
-          var charNb = getJson(:EngoCfg12)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg12)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg13).size(); i++) {
-          var charNb = getJson(:EngoCfg13)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg13)[i]);
-
-          sendRawCmd(engo_rx, cmd);
-        }
-        for (var i = 0; i < getJson(:EngoCfg14).size(); i++) {
-          var charNb = getJson(:EngoCfg14)[i].length();
-          cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
-          var cmd = arrayToRawCmd(getJson(:EngoCfg14)[i]);
-          sendRawCmd(engo_rx, cmd);
+        // Each getJson(symbol) call is a WatchUi.loadResource() -- not free,
+        // it re-parses the JSON resource every time. The original code
+        // called it 3x per loop iteration (loop condition, .length(), and
+        // arrayToRawCmd()) across 14 copy-pasted blocks, all synchronous
+        // inside this BLE callback. Hoisted to one load per config, and
+        // collapsed the 14 blocks (identical apart from which symbol) into
+        // a loop -- same configs sent in the same order.
+        var engoCfgSymbols = [
+          :EngoCfg1,
+          :EngoCfg2,
+          :EngoCfg3,
+          :EngoCfg4,
+          :EngoCfg5,
+          :EngoCfg6,
+          :EngoCfg7,
+          :EngoCfg8,
+          :EngoCfg9,
+          :EngoCfg10,
+          :EngoCfg11,
+          :EngoCfg12,
+          :EngoCfg13,
+          :EngoCfg14,
+        ];
+        for (var c = 0; c < engoCfgSymbols.size(); c++) {
+          var cfg = getJson(engoCfgSymbols[c]);
+          for (var i = 0; i < cfg.size(); i++) {
+            var charNb = cfg[i].length();
+            cfgPacketsTotal = cfgPacketsTotal + Math.ceil(charNb / 40);
+            var cmd = arrayToRawCmd(cfg[i]);
+            sendRawCmd(engo_rx, cmd);
+          }
         }
         if (eucData.customLayout == true) {
           buildCustomPage();
