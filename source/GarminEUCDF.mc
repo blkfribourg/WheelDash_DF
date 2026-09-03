@@ -12,6 +12,11 @@ class GarminEUCDF extends WatchUi.DataField {
   var empty_logo;
   var delay = 3;
 
+  // Crash recovery: a resumed activity restores the stats saved by the previous run
+  var resumeChecked = false;
+  var sessionResumed = false;
+  var restoreDone = false;
+
   var fieldNames;
   var fieldValues;
   const SPEED_FIELD_ID = 0;
@@ -34,13 +39,6 @@ class GarminEUCDF extends WatchUi.DataField {
   // renderNorthOnUI/renderWindOnUI compass-arrow geometry
   const RAD_TO_DEG = -57.2958;
   const COMPASS_REFERENCE_SCREEN_DIAM = 454.0; // arrow size was tuned against this screen size
-
-  // See the resume-detection comment at its use site in compute(): a
-  // genuinely new activity's info.timerTime is near 0 for the whole
-  // multi-second window that check covers; a resumed one already has real
-  // history. This threshold just needs to sit safely above what a brand-new
-  // activity could accumulate in that window, well below any real ride.
-  const RESUME_MIN_TIMER_TIME_MS = 10000;
 
   var mSpeedField = null;
   var mPWMField = null;
@@ -503,6 +501,13 @@ class GarminEUCDF extends WatchUi.DataField {
     Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
     Storage.setValue("EUCBatteryPercStart", EUCBatteryPercStart);
 
+    // Identify the session these stats belong to, so a later run only restores its own data
+    Storage.setValue(
+      "statsWheelName",
+      Properties.getValue("wheelName_p" + eucData.loadedProfile)
+    );
+    Storage.setValue("statsTimerTime", eucData.activityTimerTime);
+
     // Save min/max values only if they changed
     if (hasMinMaxAvgDataChanged()) {
       Storage.setValue("maxSpeed", maxSpeed);
@@ -526,6 +531,50 @@ class GarminEUCDF extends WatchUi.DataField {
     if (eucData.useRadar == true) {
       Storage.setValue("totalVehCount", eucData.totalVehCount);
     }
+  }
+
+  // Stats may only be restored if they were saved by this profile's wheel, during the
+  // activity that is being resumed. A resumed activity picks its timer up where it was
+  // left, so its timer time can never be behind the one the stats were saved with.
+  function storedStatsMatchSession(garminInfo) {
+    var storedTimerTime = Storage.getValue("statsTimerTime") as Number;
+    if (storedTimerTime == null || garminInfo.timerTime == null) {
+      return false;
+    }
+
+    var wheelName =
+      Properties.getValue("wheelName_p" + eucData.loadedProfile) as String;
+    if (!wheelName.equals(Storage.getValue("statsWheelName"))) {
+      return false;
+    }
+
+    return garminInfo.timerTime >= storedTimerTime;
+  }
+
+  function clearStoredValues() {
+    Storage.deleteValue("callNb");
+    Storage.deleteValue("sumCurrent");
+    Storage.deleteValue("sumPower");
+    Storage.deleteValue("movingmsec");
+    Storage.deleteValue("sessionDistance");
+    Storage.deleteValue("avgSpeed");
+    Storage.deleteValue("avgCurrent");
+    Storage.deleteValue("avgPower");
+    Storage.deleteValue("startingEUCTripDistance");
+    Storage.deleteValue("EUCBatteryPercStart");
+    Storage.deleteValue("maxSpeed");
+    Storage.deleteValue("maxPWM");
+    Storage.deleteValue("maxCurrent");
+    Storage.deleteValue("maxPower");
+    Storage.deleteValue("maxTemp");
+    Storage.deleteValue("minTemp");
+    Storage.deleteValue("minVoltage");
+    Storage.deleteValue("maxVoltage");
+    Storage.deleteValue("minBatteryPerc");
+    Storage.deleteValue("maxBatteryPerc");
+    Storage.deleteValue("totalVehCount");
+    Storage.deleteValue("statsWheelName");
+    Storage.deleteValue("statsTimerTime");
   }
 
   function performPeriodicSave() {
@@ -699,6 +748,23 @@ class GarminEUCDF extends WatchUi.DataField {
   // Calculate the data to display in the field here
   //var fakeVariaObj;
   function compute(info) {
+    // A fresh activity has its timer off and at 0 on the first compute, while an activity
+    // resumed after a crash already carries the elapsed time it was saved with.
+    if (!resumeChecked && info != null) {
+      resumeChecked = true;
+      sessionResumed =
+        (info.timerTime != null && info.timerTime > 0) ||
+        (info.elapsedTime != null && info.elapsedTime > 0) ||
+        (info.timerState != null && info.timerState != 0);
+      if (!sessionResumed) {
+        // New ride: previous stats can never be restored anymore, don't leave them around
+        clearStoredValues();
+      }
+      if (eucData.debug) {
+        System.println("session resumed: " + sessionResumed);
+      }
+    }
+
     // DF init ---------------------------------------------------------------------
     // If settings are not loaded, load settings:
 
@@ -800,6 +866,24 @@ class GarminEUCDF extends WatchUi.DataField {
         eucData.activityTimerTime = info.timerTime;
       }
       eucData.timerState = activityTimerState;
+
+      // Restore the stats of the interrupted session. Done here, before any call to
+      // updateFitData(), so a periodic save can never overwrite them beforehand. It must
+      // not depend on the wheel being connected: the rider may well restart the activity
+      // before the BLE connection is back.
+      if (sessionResumed && !restoreDone) {
+        restoreDone = true;
+        if (storedStatsMatchSession(info)) {
+          loadStoredValues();
+          lastSaveTime = System.getTimer();
+          if (eucData.debug) {
+            System.println("stored stats restored");
+          }
+        } else if (eucData.debug) {
+          System.println("no matching stats to restore");
+        }
+      }
+
       if (eucData.useEngo == true) {
         engoUpdate();
 
@@ -872,27 +956,6 @@ class GarminEUCDF extends WatchUi.DataField {
           Varia.processTarget(fakeVariaObj);
           Varia.processTarget(fakeVariaObj);
         }*/
-        } else {
-          // Distinguish "this DataField object was freshly (re)constructed
-          // while an activity that's already in progress resumes" (e.g. the
-          // user stopped and quickly resumed a ride) from "this really is a
-          // brand-new activity". timerState alone can't tell them apart --
-          // a freshly-started and a resumed activity both read as
-          // ON/PAUSED/STOPPED by the time this first runs. timerTime can:
-          // it's the CURRENT activity's own accumulated recording time, so
-          // a genuine resume already has real history, while a brand-new
-          // activity's timerTime is still near 0 for this whole
-          // multi-second window. Below the threshold, trust the fresh
-          // in-memory zeros from construction; above it, restore the saved
-          // session stats instead of showing a false "reset".
-          if (
-            info.timerState != null &&
-            info.timerState != 0 && // not TIMER_STATE_OFF
-            info.timerTime != null &&
-            info.timerTime > RESUME_MIN_TIMER_TIME_MS
-          ) {
-            loadStoredValues();
-          }
         }
         // }
         //System.println(info.averageSpeed);
@@ -1617,7 +1680,6 @@ class GarminEUCDF extends WatchUi.DataField {
     }
   }
   function loadStoredValues() {
-    // should add a check on wheel name to avoid restoring data saved with another euc
     if (Storage.getValue("maxTemp") != null) {
       maxTemp = Storage.getValue("maxTemp");
     }
@@ -1687,6 +1749,11 @@ class GarminEUCDF extends WatchUi.DataField {
       }
     }
 
+    if (movingmsec > 0) {
+      averageMovingSpeed = sessionDistance / (movingmsec / 3600000.0);
+    }
+    updatePreviousMinMaxAvgValues();
+
     // should only be required for max values
     mMaxSpeedField.setData(maxSpeed);
     mMaxPWMField.setData(maxPWM);
@@ -1698,7 +1765,7 @@ class GarminEUCDF extends WatchUi.DataField {
 
   function onTimerReset() {
     //System.println("reset");
-    //Storage.clearValues();
+    clearStoredValues();
   }
   function onTimerStop() {
     // System.println("stop");
@@ -1722,6 +1789,11 @@ class GarminEUCDF extends WatchUi.DataField {
     Storage.setValue("movingmsec", movingmsec);
     Storage.setValue("startingEUCTripDistance", startingEUCTripDistance);
     Storage.setValue("EUCBatteryPercStart", EUCBatteryPercStart);
+    Storage.setValue(
+      "statsWheelName",
+      Properties.getValue("wheelName_p" + eucData.loadedProfile)
+    );
+    Storage.setValue("statsTimerTime", eucData.activityTimerTime);
     if (eucData.useRadar == true) {
       Storage.setValue("totalVehCount", eucData.totalVehCount);
     }
